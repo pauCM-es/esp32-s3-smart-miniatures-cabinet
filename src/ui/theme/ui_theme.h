@@ -35,6 +35,10 @@ static inline lv_color_t ui_color_text_dim(void)       { return lv_color_hex(0xA
 static inline lv_color_t ui_color_border(void)         { return lv_color_hex(0x3B3E4D); }
 /* Active nav-bar item background — dark cyan tint */
 static inline lv_color_t ui_color_nav_active_bg(void)  { return lv_color_hex(0x061318); }
+/* Yellow — brightness, warnings */
+static inline lv_color_t ui_color_yellow(void)         { return lv_color_hex(0xFFB800); }
+/* Blue — info, about */
+static inline lv_color_t ui_color_blue(void)           { return lv_color_hex(0x3A7FD5); }
 
 /* ── Display dimensions ──────────────────────────────────────────────────── */
 static constexpr lv_coord_t UI_SCREEN_W = 480;   /* display width             */
