@@ -1,55 +1,80 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Simulator: Configure",
-            "type": "shell",
-            "command": "cmake",
-            "args": [
-                "-S", "${workspaceFolder}\\simulator",
-                "-B", "${workspaceFolder}\\simulator\\build",
-                "-G", "Ninja",
-                "-DCMAKE_C_COMPILER=${env:USERPROFILE}\\scoop\\apps\\mingw\\current\\bin\\gcc.exe",
-                "-DCMAKE_CXX_COMPILER=${env:USERPROFILE}\\scoop\\apps\\mingw\\current\\bin\\g++.exe",
-                "-DCMAKE_MAKE_PROGRAM=${env:USERPROFILE}\\scoop\\apps\\ninja\\current\\ninja.exe"
-            ],
-            "group": "build",
-            "presentation": { "reveal": "always", "panel": "shared" },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "Simulator: Build",
-            "type": "shell",
-            "command": "cmake",
-            "args": ["--build", "${workspaceFolder}\\simulator\\build", "--parallel"],
-            "group": { "kind": "build", "isDefault": true },
-            "dependsOn": [],
-            "presentation": { "reveal": "always", "panel": "shared" },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "Simulator: Configure + Build",
-            "dependsOrder": "sequence",
-            "dependsOn": ["Simulator: Configure", "Simulator: Build"],
-            "group": "build",
-            "presentation": { "reveal": "always", "panel": "shared" },
-            "problemMatcher": []
-        },
-        {
-            "label": "Simulator: Run",
-            "type": "shell",
-            "command": "${workspaceFolder}\\simulator\\build\\simulator.exe",
-            "group": "test",
-            "presentation": { "reveal": "always", "panel": "dedicated" },
-            "problemMatcher": []
-        },
-        {
-            "label": "Simulator: Build + Run",
-            "dependsOrder": "sequence",
-            "dependsOn": ["Simulator: Build", "Simulator: Run"],
-            "group": "test",
-            "presentation": { "reveal": "always", "panel": "dedicated" },
-            "problemMatcher": []
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Simulator: Configure",
+			"type": "shell",
+			"command": "cmake",
+			"args": [
+				"-S",
+				"${workspaceFolder}\\simulator",
+				"-B",
+				"${workspaceFolder}\\simulator\\build",
+				"-G",
+				"Ninja",
+				"-DCMAKE_C_COMPILER=${env:USERPROFILE}\\scoop\\apps\\mingw\\current\\bin\\gcc.exe",
+				"-DCMAKE_CXX_COMPILER=${env:USERPROFILE}\\scoop\\apps\\mingw\\current\\bin\\g++.exe",
+				"-DCMAKE_MAKE_PROGRAM=${env:USERPROFILE}\\scoop\\apps\\ninja\\current\\ninja.exe"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": "$gcc"
+		},
+		{
+			"label": "Simulator: Build",
+			"type": "shell",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"${workspaceFolder}\\simulator\\build",
+				"--parallel"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": "$gcc"
+		},
+		{
+			"label": "Simulator: Configure + Build",
+			"dependsOrder": "sequence",
+			"dependsOn": ["Simulator: Configure", "Simulator: Build"],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Simulator: Run",
+			"type": "shell",
+			"command": "${workspaceFolder}\\simulator\\build\\simulator.exe",
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Simulator: Build + Run",
+			"dependsOrder": "sequence",
+			"dependsOn": ["Simulator: Build", "Simulator: Run"],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"problemMatcher": []
+		}
+	]
 }

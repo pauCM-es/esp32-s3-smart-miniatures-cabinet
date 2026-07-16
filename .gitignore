@@ -8,3 +8,6 @@
 # Simulator build output and downloaded dependencies
 simulator/build/
 simulator/deps/
+
+assets-to-convert/
+

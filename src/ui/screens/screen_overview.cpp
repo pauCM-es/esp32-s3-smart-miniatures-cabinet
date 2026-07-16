@@ -73,11 +73,11 @@ void screen_overview_load(void)
     lv_obj_t *img_panel = lv_obj_create(scr);
     lv_obj_set_size(img_panel, COL_W, CONTENT_H);
     lv_obj_set_pos(img_panel, LEFT_X, CONTENT_Y);
-    lv_obj_set_style_bg_color(img_panel, lv_color_hex(0x090914), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(img_panel, ui_color_bg(), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(img_panel, LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_style_bg_img_src(img_panel, &img_cabinet, LV_PART_MAIN);
     lv_obj_set_style_border_color(img_panel, ui_color_border(), LV_PART_MAIN);
-    lv_obj_set_style_border_width(img_panel, 1, LV_PART_MAIN);
+    lv_obj_set_style_border_width(img_panel, 0, LV_PART_MAIN);
     lv_obj_set_style_radius(img_panel, UI_RADIUS, LV_PART_MAIN);
     lv_obj_set_style_pad_all(img_panel, 0, LV_PART_MAIN);
     lv_obj_clear_flag(img_panel, LV_OBJ_FLAG_SCROLLABLE);
