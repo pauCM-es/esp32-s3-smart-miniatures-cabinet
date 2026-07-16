@@ -1,10 +1,15 @@
 #include "screen_overview.h"
 #include "../theme/ui_theme.h"
+#include "../ui_router.h"
+#include "../components/ui_header.h"
 #include "../components/ui_icon_placeholder.h"
 #include "../components/ui_info_card.h"
 #include "../components/ui_nav_bar.h"
 #include "../assets/img_cabinet.h"
 #include "lvgl/lvgl.h"
+
+/* ── Nav callbacks ───────────────────────────────────────────────────────── */
+static void on_nav_settings(lv_event_t *e) { (void)e; ui_goto_settings(); }
 
 /* ── Layout constants ────────────────────────────────────────────────────── */
 /*
@@ -38,34 +43,7 @@ void screen_overview_load(void)
     lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
 
     /* ── Header ─────────────────────────────────────────────────────────── */
-    lv_obj_t *hdr = lv_obj_create(scr);
-    lv_obj_set_size(hdr, UI_SCREEN_W, UI_HDR_H);
-    lv_obj_set_pos(hdr, 0, 0);
-    lv_obj_set_style_bg_color(hdr, ui_color_header(), LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(hdr, LV_OPA_COVER, LV_PART_MAIN);
-    lv_obj_set_style_border_color(hdr, ui_color_border(), LV_PART_MAIN);
-    lv_obj_set_style_border_width(hdr, 1, LV_PART_MAIN);
-    lv_obj_set_style_border_side(hdr, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN);
-    lv_obj_set_style_radius(hdr, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(hdr, 0, LV_PART_MAIN);
-    lv_obj_clear_flag(hdr, LV_OBJ_FLAG_SCROLLABLE);
-
-    /* Logo icon placeholder (M) + title */
-    lv_obj_t *logo = ui_icon_placeholder_create(hdr, UI_ICON_M, ui_color_accent2());
-    lv_obj_align(logo, LV_ALIGN_LEFT_MID, UI_MARGIN, 0);
-
-    lv_obj_t *title = lv_label_create(hdr);
-    lv_label_set_text(title, "OVERVIEW");
-    lv_obj_set_style_text_color(title, ui_color_text(), LV_PART_MAIN);
-    lv_obj_set_style_text_font(title, UI_FONT_TITLE, LV_PART_MAIN);
-    lv_obj_align_to(title, logo, LV_ALIGN_OUT_RIGHT_MID, UI_GAP, 0);
-
-    /* Time on the right — TODO: hook up to real RTC / NTP */
-    lv_obj_t *hdr_time = lv_label_create(hdr);
-    lv_label_set_text(hdr_time, "23:17");
-    lv_obj_set_style_text_color(hdr_time, ui_color_text_dim(), LV_PART_MAIN);
-    lv_obj_set_style_text_font(hdr_time, UI_FONT_BODY, LV_PART_MAIN);
-    lv_obj_align(hdr_time, LV_ALIGN_RIGHT_MID, -UI_MARGIN, 0);
+    ui_header_create(scr, false, nullptr, ui_color_accent2(), "OVERVIEW", ui_color_text_dim());
 
     /* ── Left panel: cabinet image ──────────────────────────────────────────
      * bg_img_src displays the 224×206 px C-array asset as the panel background.
@@ -153,11 +131,11 @@ void screen_overview_load(void)
 
     /* ── Bottom navigation bar ───────────────────────────────────────────── */
     static const ui_nav_item_t nav_items[] = {
-        { "OVERVIEW",   NULL },
-        { "SHELVES",    NULL },
-        { "MINIATURES", NULL },
-        { "LIGHTS",     NULL },
-        { "SETTINGS",   NULL },
+        { "OVERVIEW",   NULL              },
+        { "SHELVES",    NULL              },
+        { "MINIATURES", NULL              },
+        { "LIGHTS",     NULL              },
+        { "SETTINGS",   on_nav_settings   },
     };
     ui_nav_bar_create(scr, nav_items, 5, 0);  /* active = OVERVIEW (index 0) */
 
