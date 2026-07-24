@@ -9,5 +9,8 @@
 simulator/build/
 simulator/deps/
 
-assets-to-convert/
+lib/
 
+assets-to-convert/
+docs
+squareline-ui

@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <lvgl.h>
 
+#include "audio/AudioService.h"
+
 #include "hal/display.h"
 #include "ui/ui.h"
 
@@ -34,6 +36,13 @@ void setup() {
 
     display.begin();
     ui_init();
+
+    if (!AudioService::begin())
+{
+    Serial.println(
+        "[Main] Audio service initialization failed"
+    );
+}
 
     Serial.printf("LVGL %d.%d.%d ready\n",
                   lv_version_major(),
