@@ -8,7 +8,17 @@
 lv_obj_t * ui_SETTINGS = NULL;
 lv_obj_t * ui_header3 = NULL;
 lv_obj_t * ui_BodyContainer1 = NULL;
+lv_obj_t * ui_recordBtn = NULL;
+lv_obj_t * ui_Label10 = NULL;
 // event funtions
+void ui_event_recordBtn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        recordTestCallback(e);
+    }
+}
 
 // build funtions
 
@@ -32,6 +42,32 @@ void ui_SETTINGS_screen_init(void)
     lv_obj_set_x(ui_BodyContainer1, 0);
     lv_obj_set_y(ui_BodyContainer1, -15);
 
+    ui_recordBtn = lv_btn_create(ui_SETTINGS);
+    lv_obj_set_width(ui_recordBtn, 246);
+    lv_obj_set_height(ui_recordBtn, 60);
+    lv_obj_set_align(ui_recordBtn, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_recordBtn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_recordBtn, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_recordBtn, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_recordBtn, lv_color_hex(0x531F71), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_recordBtn, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_img_recolor(ui_recordBtn, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_img_recolor_opa(ui_recordBtn, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_object_set_themeable_style_property(ui_recordBtn, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_COLOR,
+                                           _ui_theme_color_Purple__________);
+    ui_object_set_themeable_style_property(ui_recordBtn, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA,
+                                           _ui_theme_alpha_Purple__________);
+    lv_obj_set_style_border_width(ui_recordBtn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Label10 = lv_label_create(ui_recordBtn);
+    lv_obj_set_width(ui_Label10, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label10, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label10, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label10, "RECORD TEST");
+    lv_obj_set_style_text_font(ui_Label10, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_recordBtn, ui_event_recordBtn, LV_EVENT_ALL, NULL);
+
 }
 
 void ui_SETTINGS_screen_destroy(void)
@@ -42,5 +78,7 @@ void ui_SETTINGS_screen_destroy(void)
     ui_SETTINGS = NULL;
     ui_header3 = NULL;
     ui_BodyContainer1 = NULL;
+    ui_recordBtn = NULL;
+    ui_Label10 = NULL;
 
 }

@@ -16,6 +16,9 @@ extern void ui_SETTINGS_screen_destroy(void);
 extern lv_obj_t * ui_SETTINGS;
 extern lv_obj_t * ui_header3;
 extern lv_obj_t * ui_BodyContainer1;
+extern void ui_event_recordBtn(lv_event_t * e);
+extern lv_obj_t * ui_recordBtn;
+extern lv_obj_t * ui_Label10;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

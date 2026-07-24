@@ -5,6 +5,8 @@
 
 #include "ui.h"
 
+#include "audio/AudioServiceBridge.h"
+
 void scrollCardsToSelectedLocation(lv_event_t * e)
 {
 	// Your code here
@@ -13,4 +15,14 @@ void scrollCardsToSelectedLocation(lv_event_t * e)
 void updateMiniLocatinValue(lv_event_t * e)
 {
 	// Your code here
+}
+
+void recordTestCallback(lv_event_t * e)
+{
+		lv_event_code_t eventCode = lv_event_get_code(e);
+
+    if (eventCode == LV_EVENT_CLICKED)
+    {
+        audio_service_start_test();
+    }
 }

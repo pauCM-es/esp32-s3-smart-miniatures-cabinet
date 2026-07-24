@@ -12,6 +12,7 @@ extern "C" {
 
 void scrollCardsToSelectedLocation(lv_event_t * e);
 void updateMiniLocatinValue(lv_event_t * e);
+void recordTestCallback(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/
