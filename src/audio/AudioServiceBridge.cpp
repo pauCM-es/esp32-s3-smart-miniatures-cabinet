@@ -7,7 +7,7 @@ extern "C" void audio_service_start_test(void)
 {
     const AudioService::Result result =
         AudioService::startRecordAndPlayback(
-            3000
+            1000
         );
 
     Serial.printf(

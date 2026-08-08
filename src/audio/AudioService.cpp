@@ -1,6 +1,6 @@
 #include "AudioService.h"
 
-#include "AudioTools.h"
+#include <ESP_I2S.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
@@ -8,7 +8,6 @@
 
 #include <esp_heap_caps.h>
 
-#include <algorithm>
 #include <cstring>
 #include <limits>
 
@@ -36,37 +35,34 @@ namespace
 
     constexpr uint32_t SAMPLE_RATE = 16000;
 
-    /**
-     * The digital microphone provides 32-bit I2S words.
-     *
-     * We convert them to signed 16-bit mono PCM before storing them.
-     */
-    constexpr uint16_t MIC_BITS_PER_SAMPLE = 32;
-    constexpr uint16_t SPEAKER_BITS_PER_SAMPLE = 16;
-
-    constexpr uint8_t MIC_CHANNELS = 1;
-    constexpr uint8_t SPEAKER_CHANNELS = 2;
-
     constexpr size_t MIC_BLOCK_SAMPLES = 256;
     constexpr size_t SPEAKER_BLOCK_FRAMES = 256;
 
-    /**
-     * Three seconds need:
-     *
-     * 16000 samples/second × 3 seconds × 2 bytes = 96000 bytes.
-     */
     constexpr uint32_t MAX_RECORDING_DURATION_MS = 10000;
 
     /**
-     * These two values control microphone conversion.
+     * The microphone supplies its useful sample in the upper part
+     * of a 32-bit I2S word.
      *
-     * They may need adjustment after inspecting the first real recording:
-     *
-     * - Lower MIC_RIGHT_SHIFT makes the recording louder.
-     * - Higher MIC_GAIN makes the recording louder.
+     * Shifting by 11 converts an approximately 24-bit microphone
+     * sample into a signed 16-bit PCM value.
      */
-    constexpr uint8_t MIC_RIGHT_SHIFT = 14;
-    constexpr int32_t MIC_GAIN = 2;
+    constexpr uint8_t MIC_RIGHT_SHIFT = 11;
+
+    /**
+     * Desired peak after automatic normalization.
+     *
+     * INT16_MAX is 32767. Keeping the target lower provides
+     * headroom and reduces clipping.
+     */
+    constexpr int32_t NORMALIZED_TARGET_PEAK = 18000;
+
+    /**
+     * Recordings with a peak below this value are considered nearly
+     * silent. They are not amplified aggressively because that would
+     * mostly amplify electronic noise.
+     */
+    constexpr int32_t MINIMUM_USEFUL_PEAK = 20;
 
     // ---------------------------------------------------------------------
     // FreeRTOS service configuration
@@ -74,17 +70,7 @@ namespace
 
     constexpr UBaseType_t COMMAND_QUEUE_LENGTH = 2;
     constexpr uint32_t AUDIO_TASK_STACK_SIZE = 8192;
-    constexpr UBaseType_t AUDIO_TASK_PRIORITY = 3;
-
-    /**
-     * The Arduino loop and LVGL usually run on core 1.
-     * The audio task is placed on core 0.
-     */
-    constexpr BaseType_t AUDIO_TASK_CORE = 0;
-
-    // ---------------------------------------------------------------------
-    // Internal command types
-    // ---------------------------------------------------------------------
+    constexpr UBaseType_t AUDIO_TASK_PRIORITY = 1;
 
     enum class CommandType : uint8_t
     {
@@ -98,21 +84,15 @@ namespace
         uint32_t durationMs;
     };
 
-    // ---------------------------------------------------------------------
-    // Internal service objects
-    // ---------------------------------------------------------------------
-
     QueueHandle_t commandQueue = nullptr;
     TaskHandle_t audioTaskHandle = nullptr;
 
     /**
-     * Separate Audio Tools streams are used because the microphone and
-     * speaker have different clocks and data pins on this board.
+     * One I2S instance is reused sequentially:
      *
-     * Only one is active at a time during record-and-playback.
+     * microphone input -> stop -> speaker output.
      */
-    I2SStream microphoneStream;
-    I2SStream speakerStream;
+    I2SClass audioI2S;
 
     bool serviceInitialized = false;
     volatile bool cancellationRequested = false;
@@ -130,7 +110,61 @@ namespace
     };
 
     // ---------------------------------------------------------------------
-    // Status management
+    // General helpers
+    // ---------------------------------------------------------------------
+
+    int32_t absoluteValue(int32_t value)
+    {
+        if (value == std::numeric_limits<int32_t>::min())
+        {
+            return std::numeric_limits<int32_t>::max();
+        }
+
+        return value < 0 ? -value : value;
+    }
+
+    int16_t clampToInt16(int32_t value)
+    {
+        if (value > std::numeric_limits<int16_t>::max())
+        {
+            return std::numeric_limits<int16_t>::max();
+        }
+
+        if (value < std::numeric_limits<int16_t>::min())
+        {
+            return std::numeric_limits<int16_t>::min();
+        }
+
+        return static_cast<int16_t>(value);
+    }
+
+    uint8_t calculateProgress(
+        size_t current,
+        size_t total
+    )
+    {
+        if (total == 0)
+        {
+            return 0;
+        }
+
+        uint64_t progress =
+            (
+                static_cast<uint64_t>(current) *
+                100ULL
+            ) /
+            static_cast<uint64_t>(total);
+
+        if (progress > 100ULL)
+        {
+            progress = 100ULL;
+        }
+
+        return static_cast<uint8_t>(progress);
+    }
+
+    // ---------------------------------------------------------------------
+    // Status handling
     // ---------------------------------------------------------------------
 
     void setStatus(
@@ -142,6 +176,11 @@ namespace
         uint8_t progressPercent
     )
     {
+        if (progressPercent > 100)
+        {
+            progressPercent = 100;
+        }
+
         portENTER_CRITICAL(&statusMutex);
 
         currentStatus.state = state;
@@ -149,8 +188,7 @@ namespace
         currentStatus.requestedDurationMs = durationMs;
         currentStatus.processedSamples = processedSamples;
         currentStatus.totalSamples = totalSamples;
-        currentStatus.progressPercent =
-            std::min<uint8_t>(progressPercent, 100);
+        currentStatus.progressPercent = progressPercent;
 
         portEXIT_CRITICAL(&statusMutex);
     }
@@ -160,24 +198,11 @@ namespace
         uint32_t totalSamples
     )
     {
-        uint8_t progress = 0;
-
-        if (totalSamples > 0)
-        {
-            const uint64_t calculatedProgress =
-                (
-                    static_cast<uint64_t>(processedSamples) *
-                    100ULL
-                ) /
-                static_cast<uint64_t>(totalSamples);
-
-            progress = static_cast<uint8_t>(
-                std::min<uint64_t>(
-                    calculatedProgress,
-                    100ULL
-                )
+        const uint8_t progress =
+            calculateProgress(
+                processedSamples,
+                totalSamples
             );
-        }
 
         portENTER_CRITICAL(&statusMutex);
 
@@ -199,37 +224,33 @@ namespace
 
     int16_t* allocateRecordingBuffer(size_t byteCount)
     {
+        /*
+        * Use internal 8-bit-capable RAM for audio.
+        *
+        * The ST77922/LVGL framebuffer already uses PSRAM. Keeping the
+        * recording buffer in internal RAM avoids concurrent display and
+        * audio access to external PSRAM.
+        */
         void* memory = heap_caps_malloc(
             byteCount,
-            MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT
-        );
-
-        if (memory != nullptr)
-        {
-            Serial.printf(
-                "[AudioService] Allocated %u bytes in PSRAM\n",
-                static_cast<unsigned int>(byteCount)
-            );
-
-            return static_cast<int16_t*>(memory);
-        }
-
-        Serial.println(
-            "[AudioService] PSRAM unavailable; trying internal RAM"
-        );
-
-        memory = heap_caps_malloc(
-            byteCount,
+            MALLOC_CAP_INTERNAL |
             MALLOC_CAP_8BIT
         );
 
-        if (memory != nullptr)
+        if (memory == nullptr)
         {
             Serial.printf(
-                "[AudioService] Allocated %u bytes in internal RAM\n",
+                "[AudioService] Could not allocate %u bytes in internal RAM\n",
                 static_cast<unsigned int>(byteCount)
             );
+
+            return nullptr;
         }
+
+        Serial.printf(
+            "[AudioService] Allocated %u bytes in internal RAM\n",
+            static_cast<unsigned int>(byteCount)
+        );
 
         return static_cast<int16_t*>(memory);
     }
@@ -246,40 +267,46 @@ namespace
     }
 
     // ---------------------------------------------------------------------
-    // Audio Tools I2S setup
+    // I2S initialization
     // ---------------------------------------------------------------------
 
-    bool beginMicrophone()
+    void stopI2S()
     {
-        microphoneStream.end();
-
-        auto config =
-            microphoneStream.defaultConfig(RX_MODE);
-
-        config.sample_rate = SAMPLE_RATE;
-        config.channels = MIC_CHANNELS;
-        config.bits_per_sample = MIC_BITS_PER_SAMPLE;
-
-        config.pin_bck = MIC_BCLK_PIN;
-        config.pin_ws = MIC_WS_PIN;
+        audioI2S.end();
 
         /**
-         * Current Audio Tools versions use pin_data_rx for the input data
-         * pin. Setting pin_data as well improves compatibility with versions
-         * where RX mode reads the generic data property.
+         * Give the driver and DMA resources a short period to be
+         * completely released before reconfiguration.
          */
-        config.pin_data_rx = MIC_DATA_PIN;
-        config.pin_data = MIC_DATA_PIN;
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
 
-        config.is_master = true;
-        config.i2s_format = I2S_STD_FORMAT;
+   bool beginMicrophone()
+    {
+        stopI2S();
 
-        const bool started =
-            microphoneStream.begin(config);
+        // Parameters: BCLK, WS, DOUT, DIN
+        audioI2S.setPins(
+            MIC_BCLK_PIN,
+            MIC_WS_PIN,
+            -1,
+            MIC_DATA_PIN
+        );
+
+        const bool started = audioI2S.begin(
+            I2S_MODE_STD,
+            SAMPLE_RATE,
+            I2S_DATA_BIT_WIDTH_32BIT,
+            I2S_SLOT_MODE_MONO
+        );
 
         if (!started)
         {
-            microphoneStream.end();
+            Serial.println(
+                "[AudioService] Microphone I2S initialization failed"
+            );
+
+            stopI2S();
             return false;
         }
 
@@ -288,62 +315,158 @@ namespace
 
     bool beginSpeaker()
     {
-        speakerStream.end();
+        stopI2S();
 
-        auto config =
-            speakerStream.defaultConfig(TX_MODE);
+        // Parameters: BCLK, WS, DOUT, DIN
+        audioI2S.setPins(
+            SPEAKER_BCLK_PIN,
+            SPEAKER_WS_PIN,
+            SPEAKER_DATA_PIN,
+            -1
+        );
 
-        config.sample_rate = SAMPLE_RATE;
-        config.channels = SPEAKER_CHANNELS;
-        config.bits_per_sample = SPEAKER_BITS_PER_SAMPLE;
-
-        config.pin_bck = SPEAKER_BCLK_PIN;
-        config.pin_ws = SPEAKER_WS_PIN;
-        config.pin_data = SPEAKER_DATA_PIN;
-
-        config.is_master = true;
-        config.i2s_format = I2S_STD_FORMAT;
-
-        const bool started =
-            speakerStream.begin(config);
+        const bool started = audioI2S.begin(
+            I2S_MODE_STD,
+            SAMPLE_RATE,
+            I2S_DATA_BIT_WIDTH_16BIT,
+            I2S_SLOT_MODE_STEREO
+        );
 
         if (!started)
         {
-            speakerStream.end();
+            Serial.println(
+                "[AudioService] Speaker I2S initialization failed"
+            );
+
+            stopI2S();
             return false;
         }
 
         return true;
     }
 
-    void stopMicrophone()
-    {
-        microphoneStream.end();
-    }
-
-    void stopSpeaker()
-    {
-        speakerStream.end();
-    }
-
     // ---------------------------------------------------------------------
-    // Microphone conversion
+    // Microphone conversion and processing
     // ---------------------------------------------------------------------
 
     int16_t convertMicrophoneSample(int32_t rawSample)
     {
-        int32_t converted =
+        const int32_t converted =
             rawSample >> MIC_RIGHT_SHIFT;
 
-        converted *= MIC_GAIN;
+        return clampToInt16(converted);
+    }
 
-        converted = std::clamp<int32_t>(
-            converted,
-            std::numeric_limits<int16_t>::min(),
-            std::numeric_limits<int16_t>::max()
+    /**
+     * Removes a constant DC offset and normalizes the signal.
+     *
+     * Digital microphones often produce samples centred slightly
+     * above or below zero. Removing that offset improves playback.
+     */
+    void processRecording(
+        int16_t* recording,
+        size_t sampleCount
+    )
+    {
+        if (
+            recording == nullptr ||
+            sampleCount == 0
+        )
+        {
+            return;
+        }
+
+        int64_t sampleSum = 0;
+
+        for (size_t index = 0; index < sampleCount; ++index)
+        {
+            sampleSum += recording[index];
+        }
+
+        const int32_t dcOffset =
+            static_cast<int32_t>(
+                sampleSum /
+                static_cast<int64_t>(sampleCount)
+            );
+
+        int32_t peakBeforeNormalization = 0;
+
+        for (size_t index = 0; index < sampleCount; ++index)
+        {
+            const int32_t centredSample =
+                static_cast<int32_t>(
+                    recording[index]
+                ) -
+                dcOffset;
+
+            recording[index] =
+                clampToInt16(centredSample);
+
+            const int32_t magnitude =
+                absoluteValue(centredSample);
+
+            if (magnitude > peakBeforeNormalization)
+            {
+                peakBeforeNormalization = magnitude;
+            }
+        }
+
+        Serial.printf(
+            "[AudioService] Microphone DC offset: %ld\n",
+            static_cast<long>(dcOffset)
         );
 
-        return static_cast<int16_t>(converted);
+        Serial.printf(
+            "[AudioService] Microphone peak before normalization: %ld\n",
+            static_cast<long>(
+                peakBeforeNormalization
+            )
+        );
+
+        if (
+            peakBeforeNormalization <
+            MINIMUM_USEFUL_PEAK
+        )
+        {
+            Serial.println(
+                "[AudioService] Warning: microphone signal is nearly silent"
+            );
+
+            return;
+        }
+
+        /**
+         * Fixed-point gain:
+         *
+         * gain = targetPeak / measuredPeak
+         *
+         * Multiplying first with int64_t avoids losing precision.
+         */
+        for (size_t index = 0; index < sampleCount; ++index)
+        {
+            const int64_t amplified =
+                (
+                    static_cast<int64_t>(
+                        recording[index]
+                    ) *
+                    NORMALIZED_TARGET_PEAK
+                ) /
+                peakBeforeNormalization;
+
+            recording[index] =
+                clampToInt16(
+                    static_cast<int32_t>(
+                        amplified
+                    )
+                );
+        }
+
+        Serial.printf(
+            "[AudioService] Recording normalized to peak %ld\n",
+            static_cast<long>(
+                NORMALIZED_TARGET_PEAK
+            )
+        );
     }
 
     // ---------------------------------------------------------------------
@@ -373,20 +496,24 @@ namespace
             AudioResult::None,
             durationMs,
             0,
-            static_cast<uint32_t>(requestedSamples),
+            static_cast<uint32_t>(
+                requestedSamples
+            ),
             0
         );
 
         Serial.printf(
             "[AudioService] Recording for %lu ms\n",
-            static_cast<unsigned long>(durationMs)
+            static_cast<unsigned long>(
+                durationMs
+            )
         );
 
         int32_t inputBlock[MIC_BLOCK_SAMPLES];
 
         const uint32_t startTime = millis();
         const uint32_t timeoutMs =
-            durationMs + 2000;
+            durationMs + 2500;
 
         uint8_t consecutiveEmptyReads = 0;
 
@@ -394,44 +521,48 @@ namespace
         {
             if (cancellationRequested)
             {
-                stopMicrophone();
+                stopI2S();
                 return AudioResult::Cancelled;
             }
 
-            if ((millis() - startTime) > timeoutMs)
+            if (
+                millis() - startTime >
+                timeoutMs
+            )
             {
                 Serial.println(
                     "[AudioService] Microphone read timeout"
                 );
 
-                stopMicrophone();
+                stopI2S();
                 return AudioResult::MicrophoneReadFailed;
             }
 
             const size_t remainingSamples =
-                requestedSamples - recordedSamples;
+                requestedSamples -
+                recordedSamples;
 
             const size_t samplesToRead =
-                std::min(
-                    remainingSamples,
-                    static_cast<size_t>(
+                remainingSamples <
                         MIC_BLOCK_SAMPLES
-                    )
-                );
+                    ? remainingSamples
+                    : MIC_BLOCK_SAMPLES;
 
             const size_t requestedBytes =
-                samplesToRead * sizeof(int32_t);
+                samplesToRead *
+                sizeof(int32_t);
 
             const size_t bytesRead =
-                microphoneStream.readBytes(
-                    reinterpret_cast<uint8_t*>(
+                audioI2S.readBytes(
+                    reinterpret_cast<char*>(
                         inputBlock
                     ),
                     requestedBytes
                 );
 
             const size_t samplesRead =
-                bytesRead / sizeof(int32_t);
+                bytesRead /
+                sizeof(int32_t);
 
             if (samplesRead == 0)
             {
@@ -443,7 +574,7 @@ namespace
                         "[AudioService] No microphone samples received"
                     );
 
-                    stopMicrophone();
+                    stopI2S();
                     return AudioResult::MicrophoneReadFailed;
                 }
 
@@ -456,7 +587,8 @@ namespace
             for (
                 size_t index = 0;
                 index < samplesRead &&
-                recordedSamples < requestedSamples;
+                recordedSamples <
+                    requestedSamples;
                 ++index
             )
             {
@@ -480,7 +612,7 @@ namespace
             taskYIELD();
         }
 
-        stopMicrophone();
+        stopI2S();
 
         Serial.printf(
             "[AudioService] Recorded %u samples\n",
@@ -489,11 +621,16 @@ namespace
             )
         );
 
+        processRecording(
+            recording,
+            recordedSamples
+        );
+
         return AudioResult::Success;
     }
 
     // ---------------------------------------------------------------------
-    // Playback
+    // Speaker playback
     // ---------------------------------------------------------------------
 
     AudioResult playAudio(
@@ -516,7 +653,9 @@ namespace
             AudioResult::None,
             durationMs,
             0,
-            static_cast<uint32_t>(recordedSamples),
+            static_cast<uint32_t>(
+                recordedSamples
+            ),
             0
         );
 
@@ -525,8 +664,7 @@ namespace
         );
 
         int16_t outputBlock[
-            SPEAKER_BLOCK_FRAMES *
-            SPEAKER_CHANNELS
+            SPEAKER_BLOCK_FRAMES * 2
         ];
 
         size_t playedSamples = 0;
@@ -535,21 +673,24 @@ namespace
         {
             if (cancellationRequested)
             {
-                stopSpeaker();
+                stopI2S();
                 return AudioResult::Cancelled;
             }
 
             const size_t remainingSamples =
-                recordedSamples - playedSamples;
+                recordedSamples -
+                playedSamples;
 
             const size_t framesThisBlock =
-                std::min(
-                    remainingSamples,
-                    static_cast<size_t>(
+                remainingSamples <
                         SPEAKER_BLOCK_FRAMES
-                    )
-                );
+                    ? remainingSamples
+                    : SPEAKER_BLOCK_FRAMES;
 
+            /**
+             * Duplicate the mono recording into left and right
+             * stereo slots.
+             */
             for (
                 size_t frame = 0;
                 frame < framesThisBlock;
@@ -570,12 +711,12 @@ namespace
 
             const size_t bytesToWrite =
                 framesThisBlock *
-                SPEAKER_CHANNELS *
+                2 *
                 sizeof(int16_t);
 
             const size_t bytesWritten =
-                speakerStream.write(
-                    reinterpret_cast<const uint8_t*>(
+                audioI2S.write(
+                    reinterpret_cast<uint8_t*>(
                         outputBlock
                     ),
                     bytesToWrite
@@ -587,20 +728,20 @@ namespace
                     "[AudioService] Speaker write failed"
                 );
 
-                stopSpeaker();
+                stopI2S();
                 return AudioResult::SpeakerWriteFailed;
             }
 
             const size_t framesWritten =
                 bytesWritten /
                 (
-                    SPEAKER_CHANNELS *
+                    2 *
                     sizeof(int16_t)
                 );
 
             if (framesWritten == 0)
             {
-                stopSpeaker();
+                stopI2S();
                 return AudioResult::SpeakerWriteFailed;
             }
 
@@ -619,8 +760,8 @@ namespace
         }
 
         /**
-         * Add a short block of silence before closing I2S so the final
-         * recorded samples can leave the DMA buffer.
+         * Send a short silence block so the final samples leave
+         * the DMA buffer before I2S is stopped.
          */
         std::memset(
             outputBlock,
@@ -628,16 +769,16 @@ namespace
             sizeof(outputBlock)
         );
 
-        speakerStream.write(
-            reinterpret_cast<const uint8_t*>(
+        audioI2S.write(
+            reinterpret_cast<uint8_t*>(
                 outputBlock
             ),
             sizeof(outputBlock)
         );
 
-        vTaskDelay(pdMS_TO_TICKS(30));
+        vTaskDelay(pdMS_TO_TICKS(100));
 
-        stopSpeaker();
+        stopI2S();
 
         Serial.println(
             "[AudioService] Playback finished"
@@ -675,7 +816,9 @@ namespace
         }
 
         const size_t requestedSamples =
-            static_cast<size_t>(sampleCount64);
+            static_cast<size_t>(
+                sampleCount64
+            );
 
         if (
             requestedSamples >
@@ -686,7 +829,8 @@ namespace
         }
 
         const size_t recordingBytes =
-            requestedSamples * sizeof(int16_t);
+            requestedSamples *
+            sizeof(int16_t);
 
         int16_t* recording =
             allocateRecordingBuffer(
@@ -695,6 +839,10 @@ namespace
 
         if (recording == nullptr)
         {
+            Serial.println(
+                "[AudioService] Recording buffer allocation failed"
+            );
+
             return AudioResult::AllocationFailed;
         }
 
@@ -709,11 +857,7 @@ namespace
 
         if (result == AudioResult::Success)
         {
-            /**
-             * Ensure the microphone I2S driver is fully released before
-             * starting the separate speaker I2S output.
-             */
-            vTaskDelay(pdMS_TO_TICKS(50));
+            vTaskDelay(pdMS_TO_TICKS(100));
 
             result = playAudio(
                 recording,
@@ -722,15 +866,14 @@ namespace
             );
         }
 
-        stopMicrophone();
-        stopSpeaker();
+        stopI2S();
         releaseRecordingBuffer(recording);
 
         return result;
     }
 
     // ---------------------------------------------------------------------
-    // Persistent FreeRTOS task
+    // Persistent audio task
     // ---------------------------------------------------------------------
 
     void audioTask(void* parameter)
@@ -757,7 +900,10 @@ namespace
                 continue;
             }
 
-            if (command.type == CommandType::Shutdown)
+            if (
+                command.type ==
+                CommandType::Shutdown
+            )
             {
                 break;
             }
@@ -774,7 +920,10 @@ namespace
 
                 cancellationRequested = false;
 
-                if (result == AudioResult::Success)
+                if (
+                    result ==
+                    AudioResult::Success
+                )
                 {
                     setStatus(
                         AudioState::Idle,
@@ -820,8 +969,7 @@ namespace
             }
         }
 
-        stopMicrophone();
-        stopSpeaker();
+        stopI2S();
 
         Serial.println(
             "[AudioService] Audio task stopped"
@@ -840,15 +988,6 @@ namespace AudioService
         {
             return true;
         }
-
-        /**
-         * Keep Audio Tools logging at warning level so audio timing is not
-         * disturbed by excessive serial output.
-         */
-        AudioToolsLogger.begin(
-            Serial,
-            AudioToolsLogLevel::Warning
-        );
 
         commandQueue = xQueueCreate(
             COMMAND_QUEUE_LENGTH,
@@ -873,15 +1012,17 @@ namespace AudioService
             return false;
         }
 
+        /**
+         * Unpinned task: FreeRTOS can choose the most appropriate core.
+         */
         const BaseType_t taskResult =
-            xTaskCreatePinnedToCore(
+            xTaskCreate(
                 audioTask,
                 "AudioService",
                 AUDIO_TASK_STACK_SIZE,
                 nullptr,
                 AUDIO_TASK_PRIORITY,
-                &audioTaskHandle,
-                AUDIO_TASK_CORE
+                &audioTaskHandle
             );
 
         if (taskResult != pdPASS)
@@ -935,23 +1076,24 @@ namespace AudioService
 
         if (commandQueue != nullptr)
         {
-            const Command command{
+            const Command shutdownCommand{
                 CommandType::Shutdown,
                 0
             };
 
             xQueueSend(
                 commandQueue,
-                &command,
+                &shutdownCommand,
                 pdMS_TO_TICKS(100)
             );
         }
 
-        const uint32_t startTime = millis();
+        const uint32_t timeoutStart =
+            millis();
 
         while (
             audioTaskHandle != nullptr &&
-            millis() - startTime < 1000
+            millis() - timeoutStart < 1000
         )
         {
             vTaskDelay(pdMS_TO_TICKS(10));
@@ -969,8 +1111,7 @@ namespace AudioService
             commandQueue = nullptr;
         }
 
-        stopMicrophone();
-        stopSpeaker();
+        stopI2S();
 
         serviceInitialized = false;
         cancellationRequested = false;
@@ -982,6 +1123,10 @@ namespace AudioService
             0,
             0,
             0
+        );
+
+        Serial.println(
+            "[AudioService] Ended"
         );
     }
 
@@ -1109,7 +1254,8 @@ namespace AudioService
 
     bool isBusy()
     {
-        const State state = getState();
+        const State state =
+            getState();
 
         return
             state == State::Queued ||
