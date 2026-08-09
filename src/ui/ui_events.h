@@ -10,9 +10,16 @@
 extern "C" {
 #endif
 
+void autoMapLedsForLocation(lv_event_t * e);
+void testLedsLocation(lv_event_t * e);
+void saveLedsLocation(lv_event_t * e);
 void scrollCardsToSelectedLocation(lv_event_t * e);
 void updateMiniLocatinValue(lv_event_t * e);
 void recordTestCallback(lv_event_t * e);
+void setMinisLightColor(lv_event_t * e);
+void setMinisLightsIntensity(lv_event_t * e);
+void setCabinetLightColor(lv_event_t * e);
+void setCabinetLightsIntensity(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

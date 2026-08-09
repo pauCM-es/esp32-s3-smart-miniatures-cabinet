@@ -11,7 +11,7 @@ void ui_event_comp_header2_go_back_btn2(lv_event_t * e)
     lv_obj_t ** comp_header2 = lv_event_get_user_data(e);
 
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_overview_screen, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_overview_screen_screen_init);
+        _ui_screen_change(&ui_overview, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_overview_screen_init);
     }
 }
 

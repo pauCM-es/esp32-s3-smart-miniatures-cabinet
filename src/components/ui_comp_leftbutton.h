@@ -3,23 +3,22 @@
 // LVGL version: 8.3.11
 // Project name: minis_cabinet
 
-#ifndef UI_LIGHTS_H
-#define UI_LIGHTS_H
+#ifndef _UI_COMP_LEFTBUTTON_H
+#define _UI_COMP_LEFTBUTTON_H
+
+#include "../ui.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SCREEN: ui_LIGHTS
-extern void ui_LIGHTS_screen_init(void);
-extern void ui_LIGHTS_screen_destroy(void);
-extern lv_obj_t * ui_LIGHTS;
-extern lv_obj_t * ui_header4;
-// CUSTOM VARIABLES
+// COMPONENT leftbutton
+#define UI_COMP_LEFTBUTTON_LEFTBUTTON 0
+#define _UI_COMP_LEFTBUTTON_NUM 1
+lv_obj_t * ui_leftbutton_create(lv_obj_t * comp_parent);
 
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif
 
 #endif
-

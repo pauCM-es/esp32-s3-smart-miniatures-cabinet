@@ -2,11 +2,13 @@ SET(SOURCES components/ui_comp_bodycontainer.c
     components/ui_comp_header2.c
     components/ui_comp_leftbutton.c
     components/ui_comp.c
-    screens/ui_overview.c
-    screens/ui_SHELVES_SCREEN.c
-    screens/ui_MINIATURES.c
-    screens/ui_SETTINGS.c
-    screens/ui_LIGHTS.c
+    components/ui_comp_led_item.c
+    components/ui_comp_shelf_tab.c
+    screens/ui_overview_screen.c
+    screens/ui_shelves_screen.c
+    screens/ui_miniatures_screen.c
+    screens/ui_settings_screen.c
+    screens/ui_lights_screen.c
     ui_theme_manager.c
     ui_themes.c
     ui.c
@@ -29,9 +31,9 @@ SET(SOURCES components/ui_comp_bodycontainer.c
     images/ui_img_remove_32dp_ffffff_fill0_wght400_grad0_opsz40_png.c
     images/ui_img_backlight_low_40dp_00e4f6_fill0_wght400_grad0_opsz40_png.c
     images/ui_img_hexagon_72dp_00e4f6_fill0_wght400_grad0_opsz48_png.c
+    images/ui_img_save_36dp_e3e3e3_fill0_wght400_grad0_opsz40_png.c
     images/ui_img_arrow_drop_down_72dp_00e4f6_fill0_wght400_grad0_opsz48_png.c
     images/ui_img_keyboard_double_arrow_left_40dp_00e4f6_fill0_wght400_grad0_opsz40_png.c
-    images/ui_img_mini_placeholder_png.c
     images/ui_img_keyboard_double_arrow_right_40dp_00e4f6_fill0_wght400_grad0_opsz40_png.c
     images/ui_img_check_40dp_75fbfd_fill0_wght400_grad0_opsz40_png.c
     images/ui_img_close_40dp_ea33f7_fill0_wght400_grad0_opsz40_png.c)

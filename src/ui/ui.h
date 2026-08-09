@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#include "lvgl.h"
+#include "lvgl/lvgl.h"
 
 #include "ui_helpers.h"
 #include "components/ui_comp.h"
@@ -22,11 +22,11 @@ extern "C" {
 
 ///////////////////// SCREENS ////////////////////
 
-#include "screens/ui_overview.h"
-#include "screens/ui_SHELVES_SCREEN.h"
-#include "screens/ui_MINIATURES.h"
-#include "screens/ui_SETTINGS.h"
-#include "screens/ui_LIGHTS.h"
+#include "screens/ui_overview_screen.h"
+#include "screens/ui_shelves_screen.h"
+#include "screens/ui_miniatures_screen.h"
+#include "screens/ui_settings_screen.h"
+#include "screens/ui_lights_screen.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -68,10 +68,11 @@ LV_IMG_DECLARE(
 LV_IMG_DECLARE(
     ui_img_hexagon_72dp_00e4f6_fill0_wght400_grad0_opsz48_png);    // assets/hexagon_72dp_00E4F6_FILL0_wght400_GRAD0_opsz48.png
 LV_IMG_DECLARE(
+    ui_img_save_36dp_e3e3e3_fill0_wght400_grad0_opsz40_png);    // assets/save_36dp_E3E3E3_FILL0_wght400_GRAD0_opsz40.png
+LV_IMG_DECLARE(
     ui_img_arrow_drop_down_72dp_00e4f6_fill0_wght400_grad0_opsz48_png);    // assets/arrow_drop_down_72dp_00E4F6_FILL0_wght400_GRAD0_opsz48.png
 LV_IMG_DECLARE(
     ui_img_keyboard_double_arrow_left_40dp_00e4f6_fill0_wght400_grad0_opsz40_png);    // assets/keyboard_double_arrow_left_40dp_00E4F6_FILL0_wght400_GRAD0_opsz40.png
-LV_IMG_DECLARE(ui_img_mini_placeholder_png);    // assets/mini_placeholder.png
 LV_IMG_DECLARE(
     ui_img_keyboard_double_arrow_right_40dp_00e4f6_fill0_wght400_grad0_opsz40_png);    // assets/keyboard_double_arrow_right_40dp_00E4F6_FILL0_wght400_GRAD0_opsz40.png
 LV_IMG_DECLARE(

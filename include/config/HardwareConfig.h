@@ -12,7 +12,7 @@
 #define SMART_CABINET_ENABLE_RGBW_CABINET_LIGHT 0
 #endif
 #ifndef SMART_CABINET_ENABLE_MINIATURE_LIGHTS
-#define SMART_CABINET_ENABLE_MINIATURE_LIGHTS 0
+#define SMART_CABINET_ENABLE_MINIATURE_LIGHTS 1
 #endif
 #ifndef SMART_CABINET_ENABLE_ENCODER
 #define SMART_CABINET_ENABLE_ENCODER 0
@@ -43,12 +43,12 @@ constexpr int kEncoderButtonPin = 6;
 constexpr uint8_t kEncoderBrightnessStep = 5;
 constexpr uint16_t kEncoderButtonDebounceMs = 35;
 
-constexpr uint8_t kDefaultShelfCount = 5;
+constexpr uint8_t kDefaultShelfCount = 1;
 constexpr uint16_t kDefaultLedsPerShelf = 80;
-constexpr uint8_t kDefaultLocationsPerShelf = 5;
+constexpr uint8_t kDefaultLocationsPerShelf = 26;
 
-constexpr uint8_t kMaxShelves = 8;
-constexpr uint8_t kMaxLocationsPerShelf = 16;
+constexpr uint8_t kMaxShelves = 5;
+constexpr uint8_t kMaxLocationsPerShelf = 26;
 
 constexpr uint32_t kLocateDurationMs = 8000;
 constexpr uint32_t kLocationTestDurationMs = 5000;
