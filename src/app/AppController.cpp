@@ -16,6 +16,8 @@ AppController::AppController(LightingManager& lighting,
 void AppController::begin() {
     lighting_.begin();
     encoder_.begin();
+    Serial.printf("[Encoder] available=%d  PWM available=%d\n",
+                  encoder_.available(), lighting_.pwmCabinet().available());
 }
 
 void AppController::update(uint32_t nowMs) {
@@ -202,11 +204,12 @@ void AppController::handleEncoder(uint32_t nowMs) {
     if (event.delta != 0) {
         const int next = static_cast<int>(lighting_.pwmCabinet().brightness()) +
                          event.delta * config::kEncoderBrightnessStep;
-        lighting_.setPwmCabinetBrightness(clampPercent(next));
+        const uint8_t clamped = clampPercent(next);
+        Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
+        lighting_.setPwmCabinetBrightness(clamped);
     }
-    if (event.pressed) {
-        lighting_.togglePwmCabinet();
-    }
+    // No button — toggle disabled:
+    // if (event.pressed) { lighting_.togglePwmCabinet(); }
 }
 
 void AppController::setHighlightTimeout(uint32_t nowMs, uint32_t durationMs) {

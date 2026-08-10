@@ -534,6 +534,16 @@ void ui_overview_screen_screen_init(void)
     lv_obj_add_event_cb(ui_screenMinis_btn, ui_event_screenMinis_btn, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_screen_settings_btn, ui_event_screen_settings_btn, LV_EVENT_ALL, NULL);
 
+    /* Scene navigation */
+    lv_obj_add_event_cb(ui_Button3, ui_event_previousScene_btn, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Button1, ui_event_nextScene_btn, LV_EVENT_ALL, NULL);
+
+    /* Cabinet lights toggle */
+    lv_obj_add_event_cb(ui_lights_switch, ui_event_lights_switch, LV_EVENT_ALL, NULL);
+
+    /* Refresh view when screen becomes active */
+    lv_obj_add_event_cb(ui_overview_screen, ui_event_overview_screen_loaded, LV_EVENT_SCREEN_LOADED, NULL);
+
 }
 
 void ui_overview_screen_screen_destroy(void)

@@ -4,6 +4,13 @@
 // Project name: minis_cabinet
 
 #include "ui.h"
+#include "events/OverviewEvents.h"
+#include "events/LightsEvents.h"
+
+void autoMapLedsForLocation(lv_event_t * e)
+{
+	// Your code here
+}
 
 void scrollCardsToSelectedLocation(lv_event_t * e)
 {
@@ -32,20 +39,53 @@ void saveLedsLocation(lv_event_t * e)
 
 void setMinisLightColor(lv_event_t * e)
 {
-	// Your code here
+	lv_color_hsv_t hsv = lv_colorwheel_get_hsv(lv_event_get_target(e));
+	lv_color_t c = lv_color_hsv_to_rgb(hsv.h, hsv.s, hsv.v);
+	lv_color32_t c32; c32.full = lv_color_to32(c);
+	lights_on_minis_color_changed(c32.ch.red, c32.ch.green, c32.ch.blue);
 }
 
 void setMinisLightsIntensity(lv_event_t * e)
 {
-	// Your code here
+	lights_on_minis_intensity_changed((uint8_t)lv_slider_get_value(lv_event_get_target(e)));
 }
 
 void setCabinetLightColor(lv_event_t * e)
 {
-	// Your code here
+	lv_color_hsv_t hsv = lv_colorwheel_get_hsv(lv_event_get_target(e));
+	lv_color_t c = lv_color_hsv_to_rgb(hsv.h, hsv.s, hsv.v);
+	lv_color32_t c32; c32.full = lv_color_to32(c);
+	lights_on_cabinet_color_changed(c32.ch.red, c32.ch.green, c32.ch.blue);
 }
 
 void setCabinetLightsIntensity(lv_event_t * e)
 {
-	// Your code here
+	lights_on_cabinet_intensity_changed((uint8_t)lv_slider_get_value(lv_event_get_target(e)));
+}
+
+// ── Overview screen events ────────────────────────────────────────────────
+// Implementations delegate to src/ui/events/OverviewEvents.cpp via extern "C".
+// If SquareLine regenerates this file, copy these four functions back.
+
+void ui_event_previousScene_btn(lv_event_t * e)
+{
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) overview_on_prev_scene();
+}
+
+void ui_event_nextScene_btn(lv_event_t * e)
+{
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) overview_on_next_scene();
+}
+
+void ui_event_lights_switch(lv_event_t * e)
+{
+    if (lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED)
+        overview_on_lights_switched(
+            lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+}
+
+void ui_event_overview_screen_loaded(lv_event_t * e)
+{
+    (void)e;
+    overview_on_screen_opened();
 }

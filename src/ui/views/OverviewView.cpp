@@ -1,7 +1,36 @@
 #include "OverviewView.h"
+#include <lvgl.h>
 #include "../screens/ui_overview_screen.h"   // LVGL widget externs
 
+#include "app/AppContext.h"
+#include "lighting/SceneRepository.h"
+
+using namespace smartcabinet;
+
 namespace OverviewView {
+
+// ── State reader ─────────────────────────────────────────────────────────────
+// Builds a ViewModel from the current application state.
+// Kept private — callers use refresh() or render().
+
+namespace {
+ViewModel buildViewModel()
+{
+    const AppState s = app.state();
+    return {
+        /* sceneName      */ SceneRepository::get(s.activeScene).name,
+        /* miniatureCount */ s.miniatureCount,
+        /* lightsOn       */ s.pwmCabinetOn || s.rgbwCabinetOn,
+    };
+}
+}  // namespace
+
+// ── Public API ───────────────────────────────────────────────────────────────
+
+void refresh()
+{
+    render(buildViewModel());
+}
 
 void setCurrentScene(const char* sceneName)
 {

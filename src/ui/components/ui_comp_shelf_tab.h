@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../ui.h"
+#include <stdint.h>
+#include "lvgl/lvgl.h"
 #include "ui_comp_led_item.h"
 
 #ifdef __cplusplus

@@ -51,6 +51,10 @@ extern lv_obj_t * ui_Container7;
 extern lv_obj_t * ui_minisAmount_label;
 extern lv_obj_t * ui_minisAmount_text;
 // CUSTOM VARIABLES
+extern void ui_event_previousScene_btn(lv_event_t * e);
+extern void ui_event_nextScene_btn(lv_event_t * e);
+extern void ui_event_lights_switch(lv_event_t * e);
+extern void ui_event_overview_screen_loaded(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

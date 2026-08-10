@@ -15,10 +15,16 @@ struct ViewModel {
     bool        lightsOn;
 };
 
-// Full refresh — call when the screen is opened.
+// ── State → View ─────────────────────────────────────────────────────────────
+// Build a ViewModel from the current AppState and render the screen.
+// Call this whenever application state changes and the screen may be visible.
+void refresh();
+
+// Full refresh from a pre-built model.
 void render(const ViewModel& model);
 
-// Incremental setters — call when a single value changes.
+// ── Incremental setters ───────────────────────────────────────────────────────
+// Call when only one value changes while the screen is already active.
 void setCurrentScene(const char* sceneName);
 void setMiniatureCount(size_t count);
 void setLightsOn(bool on);

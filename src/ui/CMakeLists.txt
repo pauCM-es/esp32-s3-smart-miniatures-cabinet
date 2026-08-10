@@ -36,6 +36,8 @@ SET(SOURCES components/ui_comp_bodycontainer.c
     images/ui_img_keyboard_double_arrow_left_40dp_00e4f6_fill0_wght400_grad0_opsz40_png.c
     images/ui_img_keyboard_double_arrow_right_40dp_00e4f6_fill0_wght400_grad0_opsz40_png.c
     images/ui_img_check_40dp_75fbfd_fill0_wght400_grad0_opsz40_png.c
-    images/ui_img_close_40dp_ea33f7_fill0_wght400_grad0_opsz40_png.c)
+    images/ui_img_close_40dp_ea33f7_fill0_wght400_grad0_opsz40_png.c
+    views/OverviewView.cpp
+    events/OverviewEvents.cpp)
 
 add_library(ui ${SOURCES})

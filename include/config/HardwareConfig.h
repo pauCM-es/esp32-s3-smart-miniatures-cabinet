@@ -24,27 +24,35 @@
 
 namespace smartcabinet::config {
 
-constexpr int kPwmCabinetPin = 1;
+constexpr int kPwmCabinetPin = 46;
 constexpr uint8_t kPwmChannel = 0;
 constexpr uint32_t kPwmFrequencyHz = 20000;
 constexpr uint8_t kPwmResolutionBits = 8;
 
-constexpr int kRgbwCabinetDataPin = 2;
-constexpr uint16_t kRgbwCabinetLedCount = 150;  // Replace with measured strip count.
+constexpr int kRgbwCabinetDataPin = 46;
+constexpr uint16_t kRgbwCabinetLedCount = 30;  // Replace with measured strip count.
 
-constexpr int kMiniatureLedDataPin = 3;
+constexpr int kMiniatureLedDataPin = 45;
 constexpr uint16_t kMiniatureLedCount = 400;    // ~2.5 m at 160 LED/m.
 constexpr uint8_t kMiniatureMaxBrightness = 96; // Conservative until current is measured.
 constexpr uint16_t kMiniaturePowerLimitMilliAmps = 2200;
 
-constexpr int kEncoderPinA = 4;
-constexpr int kEncoderPinB = 5;
-constexpr int kEncoderButtonPin = 6;
-constexpr uint8_t kEncoderBrightnessStep = 5;
+// Encoder via PCF8575 I2C expander (original — commented out).
+constexpr int kI2cSdaPin = 38;
+constexpr int kI2cSclPin = 39;
+constexpr uint8_t kPcf8575Address = 0x20;
+constexpr int kEncoderPinA = 0;       // P0 → encoder signal A
+constexpr int kEncoderPinB = 1;       // P1 → encoder signal B
+constexpr int kEncoderButtonPin = 2;  // P2 → encoder push button
 constexpr uint16_t kEncoderButtonDebounceMs = 35;
 
+// Encoder wired directly to GPIO (quadrature, no button).
+// constexpr int kEncoderPinA = 38;
+// constexpr int kEncoderPinB = 39;
+constexpr uint8_t kEncoderBrightnessStep = 5;
+
 constexpr uint8_t kDefaultShelfCount = 1;
-constexpr uint16_t kDefaultLedsPerShelf = 80;
+constexpr uint16_t kDefaultLedsPerShelf = 160;
 constexpr uint8_t kDefaultLocationsPerShelf = 26;
 
 constexpr uint8_t kMaxShelves = 5;

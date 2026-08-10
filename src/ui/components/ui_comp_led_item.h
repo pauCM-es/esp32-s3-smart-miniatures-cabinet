@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../ui.h"
+#include <stdint.h>
+#include "lvgl/lvgl.h"
 
 #ifdef __cplusplus
 extern "C" {

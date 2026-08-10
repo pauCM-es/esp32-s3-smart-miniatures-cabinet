@@ -1,4 +1,5 @@
 #include "ui_comp_shelf_tab.h"
+#include "../ui.h"
 #include "../ui_events.h"
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */

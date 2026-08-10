@@ -112,6 +112,15 @@ void Display::begin() {
 
     memset(frameBuffer, 0, kFrameBytes);
 
+    // Clear panel to a known state before LVGL starts refreshing.
+    panel.Fill_Colors(
+        0,
+        0,
+        kWidth,
+        kHeight,
+        reinterpret_cast<uint16_t*>(frameBuffer)
+    );
+
     Serial.printf(
         "LVGL framebuffer allocated: %u bytes\n",
         static_cast<unsigned int>(kFrameBytes)

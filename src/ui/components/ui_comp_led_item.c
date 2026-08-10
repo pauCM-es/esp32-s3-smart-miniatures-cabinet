@@ -1,4 +1,5 @@
 #include "ui_comp_led_item.h"
+#include "../ui.h"
 
 /* Child indices inside the LED item container */
 #define LED_ITEM_CHILD_BAR   0
