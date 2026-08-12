@@ -41,9 +41,9 @@ constexpr uint16_t kMiniaturePowerLimitMilliAmps = 2200;
 constexpr int kI2cSdaPin = 38;
 constexpr int kI2cSclPin = 39;
 constexpr uint8_t kPcf8575Address = 0x20;
-constexpr int kEncoderPinA = 0;       // P0 → encoder signal A
-constexpr int kEncoderPinB = 1;       // P1 → encoder signal B
-constexpr int kEncoderButtonPin = 2;  // P2 → encoder push button
+constexpr int kEncoderButtonPin = 0;  // P0 → encoder push button
+constexpr int kEncoderPinA = 1;       // P1 → encoder signal A
+constexpr int kEncoderPinB = 2;       // P2 → encoder signal B
 constexpr uint16_t kEncoderButtonDebounceMs = 35;
 
 // Encoder wired directly to GPIO (quadrature, no button).
