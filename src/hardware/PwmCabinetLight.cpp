@@ -42,6 +42,11 @@ void PwmCabinetLight::toggle() {
 
 void PwmCabinetLight::setBrightness(uint8_t percent) {
     brightness_ = clampPercent(percent);
+    if (brightness_ > 0 && !on_) {
+        on_ = true;
+    } else if (brightness_ == 0 && on_) {
+        on_ = false;
+    }
     applyOutput();
 }
 
