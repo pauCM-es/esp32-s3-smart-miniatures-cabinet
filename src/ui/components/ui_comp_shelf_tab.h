@@ -46,6 +46,12 @@ ui_shelf_tab_t ui_shelf_tab_create(lv_obj_t *tabview,
                                    uint16_t  led_count,
                                    uint8_t   location_count);
 
+/** Rebuild the location-selector row and update the count label. */
+void ui_shelf_tab_set_location_count(ui_shelf_tab_t *tab, uint8_t count);
+
+/** Rebuild the LED-mapping bar and update the count label. */
+void ui_shelf_tab_set_led_count(ui_shelf_tab_t *tab, uint16_t count);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

@@ -43,6 +43,7 @@ public:
 
     bool locateMiniature(uint8_t miniatureId, uint32_t durationMs = 0);
     bool testLocation(LocationId locationId, uint32_t durationMs = 0);
+    bool testLocationPersistent(LocationId locationId);  // no auto-expire
     void clearHighlight();
 
     const Miniature* miniatureByIndex(size_t index) const;
@@ -54,7 +55,14 @@ public:
     bool setShelfLocationCount(uint8_t shelfIndex, uint8_t locationCount);
     bool setLocationRange(uint8_t shelfIndex, uint8_t locationIndex,
                           uint16_t relativeLedStart, uint16_t ledCount);
+    bool clearShelfLocation(uint8_t shelfIndex, uint8_t locationIndex);
+    bool clearShelfAllLocations(uint8_t shelfIndex);
     bool distributeShelfEvenly(uint8_t shelfIndex);
+
+    uint8_t selectedShelfIndex() const;
+    void    setSelectedShelf(uint8_t shelfIndex);
+    uint8_t selectedLocationIndex() const;
+    void    setSelectedLocation(uint8_t locationIndex);
 
     const CabinetLayout& layout() const;
 
@@ -66,6 +74,9 @@ private:
 
     int16_t highlightedMiniatureId_{-1};
     uint32_t highlightExpiresAtMs_{0};
+
+    uint8_t selectedShelfIndex_{0};
+    uint8_t selectedLocationIndex_{0};
 
     void handleEncoder(uint32_t nowMs);
     void setHighlightTimeout(uint32_t nowMs, uint32_t durationMs);

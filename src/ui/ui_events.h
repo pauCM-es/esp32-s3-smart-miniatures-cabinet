@@ -10,16 +10,48 @@
 extern "C" {
 #endif
 
-void autoMapLedsForLocation(lv_event_t * e);
-void testLedsLocation(lv_event_t * e);
-void saveLedsLocation(lv_event_t * e);
-void scrollCardsToSelectedLocation(lv_event_t * e);
-void updateMiniLocatinValue(lv_event_t * e);
-void recordTestCallback(lv_event_t * e);
-void setMinisLightColor(lv_event_t * e);
-void setMinisLightsIntensity(lv_event_t * e);
+// Overview events
+
+
+// Lights events
+void onMinisLightColorChange(lv_event_t * e);
+void onCabinetBrightnessChange(lv_event_t * e);
 void setCabinetLightColor(lv_event_t * e);
-void setCabinetLightsIntensity(lv_event_t * e);
+
+// Shelves events
+void addShelf(lv_event_t * e);
+void selectShelf(lv_event_t * e);
+
+void addLoactionToShelf(lv_event_t * e);
+void substractLocationFromShelf(lv_event_t * e);
+void addLedsToShelf(lv_event_t * e);
+void substractLedsFromShelf(lv_event_t * e);
+
+void selectLocationToMap(lv_event_t * e);
+
+void addLedsToSection(lv_event_t * e);
+void substractLedsToSection(lv_event_t * e);
+
+void cancelMapLeds(lv_event_t * e);
+void clearLedsLocation(lv_event_t * e);
+
+void autoMapLeds(lv_event_t * e);
+void clearAllLedsLocation(lv_event_t * e);
+void testLedsLocation(lv_event_t * e);
+
+
+// Mini info events
+void updateMiniLocatinValue(lv_event_t * e);
+void moveMiniBy(lv_event_t * e);
+void onSlideLocationChange(lv_event_t * e);
+void updateMiniLocatinValue(lv_event_t * e);
+
+
+
+void recordTestCallback(lv_event_t * e);
+
+
+
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -3,6 +3,7 @@
 
 #include "ui_shelves_screen.h"
 #include "../components/ui_comp_shelf_tab.h"
+#include "../events/ShelvesEvents.h"
 
 /* ── Defaults matching HardwareConfig.h ───────────────────────────────────
    These are only used for the initial screen_init() call.
@@ -26,7 +27,7 @@ uint8_t        ui_shelf_tab_count = 0;
 void ui_event_autoMapAction_btn(lv_event_t *e)
 {
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
-        autoMapLedsForLocation(e);
+        autoMapLeds(e);
     }
 }
 
@@ -40,8 +41,15 @@ void ui_event_testLedsAction_btn(lv_event_t *e)
 void ui_event_saveLedsLocationAction_btn2(lv_event_t *e)
 {
     if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
-        saveLedsLocation(e);
+        clearAllLedsLocation(e);
     }
+}
+
+/* Fires when the user switches tabs via the tab-button strip. */
+static void on_tabview_tab_changed(lv_event_t *e)
+{
+    uint16_t active = lv_tabview_get_tab_act((lv_obj_t *)lv_event_get_target(e));
+    shelves_on_shelf_selected((uint8_t)active);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -119,6 +127,9 @@ static void build_tabview_chrome(void)
     ui_object_set_themeable_style_property(tabBtns, LV_PART_ITEMS | LV_STATE_DEFAULT,
         LV_STYLE_BORDER_OPA, _ui_theme_alpha_Purple__________);
     lv_obj_set_style_border_width(tabBtns, 2, LV_PART_ITEMS | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_shelves_tabView, on_tabview_tab_changed,
+                        LV_EVENT_VALUE_CHANGED, NULL);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -145,6 +156,39 @@ void ui_shelves_screen_screen_init(void)
     lv_obj_set_y(ui_header2, 0);
 
     build_tabview_chrome();
+
+    /* Add-shelf floating button ("+", top-right area) */
+    lv_obj_t *addShelfBtn = lv_btn_create(ui_shelves_screen);
+    lv_obj_set_width(addShelfBtn, 40);
+    lv_obj_set_height(addShelfBtn, 34);
+    lv_obj_set_x(addShelfBtn, 100);
+    lv_obj_set_y(addShelfBtn, -139);
+    lv_obj_set_align(addShelfBtn, LV_ALIGN_CENTER);
+    lv_obj_add_flag(addShelfBtn, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_clear_flag(addShelfBtn,
+        LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(addShelfBtn, lv_color_hex(0xFFFFFF),
+                              LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(addShelfBtn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_object_set_themeable_style_property(addShelfBtn, LV_PART_MAIN | LV_STATE_DEFAULT,
+        LV_STYLE_BORDER_COLOR, _ui_theme_color_Cyan____________);
+    ui_object_set_themeable_style_property(addShelfBtn, LV_PART_MAIN | LV_STATE_DEFAULT,
+        LV_STYLE_BORDER_OPA, _ui_theme_alpha_Cyan____________);
+    lv_obj_set_style_border_width(addShelfBtn, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_object_set_themeable_style_property(addShelfBtn, LV_PART_MAIN | LV_STATE_DEFAULT,
+        LV_STYLE_TEXT_COLOR, _ui_theme_color_Cyan____________);
+    ui_object_set_themeable_style_property(addShelfBtn, LV_PART_MAIN | LV_STATE_DEFAULT,
+        LV_STYLE_TEXT_OPA, _ui_theme_alpha_Cyan____________);
+    lv_obj_set_style_text_font(addShelfBtn, &lv_font_montserrat_32,
+                               LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t *addShelfLabel = lv_label_create(addShelfBtn);
+    lv_obj_set_width(addShelfLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(addShelfLabel, LV_SIZE_CONTENT);
+    lv_obj_set_align(addShelfLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(addShelfLabel, "+");
+    lv_obj_set_style_bg_opa(addShelfLabel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(addShelfBtn, addShelf, LV_EVENT_ALL, NULL);
 
     ui_shelves_screen_rebuild(UI_SHELVES_DEFAULT_SHELF_COUNT,
                               default_leds, default_locs);

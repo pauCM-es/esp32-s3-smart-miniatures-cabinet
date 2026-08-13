@@ -20,14 +20,12 @@ extern lv_obj_t * ui_minis_section;
 extern void ui_event_minisLights_colorwheel(lv_event_t * e);
 extern lv_obj_t * ui_minisLights_colorwheel;
 extern lv_obj_t * ui_minisWheel_text;
-extern void ui_event_minisIntentsity_slider(lv_event_t * e);
-extern lv_obj_t * ui_minisIntentsity_slider;
+extern lv_obj_t * ui_minisBrighness_valueLabel;
 extern lv_obj_t * ui_cabinet_section;
-extern void ui_event_cabinetLights_colorwheel(lv_event_t * e);
-extern lv_obj_t * ui_cabinetLights_colorwheel;
-extern lv_obj_t * ui_cabinetWheel_text;
-extern void ui_event_cabinetIntentsity_slider(lv_event_t * e);
-extern lv_obj_t * ui_cabinetIntentsity_slider;
+extern void ui_event_cabinetBrightness_arc(lv_event_t * e);
+extern lv_obj_t * ui_cabinetBrightness_arc;
+extern lv_obj_t * ui_cabinetBrighness_valueLabel;
+extern lv_obj_t * ui_Label3;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

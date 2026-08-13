@@ -151,6 +151,17 @@ bool AppController::testLocation(LocationId locationId, uint32_t durationMs) {
     return true;
 }
 
+bool AppController::testLocationPersistent(LocationId locationId) {
+    const Location* loc = layout_.location(locationId);
+    if (loc == nullptr || loc->ledCount == 0) return false;
+    if (!lighting_.highlightMiniatureSegment(loc->ledStart, loc->ledCount, kPurple)) {
+        return false;
+    }
+    highlightedMiniatureId_ = -1;
+    highlightExpiresAtMs_ = 0;
+    return true;
+}
+
 void AppController::clearHighlight() {
     lighting_.clearMiniatureHighlight();
     highlightedMiniatureId_ = -1;
@@ -192,6 +203,31 @@ bool AppController::distributeShelfEvenly(uint8_t shelfIndex) {
 
 const CabinetLayout& AppController::layout() const {
     return layout_;
+}
+
+uint8_t AppController::selectedShelfIndex() const    { return selectedShelfIndex_; }
+uint8_t AppController::selectedLocationIndex() const { return selectedLocationIndex_; }
+
+void AppController::setSelectedShelf(uint8_t shelfIndex) {
+    if (shelfIndex < config::kMaxShelves) selectedShelfIndex_ = shelfIndex;
+}
+
+void AppController::setSelectedLocation(uint8_t locationIndex) {
+    if (locationIndex < config::kMaxLocationsPerShelf) selectedLocationIndex_ = locationIndex;
+}
+
+bool AppController::clearShelfLocation(uint8_t shelfIndex, uint8_t locationIndex) {
+    return layout_.setLocationRange(shelfIndex, locationIndex, 0, 0);
+}
+
+bool AppController::clearShelfAllLocations(uint8_t shelfIndex) {
+    const Shelf* s = layout_.shelf(shelfIndex);
+    if (!s) return false;
+    bool ok = true;
+    for (uint8_t i = 0; i < s->locationCount; i++) {
+        ok &= layout_.setLocationRange(shelfIndex, i, 0, 0);
+    }
+    return ok;
 }
 
 void AppController::handleEncoder(uint32_t nowMs) {

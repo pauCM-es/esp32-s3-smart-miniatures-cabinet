@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "events/OverviewEvents.h"
 #include "events/LightsEvents.h"
+#include "events/ShelvesEvents.h"
 
 void autoMapLedsForLocation(lv_event_t * e)
 {
@@ -29,20 +30,12 @@ void recordTestCallback(lv_event_t * e)
 
 void testLedsLocation(lv_event_t * e)
 {
-	// Your code here
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_test_pressed();
 }
 
 void saveLedsLocation(lv_event_t * e)
 {
 	// Your code here
-}
-
-void setMinisLightColor(lv_event_t * e)
-{
-	lv_color_hsv_t hsv = lv_colorwheel_get_hsv(lv_event_get_target(e));
-	lv_color_t c = lv_color_hsv_to_rgb(hsv.h, hsv.s, hsv.v);
-	lv_color32_t c32; c32.full = lv_color_to32(c);
-	lights_on_minis_color_changed(c32.ch.red, c32.ch.green, c32.ch.blue);
 }
 
 void setMinisLightsIntensity(lv_event_t * e)
@@ -61,6 +54,113 @@ void setCabinetLightColor(lv_event_t * e)
 void setCabinetLightsIntensity(lv_event_t * e)
 {
 	lights_on_cabinet_intensity_changed((uint8_t)lv_slider_get_value(lv_event_get_target(e)));
+}
+
+// ── Lights events ─────────────────────────────────────────────────────────
+
+void onMinisLightColorChange(lv_event_t * e)
+{
+	lv_color_hsv_t hsv = lv_colorwheel_get_hsv(lv_event_get_target(e));
+	lv_color_t c = lv_color_hsv_to_rgb(hsv.h, hsv.s, hsv.v);
+	lv_color32_t c32; c32.full = lv_color_to32(c);
+	char buf[6];
+	lv_snprintf(buf, sizeof(buf), "%u%%", (unsigned)hsv.v);
+	lv_label_set_text(ui_minisBrighness_valueLabel, buf);
+	lights_on_minis_color_changed(c32.ch.red, c32.ch.green, c32.ch.blue);
+}
+
+void onCabinetBrightnessChange(lv_event_t * e)
+{
+	uint8_t percent = (uint8_t)lv_arc_get_value(lv_event_get_target(e));
+	char buf[6];
+	lv_snprintf(buf, sizeof(buf), "%u%%", percent);
+	lv_label_set_text(ui_cabinetBrighness_valueLabel, buf);
+	lights_on_cabinet_intensity_changed(percent);
+}
+
+// ── Shelves management events ─────────────────────────────────────────────
+
+void addShelf(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_add_shelf_pressed();
+}
+
+void selectShelf(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED)
+		shelves_on_shelf_selected((uint8_t)(uintptr_t)lv_event_get_user_data(e));
+}
+
+void addLoactionToShelf(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_location_count_increment();
+}
+
+void substractLocationFromShelf(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_location_count_decrement();
+}
+
+void addLedsToShelf(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_led_count_increment();
+}
+
+void substractLedsFromShelf(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_led_count_decrement();
+}
+
+void selectLocationToMap(lv_event_t * e)
+{
+	/* location_num user_data is 1-based; convert to 0-based index */
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
+		uint8_t locationNum = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
+		shelves_on_location_selected(locationNum > 0u ? (uint8_t)(locationNum - 1u) : 0u);
+	}
+}
+
+void addLedsToSection(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_location_led_count_increment();
+}
+
+void substractLedsToSection(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_location_led_count_decrement();
+}
+
+void cancelMapLeds(lv_event_t * e)
+{
+	(void)e;
+	shelves_on_location_editor_close();
+}
+
+void clearLedsLocation(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_clear_location();
+}
+
+void autoMapLeds(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_auto_assign();
+}
+
+void clearAllLedsLocation(lv_event_t * e)
+{
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) shelves_on_clear_shelf();
+}
+
+// ── Miniatures events ─────────────────────────────────────────────────────
+
+void moveMiniBy(lv_event_t * e)
+{
+	// Your code here
+}
+
+void onSlideLocationChange(lv_event_t * e)
+{
+	// Your code here
 }
 
 // ── Overview screen events ────────────────────────────────────────────────
