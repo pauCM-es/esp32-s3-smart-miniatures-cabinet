@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 
 #include "app/AppState.h"
 #include "cabinet/CabinetLayout.h"
@@ -63,6 +64,9 @@ public:
     // Consume encoder delta this tick; called before app.update() processes it.
     int8_t consumeEncoderEvent(uint32_t nowMs);
 
+    using EncoderBrightnessCallback = std::function<void(uint8_t percent)>;
+    void setEncoderBrightnessCallback(EncoderBrightnessCallback cb);
+
 private:
     LightingManager& lighting_;
     CabinetLayout& layout_;
@@ -71,6 +75,7 @@ private:
 
     uint8_t selectedShelfIndex_{0};
     uint8_t selectedLocationIndex_{0};
+    EncoderBrightnessCallback encoderBrightnessCallback_;
 
     void handleEncoder(uint32_t nowMs);
     void setHighlightTimeout(uint32_t nowMs, uint32_t durationMs);

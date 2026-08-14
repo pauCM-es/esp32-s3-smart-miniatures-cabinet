@@ -209,6 +209,7 @@ void AppController::handleEncoder(uint32_t nowMs) {
         const uint8_t clamped = clampPercent(next);
         Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
         lighting_.setPwmCabinetBrightness(clamped);
+        if (encoderBrightnessCallback_) encoderBrightnessCallback_(clamped);
     }
     // No button — toggle disabled:
     // if (event.pressed) { lighting_.togglePwmCabinet(); }
@@ -220,6 +221,10 @@ void AppController::setHighlightTimeout(uint32_t nowMs, uint32_t durationMs) {
 
 int8_t AppController::consumeEncoderEvent(uint32_t nowMs) {
     return encoder_.update(nowMs).delta;
+}
+
+void AppController::setEncoderBrightnessCallback(EncoderBrightnessCallback cb) {
+    encoderBrightnessCallback_ = std::move(cb);
 }
 
 }  // namespace smartcabinet

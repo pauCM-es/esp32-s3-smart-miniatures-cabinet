@@ -101,6 +101,9 @@ void setup() {
         Serial.println("[WiFi] Not connected — MQTT will retry in loop");
     }
 
+    // Propagate encoder brightness changes to SmartCabinetService so HA state stays in sync.
+    smartcabinet::app.setEncoderBrightnessCallback([](uint8_t b) { smartCabinet.setBrightness(b); });
+
     // Start MQTT (connect attempt; retries automatically in loop).
     mqttApi.begin();
 }
