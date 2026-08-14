@@ -55,7 +55,19 @@ void SmartCabinetService::setBrightness(uint8_t percent) {
     state_.brightness = clamped;
     settingsRepository_.setBrightness(clamped);
 
-    notifyStateChanged();
+    // power follows brightness: reaching 0 turns off, leaving 0 turns on.
+    // setPower notifies; skip the redundant notify here when power will change.
+    const bool powerWillChange = (clamped == 0 && state_.power) ||
+                                 (clamped > 0 && !state_.power);
+    if (!powerWillChange) {
+        notifyStateChanged();
+    }
+
+    if (clamped == 0) {
+        setPower(false);
+    } else if (!state_.power) {
+        setPower(true);
+    }
 }
 
 bool SmartCabinetService::highlightLocation(
