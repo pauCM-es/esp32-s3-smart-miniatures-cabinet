@@ -36,7 +36,6 @@ void ui_init(void)
                                                true, LV_FONT_DEFAULT);
     lv_disp_set_theme(dispp, theme);
     ui_overview_screen_screen_init();
-    ui_shelves_screen_screen_init();
     ui_miniatures_screen_screen_init();
     ui_settings_screen_screen_init();
     ui_lights_screen_screen_init();
@@ -47,7 +46,6 @@ void ui_init(void)
 void ui_destroy(void)
 {
     ui_overview_screen_screen_destroy();
-    ui_shelves_screen_screen_destroy();
     ui_miniatures_screen_screen_destroy();
     ui_settings_screen_screen_destroy();
     ui_lights_screen_screen_destroy();

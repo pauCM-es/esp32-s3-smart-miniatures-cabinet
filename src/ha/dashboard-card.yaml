@@ -1,0 +1,6 @@
+type: custom:smart-cabinet-card
+title: Smart Cabinet
+power_entity: switch.smart_cabinet_power
+brightness_entity: number.smart_cabinet_brightness
+highlight_entity: sensor.smart_cabinet_last_highlight
+command_topic: smartcabinet/cabinet01/api/command

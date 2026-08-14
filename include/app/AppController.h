@@ -42,6 +42,7 @@ public:
     void applyScene(SceneId id);
 
     bool locateMiniature(uint8_t miniatureId, uint32_t durationMs = 0);
+    bool highlightLocation(uint8_t shelfIndex, uint8_t locationIndex, uint32_t durationMs = 0);
     bool testLocation(LocationId locationId, uint32_t durationMs = 0);
     bool testLocationPersistent(LocationId locationId);  // no auto-expire
     void clearHighlight();

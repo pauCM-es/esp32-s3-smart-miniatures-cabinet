@@ -1,0 +1,35 @@
+#pragma once
+
+#include "../SmartCabinetApi/IAppControllerActions.h"
+#include "AppController.h"
+
+/*
+ * Rename this class if you want.
+ * This is the only place that needs to know the real AppController API.
+ */
+class AppControllerActionsAdapter final : public IAppControllerActions {
+public:
+    explicit AppControllerActionsAdapter(AppController& appController)
+        : appController_(appController) {}
+
+    void setPower(bool enabled) override {
+        appController_.setPower(enabled);
+    }
+
+    void setBrightness(uint8_t percent) override {
+        appController_.setBrightness(percent);
+    }
+
+    void highlightLocation(
+        uint16_t shelf,
+        uint16_t location
+    ) override {
+        // If AppController uses 0-based indexes:
+        // appController_.highlightLocation(shelf - 1, location - 1);
+
+        appController_.highlightLocation(shelf, location);
+    }
+
+private:
+    AppController& appController_;
+};

@@ -136,6 +136,10 @@ bool AppController::locateMiniature(uint8_t miniatureId, uint32_t durationMs) {
     return true;
 }
 
+bool AppController::highlightLocation(uint8_t shelfIndex, uint8_t locationIndex, uint32_t durationMs) {
+    return testLocation(CabinetLayout::makeLocationId(shelfIndex, locationIndex), durationMs);
+}
+
 bool AppController::testLocation(LocationId locationId, uint32_t durationMs) {
     const Location* loc = layout_.location(locationId);
     if (loc == nullptr || loc->ledCount == 0) {

@@ -1,0 +1,106 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <LittleFS.h>
+
+#include "../SmartCabinetApi/SmartCabinetApi.h"
+#include "AppController.h"
+#include "AppControllerActionsAdapter.h"
+
+// Keep credentials outside source control.
+#include "secrets.h"
+
+AppController appController;
+
+// Bridge existing AppController to the new module.
+AppControllerActionsAdapter appActions(appController);
+
+// Small cabinet settings: NVS now.
+NvsSettingsStore settingsStore("cabinet");
+SettingsRepository settingsRepository(
+    settingsStore,
+    1000
+);
+
+SmartCabinetService smartCabinet(
+    appActions,
+    settingsRepository
+);
+
+// Miniature catalogue: ESP32 internal flash now.
+// Later replace only this store with SdMiniatureStore.
+FlashMiniatureStore miniatureStore(
+    LittleFS,
+    "/smart_cabinet/miniatures.json"
+);
+
+MiniatureRepository miniatureRepository(
+    miniatureStore,
+    100
+);
+
+// MQTT.
+WiFiClient networkClient;
+
+MqttApiConfig makeMqttConfig() {
+    MqttApiConfig config;
+    config.host = MQTT_HOST;
+    config.port = MQTT_PORT;
+    config.username = MQTT_USER;
+    config.password = MQTT_PASSWORD;
+    config.deviceId = "cabinet01";
+    config.deviceName = "Smart Cabinet";
+    config.baseTopic = "smartcabinet/cabinet01";
+
+    // Catalogue JSON can be larger than simple state packets.
+    config.packetBufferSize = 8192;
+    config.reconnectIntervalMs = 5000;
+
+    return config;
+}
+
+MqttApiConfig mqttConfig = makeMqttConfig();
+
+MqttApiService mqttApi(
+    networkClient,
+    mqttConfig,
+    smartCabinet,
+    miniatureRepository
+);
+
+void setup() {
+    Serial.begin(115200);
+
+    // Existing board/display/AppController setup first.
+    appController.begin();
+
+    // Existing Wi-Fi connection code.
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(250);
+    }
+
+    // Restores persisted power + brightness.
+    smartCabinet.begin();
+
+    // Internal flash filesystem for catalogue persistence.
+    if (!LittleFS.begin(true)) {
+        Serial.println("LittleFS mount failed");
+    }
+
+    // Loads the miniature catalogue.
+    miniatureRepository.begin();
+
+    // Starts MQTT and Home Assistant Discovery.
+    mqttApi.begin();
+}
+
+void loop() {
+    // Existing application loop.
+    appController.loop();
+
+    // New modules.
+    smartCabinet.loop();
+    mqttApi.loop();
+}

@@ -2,10 +2,7 @@ SET(SOURCES components/ui_comp_bodycontainer.c
     components/ui_comp_header2.c
     components/ui_comp_leftbutton.c
     components/ui_comp.c
-    components/ui_comp_led_item.c
-    components/ui_comp_shelf_tab.c
     screens/ui_overview_screen.c
-    screens/ui_shelves_screen.c
     screens/ui_miniatures_screen.c
     screens/ui_settings_screen.c
     screens/ui_lights_screen.c

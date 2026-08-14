@@ -23,7 +23,6 @@ extern "C" {
 ///////////////////// SCREENS ////////////////////
 
 #include "screens/ui_overview_screen.h"
-#include "screens/ui_shelves_screen.h"
 #include "screens/ui_miniatures_screen.h"
 #include "screens/ui_settings_screen.h"
 #include "screens/ui_lights_screen.h"
