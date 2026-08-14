@@ -13,6 +13,9 @@
 #include "miniatures/SdMiniatureStore.h"
 
 #include "mqtt/MqttApiConfig.h"
+#include "mqtt/MqttUtils.h"
+#include "mqtt/MqttCabinetHandler.h"
+#include "mqtt/MqttCatalogueHandler.h"
 #include "mqtt/MqttApiService.h"
 
 #include "persistence/ISettingsStore.h"

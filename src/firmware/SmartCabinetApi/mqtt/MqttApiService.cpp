@@ -1,8 +1,8 @@
 #include "MqttApiService.h"
 
 #include <ArduinoJson.h>
-#include <cstdlib>
 
+#include "MqttUtils.h"
 #include "../miniatures/MiniatureJson.h"
 
 namespace {
@@ -29,23 +29,19 @@ MqttApiService::MqttApiService(
     CatalogueRepository& miniatures
 )
     : config_(config),
-      smartCabinet_(smartCabinet),
-      miniatures_(miniatures),
-      mqtt_(networkClient) {
-
-    smartCabinet_.setStateChangedCallback(
+      mqtt_(networkClient),
+      cabinetHandler_(smartCabinet, mqtt_, config_),
+      catalogueHandler_(miniatures, mqtt_, config_)
+{
+    smartCabinet.setStateChangedCallback(
         [this](const CabinetRuntimeState&) {
-            if (mqtt_.connected()) {
-                publishState();
-            }
+            if (mqtt_.connected()) publishState();
         }
     );
 
-    miniatures_.setChangedCallback(
+    miniatures.setChangedCallback(
         [this](const std::vector<Miniature>&) {
-            if (mqtt_.connected()) {
-                publishMiniatures();
-            }
+            if (mqtt_.connected()) publishMiniatures();
         }
     );
 }
@@ -180,12 +176,12 @@ void MqttApiService::handleMessage(
     }
 
     if (incoming == topic("/ha/power/set")) {
-        handlePowerCommand(payload, length);
+        cabinetHandler_.handlePowerSet(payload, length);
         return;
     }
 
     if (incoming == topic("/ha/brightness/set")) {
-        handleBrightnessCommand(payload, length);
+        cabinetHandler_.handleBrightnessSet(payload, length);
     }
 }
 
@@ -194,249 +190,51 @@ void MqttApiService::handleApiCommand(
     unsigned int length
 ) {
     JsonDocument doc;
-    const DeserializationError parseError =
-        deserializeJson(doc, payload, length);
-
-    if (parseError) {
-        publishResult(false, "unknown", "invalid_json");
+    if (deserializeJson(doc, payload, length)) {
+        MqttUtils::publishResult(mqtt_, config_, false, "unknown", "invalid_json");
         return;
     }
 
     const char* action = doc["action"] | "";
 
-    if (strcmp(action, "setPower") == 0) {
-        if (!doc["value"].is<bool>()) {
-            publishResult(
-                false,
-                action,
-                "value_must_be_boolean"
-            );
-            return;
-        }
-
-        smartCabinet_.setPower(doc["value"].as<bool>());
-        publishResult(true, action);
-        return;
+    if (!cabinetHandler_.handleCommand(action, doc) &&
+        !catalogueHandler_.handleCommand(action, doc)) {
+        MqttUtils::publishResult(mqtt_, config_, false, action, "unknown_action");
     }
-
-    if (strcmp(action, "setBrightness") == 0) {
-        if (!doc["value"].is<int>()) {
-            publishResult(
-                false,
-                action,
-                "value_must_be_integer"
-            );
-            return;
-        }
-
-        const int value = doc["value"].as<int>();
-
-        if (value < 0 || value > 100) {
-            publishResult(
-                false,
-                action,
-                "brightness_out_of_range"
-            );
-            return;
-        }
-
-        smartCabinet_.setBrightness(
-            static_cast<uint8_t>(value)
-        );
-
-        publishResult(true, action);
-        return;
-    }
-
-    if (strcmp(action, "highlightLocation") == 0) {
-        if (
-            !doc["shelf"].is<int>() ||
-            !doc["location"].is<int>()
-        ) {
-            publishResult(
-                false,
-                action,
-                "shelf_and_location_must_be_integers"
-            );
-            return;
-        }
-
-        const int shelf = doc["shelf"].as<int>();
-        const int location = doc["location"].as<int>();
-
-        if (
-            shelf <= 0 ||
-            location <= 0 ||
-            shelf > 65535 ||
-            location > 65535
-        ) {
-            publishResult(
-                false,
-                action,
-                "shelf_and_location_are_1_based"
-            );
-            return;
-        }
-
-        const bool ok = smartCabinet_.highlightLocation(
-            static_cast<uint16_t>(shelf),
-            static_cast<uint16_t>(location)
-        );
-
-        publishResult(
-            ok,
-            action,
-            ok ? nullptr : "invalid_location"
-        );
-        return;
-    }
-
-    if (strcmp(action, "getMiniatures") == 0) {
-        publishMiniatures();
-        publishResult(true, action);
-        return;
-    }
-
-    if (strcmp(action, "getMiniature") == 0) {
-        const char* id = doc["id"] | "";
-
-        if (strlen(id) == 0) {
-            publishResult(false, action, "id_required");
-            return;
-        }
-
-        const Miniature* item =
-            miniatures_.findById(id);
-
-        if (item == nullptr) {
-            publishResult(
-                false,
-                action,
-                "miniature_not_found"
-            );
-            return;
-        }
-
-        publishSingleMiniature(*item);
-        publishResult(true, action, nullptr, item->id.c_str());
-        return;
-    }
-
-    if (
-        strcmp(action, "createMiniature") == 0 ||
-        strcmp(action, "updateMiniature") == 0
-    ) {
-        String name;
-        String collection;
-        String artist;
-        String date;
-        String notes;
-        String fieldError;
-        uint16_t shelf = 0;
-        uint16_t location = 0;
-
-        if (
-            !readMiniatureFields(
-                doc,
-                name,
-                collection,
-                artist,
-                date,
-                shelf,
-                location,
-                notes,
-                fieldError
-            )
-        ) {
-            publishResult(
-                false,
-                action,
-                fieldError.c_str()
-            );
-            return;
-        }
-
-        if (strcmp(action, "createMiniature") == 0) {
-            Miniature created;
-            String error;
-
-            const bool ok = miniatures_.create(
-                name,
-                collection,
-                artist,
-                date,
-                shelf,
-                location,
-                notes,
-                created,
-                error
-            );
-
-            publishResult(
-                ok,
-                action,
-                ok ? nullptr : error.c_str(),
-                ok ? created.id.c_str() : nullptr
-            );
-            return;
-        }
-
-        const char* id = doc["id"] | "";
-
-        if (strlen(id) == 0) {
-            publishResult(false, action, "id_required");
-            return;
-        }
-
-        Miniature updated;
-        String error;
-
-        const bool ok = miniatures_.update(
-            id,
-            name,
-            collection,
-            artist,
-            date,
-            shelf,
-            location,
-            notes,
-            updated,
-            error
-        );
-
-        publishResult(
-            ok,
-            action,
-            ok ? nullptr : error.c_str(),
-            ok ? updated.id.c_str() : nullptr
-        );
-        return;
-    }
-
-    if (strcmp(action, "deleteMiniature") == 0) {
-        const char* id = doc["id"] | "";
-
-        if (strlen(id) == 0) {
-            publishResult(false, action, "id_required");
-            return;
-        }
-
-        String error;
-        const bool ok = miniatures_.remove(id, error);
-
-        publishResult(
-            ok,
-            action,
-            ok ? nullptr : error.c_str(),
-            ok ? id : nullptr
-        );
-        return;
-    }
-
-    publishResult(false, action, "unknown_action");
 }
 
-void MqttApiService::handlePowerCommand(
+void MqttApiService::publishState() {
+    cabinetHandler_.publishState();
+}
+
+void MqttApiService::publishMiniatures() {
+    catalogueHandler_.publishMiniatures();
+}
+
+void MqttApiService::publishDiscovery() {
+    if (!mqtt_.connected()) return;
+    cabinetHandler_.publishDiscovery();
+    catalogueHandler_.publishDiscovery();
+}
+
+String MqttApiService::topic(const char* suffix) const {
+    return String(config_.baseTopic) + suffix;
+}
+
+String MqttApiService::discoveryTopic(
+    const char* component,
+    const char* objectId
+) const {
+    String out = "homeassistant/";
+    out += component;
+    out += "/";
+    out += config_.deviceId;
+    out += "/";
+    out += objectId;
+    out += "/config";
+    return out;
+}
+
     uint8_t* payload,
     unsigned int length
 ) {
