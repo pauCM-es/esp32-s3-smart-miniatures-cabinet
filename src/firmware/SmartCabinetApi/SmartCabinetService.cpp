@@ -111,6 +111,21 @@ void SmartCabinetService::setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b
     notifyStateChanged();
 }
 
+void SmartCabinetService::highlightLocationWhite(uint16_t shelf, uint16_t location) {
+    if (shelf == 0 || location == 0) {
+        appController_.clearHighlight();
+        state_.hasHighlight = false;
+        state_.highlightShelf = 0;
+        state_.highlightLocation = 0;
+    } else {
+        appController_.highlightLocationPersistentWhite(shelf, location);
+        state_.hasHighlight = true;
+        state_.highlightShelf = shelf;
+        state_.highlightLocation = location;
+    }
+    notifyStateChanged();
+}
+
 const CabinetRuntimeState& SmartCabinetService::state() const {
     return state_;
 }

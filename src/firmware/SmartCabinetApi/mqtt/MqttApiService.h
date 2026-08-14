@@ -9,6 +9,7 @@
 #include "MqttApiConfig.h"
 #include "MqttCabinetHandler.h"
 #include "MqttCatalogueHandler.h"
+#include "MqttHighlightHandler.h"
 #include "MqttMiniatureLightsHandler.h"
 
 class MqttApiService {
@@ -49,6 +50,7 @@ private:
     PubSubClient               mqtt_;
     MqttCabinetHandler         cabinetHandler_;
     MqttCatalogueHandler       catalogueHandler_;
+    MqttHighlightHandler       highlightHandler_;
     MqttMiniatureLightsHandler miniLightsHandler_;
 
     uint32_t lastReconnectAttemptMs_ = 0;

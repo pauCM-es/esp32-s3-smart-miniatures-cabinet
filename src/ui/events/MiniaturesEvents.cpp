@@ -10,10 +10,12 @@
 
 static size_t s_currentIndex = 0;
 
+// Set by encoder callbacks; consumed by the LVGL timer (not inside handleEncoder).
+static bool s_pendingUpdate = false;
+static lv_timer_t* s_navTimer = nullptr;
+
 namespace {
 
-// Highlight the current miniature's location in white (persistent, no timeout).
-// shelf/location in the catalogue are 1-based; AppController expects 0-based.
 void highlightCurrent()
 {
     const auto& items = catalogue.all();
@@ -46,7 +48,7 @@ void showCurrent()
         return;
     }
     const auto& m = items[s_currentIndex];
-    Serial.printf("[Minis] show index=%zu/%zu  name='%s'  shelf=%u loc=%u\n",
+    Serial.printf("[Minis] show %zu/%zu  '%s'  shelf=%u loc=%u\n",
                   s_currentIndex + 1, items.size(), m.name.c_str(), m.shelf, m.location);
     MiniaturesView::render({
         m.name.c_str(),
@@ -62,6 +64,14 @@ void showCurrent()
     highlightCurrent();
 }
 
+// Fired by LVGL timer — runs in lv_timer_handler(), safely outside handleEncoder().
+void onNavTimer(lv_timer_t*)
+{
+    if (!s_pendingUpdate) return;
+    s_pendingUpdate = false;
+    showCurrent();
+}
+
 }  // namespace
 
 extern "C" {
@@ -69,6 +79,7 @@ extern "C" {
 void minis_on_screen_opened()
 {
     s_currentIndex = 0;
+    s_pendingUpdate = false;
     Serial.printf("[Minis] screen opened — %zu miniatures\n", catalogue.all().size());
 
     // Dim cabinet lights; keep miniature LEDs on so the highlight is visible.
@@ -76,11 +87,23 @@ void minis_on_screen_opened()
     smartcabinet::app.setRgbwCabinetPower(false);
     smartcabinet::app.setMiniaturePower(true);
 
+    // Immediate render for the first item; subsequent navigations go via the timer.
     showCurrent();
 
+    // Timer decouples showCurrent() from the encoder handler to avoid missing transitions.
+    s_navTimer = lv_timer_create(onNavTimer, 50, nullptr);
+
     smartcabinet::app.setEncoderNavigationCallback([](int8_t delta) {
-        if (delta > 0) minis_on_next_pressed();
-        else           minis_on_previous_pressed();
+        const size_t count = catalogue.all().size();
+        if (count == 0) return;
+        if (delta > 0) {
+            s_currentIndex = (s_currentIndex + 1) % count;
+        } else {
+            s_currentIndex = (s_currentIndex > 0) ? s_currentIndex - 1 : count - 1;
+        }
+        Serial.printf("[Minis] encoder delta=%d -> index=%zu\n", delta, s_currentIndex + 1);
+        s_pendingUpdate = true;
+        // showCurrent() is NOT called here; the timer handles it next cycle.
     });
 }
 
@@ -89,6 +112,11 @@ void minis_on_screen_unloaded()
     Serial.println("[Minis] screen unloaded — clearing highlight");
     smartcabinet::app.clearHighlight();
     smartcabinet::app.setEncoderNavigationCallback(nullptr);
+    if (s_navTimer) {
+        lv_timer_del(s_navTimer);
+        s_navTimer = nullptr;
+    }
+    s_pendingUpdate = false;
 }
 
 void minis_on_previous_pressed()
@@ -96,7 +124,7 @@ void minis_on_previous_pressed()
     const size_t count = catalogue.all().size();
     if (count == 0) return;
     s_currentIndex = (s_currentIndex > 0) ? s_currentIndex - 1 : count - 1;
-    Serial.printf("[Minis] previous -> index=%zu\n", s_currentIndex + 1);
+    Serial.printf("[Minis] btn previous -> %zu/%zu\n", s_currentIndex + 1, count);
     showCurrent();
 }
 
@@ -105,7 +133,7 @@ void minis_on_next_pressed()
     const size_t count = catalogue.all().size();
     if (count == 0) return;
     s_currentIndex = (s_currentIndex + 1) % count;
-    Serial.printf("[Minis] next -> index=%zu\n", s_currentIndex + 1);
+    Serial.printf("[Minis] btn next -> %zu/%zu\n", s_currentIndex + 1, count);
     showCurrent();
 }
 
@@ -115,7 +143,7 @@ void minis_on_slider_changed(int32_t index)
     if (count == 0 || index < 0) return;
     const size_t idx = static_cast<size_t>(index);
     s_currentIndex = idx < count ? idx : count - 1;
-    Serial.printf("[Minis] slider -> index=%zu\n", s_currentIndex + 1);
+    Serial.printf("[Minis] slider -> %zu/%zu\n", s_currentIndex + 1, count);
     showCurrent();
 }
 
@@ -166,3 +194,4 @@ void updateMiniLocatinValue(lv_event_t* /*e*/)
 }
 
 }  // extern "C"
+

@@ -46,6 +46,19 @@ public:
         app_.setMiniatureColor({r, g, b});
     }
 
+    void highlightLocationPersistentWhite(uint16_t shelf, uint16_t location) override {
+        if (shelf == 0 || location == 0) return;
+        app_.highlightLocationPersistent(
+            static_cast<uint8_t>(shelf - 1),
+            static_cast<uint8_t>(location - 1),
+            smartcabinet::kWhite
+        );
+    }
+
+    void clearHighlight() override {
+        app_.clearHighlight();
+    }
+
 private:
     AppController& app_;
 };

@@ -28,6 +28,9 @@ public:
     void setMiniatureLightBrightness(uint8_t percent);
     void setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b);
 
+    // Persistent white highlight; shelf=0 or location=0 clears it.
+    void highlightLocationWhite(uint16_t shelf, uint16_t location);
+
     const CabinetRuntimeState& state() const;
 
     void setStateChangedCallback(StateChangedCallback callback);
