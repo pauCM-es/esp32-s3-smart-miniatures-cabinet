@@ -89,6 +89,28 @@ bool SmartCabinetService::highlightLocation(
     return true;
 }
 
+void SmartCabinetService::setMiniatureLightPower(bool enabled) {
+    if (state_.miniLightPower == enabled) return;
+    appController_.setMiniatureLightPower(enabled);
+    state_.miniLightPower = enabled;
+    notifyStateChanged();
+}
+
+void SmartCabinetService::setMiniatureLightBrightness(uint8_t percent) {
+    const uint8_t clamped = percent > 100 ? 100 : percent;
+    appController_.setMiniatureLightBrightness(clamped);
+    state_.miniLightBrightness = clamped;
+    notifyStateChanged();
+}
+
+void SmartCabinetService::setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b) {
+    appController_.setMiniatureLightColor(r, g, b);
+    state_.miniLightR = r;
+    state_.miniLightG = g;
+    state_.miniLightB = b;
+    notifyStateChanged();
+}
+
 const CabinetRuntimeState& SmartCabinetService::state() const {
     return state_;
 }

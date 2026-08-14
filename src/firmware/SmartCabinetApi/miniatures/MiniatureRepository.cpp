@@ -162,6 +162,16 @@ bool CatalogueRepository::remove(
     return false;
 }
 
+bool CatalogueRepository::reset() {
+    items_.clear();
+    seedDefaults();
+    if (!store_.save(items_)) {
+        return false;
+    }
+    notifyChanged();
+    return true;
+}
+
 void CatalogueRepository::setChangedCallback(
     ChangedCallback callback
 ) {

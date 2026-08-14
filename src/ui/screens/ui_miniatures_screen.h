@@ -60,6 +60,7 @@ extern lv_obj_t * ui_uiBtnActionCancelSwapMini;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_header1_Container2;
 extern void ui_event_miniatures_screen_loaded(lv_event_t * e);
+extern void ui_event_miniatures_screen_unloaded(lv_event_t * e);
 extern void ui_event_previousMini_btn(lv_event_t * e);
 extern void ui_event_nextMini_btn(lv_event_t * e);
 extern void ui_event_minis_locate(lv_event_t * e);

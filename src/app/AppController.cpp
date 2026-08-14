@@ -198,18 +198,20 @@ bool AppController::clearShelfAllLocations(uint8_t shelfIndex) {
 
 void AppController::handleEncoder(uint32_t nowMs) {
     (void)nowMs;
-    if (!encoder_.available() || !lighting_.pwmCabinet().available()) {
-        return;
-    }
+    if (!encoder_.available()) return;
 
     const EncoderEvent event = encoder_.update(nowMs);
     if (event.delta != 0) {
-        const int next = static_cast<int>(lighting_.pwmCabinet().brightness()) +
-                         event.delta * config::kEncoderBrightnessStep;
-        const uint8_t clamped = clampPercent(next);
-        Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
-        lighting_.setPwmCabinetBrightness(clamped);
-        if (encoderBrightnessCallback_) encoderBrightnessCallback_(clamped);
+        if (encoderNavigationCallback_) {
+            encoderNavigationCallback_(event.delta);
+        } else if (lighting_.pwmCabinet().available()) {
+            const int next = static_cast<int>(lighting_.pwmCabinet().brightness()) +
+                             event.delta * config::kEncoderBrightnessStep;
+            const uint8_t clamped = clampPercent(next);
+            Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
+            lighting_.setPwmCabinetBrightness(clamped);
+            if (encoderBrightnessCallback_) encoderBrightnessCallback_(clamped);
+        }
     }
     // No button — toggle disabled:
     // if (event.pressed) { lighting_.togglePwmCabinet(); }
@@ -225,6 +227,10 @@ int8_t AppController::consumeEncoderEvent(uint32_t nowMs) {
 
 void AppController::setEncoderBrightnessCallback(EncoderBrightnessCallback cb) {
     encoderBrightnessCallback_ = std::move(cb);
+}
+
+void AppController::setEncoderNavigationCallback(EncoderNavigationCallback cb) {
+    encoderNavigationCallback_ = std::move(cb);
 }
 
 }  // namespace smartcabinet

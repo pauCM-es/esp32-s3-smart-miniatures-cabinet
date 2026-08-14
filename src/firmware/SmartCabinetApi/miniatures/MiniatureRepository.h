@@ -52,6 +52,8 @@ public:
         String& error
     );
 
+    bool reset();
+
     void setChangedCallback(ChangedCallback callback);
 
 private:

@@ -24,6 +24,10 @@ public:
     void setBrightness(uint8_t percent);
     bool highlightLocation(uint16_t shelf, uint16_t location);
 
+    void setMiniatureLightPower(bool enabled);
+    void setMiniatureLightBrightness(uint8_t percent);
+    void setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b);
+
     const CabinetRuntimeState& state() const;
 
     void setStateChangedCallback(StateChangedCallback callback);

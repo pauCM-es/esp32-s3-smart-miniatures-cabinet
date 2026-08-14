@@ -1,6 +1,7 @@
 #include "MiniaturesEvents.h"
 
 #include <lvgl.h>
+#include "app/AppContext.h"
 #include "app/CatalogueContext.h"
 #include "app/SmartCabinetContext.h"
 #include "ui/views/MiniaturesView.h"
@@ -38,6 +39,15 @@ void minis_on_screen_opened()
 {
     s_currentIndex = 0;
     showCurrent();
+    smartcabinet::app.setEncoderNavigationCallback([](int8_t delta) {
+        if (delta > 0) minis_on_next_pressed();
+        else           minis_on_previous_pressed();
+    });
+}
+
+void minis_on_screen_unloaded()
+{
+    smartcabinet::app.setEncoderNavigationCallback(nullptr);
 }
 
 void minis_on_previous_pressed()
@@ -79,6 +89,12 @@ void ui_event_miniatures_screen_loaded(lv_event_t* e)
 {
     if (lv_event_get_code(e) == LV_EVENT_SCREEN_LOADED)
         minis_on_screen_opened();
+}
+
+void ui_event_miniatures_screen_unloaded(lv_event_t* e)
+{
+    if (lv_event_get_code(e) == LV_EVENT_SCREEN_UNLOADED)
+        minis_on_screen_unloaded();
 }
 
 void ui_event_previousMini_btn(lv_event_t* e)

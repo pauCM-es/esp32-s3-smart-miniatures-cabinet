@@ -7,6 +7,7 @@
 #include "events/OverviewEvents.h"
 #include "events/LightsEvents.h"
 #include "events/ShelvesEvents.h"
+#include "events/SettingsEvents.h"
 
 void autoMapLedsForLocation(lv_event_t * e)
 {
@@ -18,14 +19,14 @@ void scrollCardsToSelectedLocation(lv_event_t * e)
 	// Your code here
 }
 
-void updateMiniLocatinValue(lv_event_t * e)
+void recordTestCallback(lv_event_t * e)
 {
 	// Your code here
 }
 
-void recordTestCallback(lv_event_t * e)
+void resetCatalogueCallback(lv_event_t * e)
 {
-	// Your code here
+	if (lv_event_get_code(e) == LV_EVENT_CLICKED) settings_on_reset_catalogue();
 }
 
 void testLedsLocation(lv_event_t * e)

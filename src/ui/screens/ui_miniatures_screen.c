@@ -639,6 +639,7 @@ void ui_miniatures_screen_screen_init(void)
 
     /* App-layer events */
     lv_obj_add_event_cb(ui_miniatures_screen, ui_event_miniatures_screen_loaded, LV_EVENT_SCREEN_LOADED, NULL);
+    lv_obj_add_event_cb(ui_miniatures_screen, ui_event_miniatures_screen_unloaded, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb(ui_previousMini_btn, ui_event_previousMini_btn, LV_EVENT_CLICKED, NULL);
     lv_obj_add_event_cb(ui_nextMini_btn, ui_event_nextMini_btn, LV_EVENT_CLICKED, NULL);
     lv_obj_add_event_cb(ui_minisCards_container, ui_event_minis_locate, LV_EVENT_CLICKED, NULL);

@@ -34,6 +34,18 @@ public:
         );
     }
 
+    void setMiniatureLightPower(bool enabled) override {
+        app_.setMiniaturePower(enabled);
+    }
+
+    void setMiniatureLightBrightness(uint8_t percent) override {
+        app_.setMiniatureBrightness(percent);
+    }
+
+    void setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b) override {
+        app_.setMiniatureColor({r, g, b});
+    }
+
 private:
     AppController& app_;
 };

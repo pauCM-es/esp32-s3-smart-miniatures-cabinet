@@ -10,6 +10,8 @@ lv_obj_t * ui_header3 = NULL;
 lv_obj_t * ui_BodyContainer1 = NULL;
 lv_obj_t * ui_recordBtn = NULL;
 lv_obj_t * ui_Label10 = NULL;
+lv_obj_t * ui_resetCatalogueBtn = NULL;
+lv_obj_t * ui_resetCatalogueLabel = NULL;
 // event funtions
 void ui_event_recordBtn(lv_event_t * e)
 {
@@ -17,6 +19,15 @@ void ui_event_recordBtn(lv_event_t * e)
 
     if(event_code == LV_EVENT_CLICKED) {
         recordTestCallback(e);
+    }
+}
+
+void ui_event_resetCatalogueBtn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        resetCatalogueCallback(e);
     }
 }
 
@@ -68,6 +79,28 @@ void ui_settings_screen_screen_init(void)
 
     lv_obj_add_event_cb(ui_recordBtn, ui_event_recordBtn, LV_EVENT_ALL, NULL);
 
+    ui_resetCatalogueBtn = lv_btn_create(ui_settings_screen);
+    lv_obj_set_width(ui_resetCatalogueBtn, 246);
+    lv_obj_set_height(ui_resetCatalogueBtn, 60);
+    lv_obj_set_align(ui_resetCatalogueBtn, LV_ALIGN_CENTER);
+    lv_obj_set_y(ui_resetCatalogueBtn, 80);
+    lv_obj_add_flag(ui_resetCatalogueBtn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_clear_flag(ui_resetCatalogueBtn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_radius(ui_resetCatalogueBtn, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_resetCatalogueBtn, lv_color_hex(0x6B1C1C), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_resetCatalogueBtn, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_resetCatalogueBtn, lv_color_hex(0xE53935), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_resetCatalogueBtn, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_resetCatalogueLabel = lv_label_create(ui_resetCatalogueBtn);
+    lv_obj_set_width(ui_resetCatalogueLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_resetCatalogueLabel, LV_SIZE_CONTENT);
+    lv_obj_set_align(ui_resetCatalogueLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_resetCatalogueLabel, "RESET CATALOGUE");
+    lv_obj_set_style_text_font(ui_resetCatalogueLabel, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_resetCatalogueBtn, ui_event_resetCatalogueBtn, LV_EVENT_ALL, NULL);
+
 }
 
 void ui_settings_screen_screen_destroy(void)
@@ -80,5 +113,7 @@ void ui_settings_screen_screen_destroy(void)
     ui_BodyContainer1 = NULL;
     ui_recordBtn = NULL;
     ui_Label10 = NULL;
+    ui_resetCatalogueBtn = NULL;
+    ui_resetCatalogueLabel = NULL;
 
 }

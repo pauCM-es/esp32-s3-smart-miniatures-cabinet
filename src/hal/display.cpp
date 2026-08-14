@@ -43,7 +43,8 @@ void flushDisplay(
 
 #if LV_USE_LOG != 0
 void printLvglLog(const char* message) {
-    Serial.print(message);
+    // Guard against blocking USB-CDC writes when no serial monitor is connected.
+    if (Serial) Serial.print(message);
 }
 #endif
 

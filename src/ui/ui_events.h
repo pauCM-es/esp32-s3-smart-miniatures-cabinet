@@ -51,6 +51,7 @@ void updateMiniLocatinValue(lv_event_t * e);
 
 
 void recordTestCallback(lv_event_t * e);
+void resetCatalogueCallback(lv_event_t * e);
 
 
 

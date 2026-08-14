@@ -64,8 +64,11 @@ public:
     // Consume encoder delta this tick; called before app.update() processes it.
     int8_t consumeEncoderEvent(uint32_t nowMs);
 
-    using EncoderBrightnessCallback = std::function<void(uint8_t percent)>;
+    using EncoderBrightnessCallback  = std::function<void(uint8_t percent)>;
+    using EncoderNavigationCallback = std::function<void(int8_t delta)>;
     void setEncoderBrightnessCallback(EncoderBrightnessCallback cb);
+    // When set, encoder drives navigation instead of brightness.
+    void setEncoderNavigationCallback(EncoderNavigationCallback cb);
 
 private:
     LightingManager& lighting_;
@@ -75,7 +78,8 @@ private:
 
     uint8_t selectedShelfIndex_{0};
     uint8_t selectedLocationIndex_{0};
-    EncoderBrightnessCallback encoderBrightnessCallback_;
+    EncoderBrightnessCallback  encoderBrightnessCallback_;
+    EncoderNavigationCallback encoderNavigationCallback_;
 
     void handleEncoder(uint32_t nowMs);
     void setHighlightTimeout(uint32_t nowMs, uint32_t durationMs);

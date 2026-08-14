@@ -17,4 +17,10 @@ struct CabinetRuntimeState {
     bool hasHighlight = false;
     uint16_t highlightShelf = 0;
     uint16_t highlightLocation = 0;
+
+    bool miniLightPower = false;
+    uint8_t miniLightBrightness = 45;
+    uint8_t miniLightR = 0;
+    uint8_t miniLightG = 190;
+    uint8_t miniLightB = 255;
 };
