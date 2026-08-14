@@ -41,6 +41,9 @@ CatalogueRepository::findById(const String& id) const {
 
 bool CatalogueRepository::create(
     const String& name,
+    const String& collection,
+    const String& artist,
+    const String& date,
     uint16_t shelf,
     uint16_t location,
     const String& notes,
@@ -59,6 +62,9 @@ bool CatalogueRepository::create(
     Miniature item;
     item.id = generateId();
     item.name = name;
+    item.collection = collection;
+    item.artist = artist;
+    item.date = date;
     item.shelf = shelf;
     item.location = location;
     item.notes = notes;
@@ -79,6 +85,9 @@ bool CatalogueRepository::create(
 bool CatalogueRepository::update(
     const String& id,
     const String& name,
+    const String& collection,
+    const String& artist,
+    const String& date,
     uint16_t shelf,
     uint16_t location,
     const String& notes,
@@ -102,6 +111,9 @@ bool CatalogueRepository::update(
         const Miniature previous = item;
 
         item.name = name;
+        item.collection = collection;
+        item.artist = artist;
+        item.date = date;
         item.shelf = shelf;
         item.location = location;
         item.notes = notes;

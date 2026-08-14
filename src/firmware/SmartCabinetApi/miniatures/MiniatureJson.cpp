@@ -8,6 +8,9 @@ void writeItem(
 ) {
     object["id"] = item.id;
     object["name"] = item.name;
+    object["collection"] = item.collection;
+    object["artist"] = item.artist;
+    object["date"] = item.date;
     object["shelf"] = item.shelf;
     object["location"] = item.location;
     object["notes"] = item.notes;
@@ -22,6 +25,9 @@ bool readItem(
     const int shelf = object["shelf"] | 0;
     const int location = object["location"] | 0;
     const char* notes = object["notes"] | "";
+    const char* collection = object["collection"] | "";
+    const char* artist = object["artist"] | "";
+    const char* date = object["date"] | "";
 
     if (
         strlen(id) == 0 ||
@@ -36,6 +42,9 @@ bool readItem(
 
     item.id = id;
     item.name = name;
+    item.collection = collection;
+    item.artist = artist;
+    item.date = date;
     item.shelf = static_cast<uint16_t>(shelf);
     item.location = static_cast<uint16_t>(location);
     item.notes = notes;

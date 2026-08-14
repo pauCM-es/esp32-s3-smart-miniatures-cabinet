@@ -24,6 +24,9 @@ public:
 
     bool create(
         const String& name,
+        const String& collection,
+        const String& artist,
+        const String& date,
         uint16_t shelf,
         uint16_t location,
         const String& notes,
@@ -34,6 +37,9 @@ public:
     bool update(
         const String& id,
         const String& name,
+        const String& collection,
+        const String& artist,
+        const String& date,
         uint16_t shelf,
         uint16_t location,
         const String& notes,

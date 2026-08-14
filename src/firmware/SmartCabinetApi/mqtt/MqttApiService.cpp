@@ -327,6 +327,9 @@ void MqttApiService::handleApiCommand(
         strcmp(action, "updateMiniature") == 0
     ) {
         String name;
+        String collection;
+        String artist;
+        String date;
         String notes;
         String fieldError;
         uint16_t shelf = 0;
@@ -336,6 +339,9 @@ void MqttApiService::handleApiCommand(
             !readMiniatureFields(
                 doc,
                 name,
+                collection,
+                artist,
+                date,
                 shelf,
                 location,
                 notes,
@@ -356,6 +362,9 @@ void MqttApiService::handleApiCommand(
 
             const bool ok = miniatures_.create(
                 name,
+                collection,
+                artist,
+                date,
                 shelf,
                 location,
                 notes,
@@ -385,6 +394,9 @@ void MqttApiService::handleApiCommand(
         const bool ok = miniatures_.update(
             id,
             name,
+            collection,
+            artist,
+            date,
             shelf,
             location,
             notes,
@@ -494,6 +506,9 @@ void MqttApiService::handleBrightnessCommand(
 bool MqttApiService::readMiniatureFields(
     JsonDocument& doc,
     String& name,
+    String& collection,
+    String& artist,
+    String& date,
     uint16_t& shelf,
     uint16_t& location,
     String& notes,
@@ -501,6 +516,9 @@ bool MqttApiService::readMiniatureFields(
 ) {
     const char* rawName = doc["name"] | "";
     const char* rawNotes = doc["notes"] | "";
+    const char* rawCollection = doc["collection"] | "";
+    const char* rawArtist = doc["artist"] | "";
+    const char* rawDate = doc["date"] | "";
 
     if (
         strlen(rawName) == 0 ||
@@ -526,6 +544,9 @@ bool MqttApiService::readMiniatureFields(
     }
 
     name = rawName;
+    collection = rawCollection;
+    artist = rawArtist;
+    date = rawDate;
     shelf = static_cast<uint16_t>(rawShelf);
     location = static_cast<uint16_t>(rawLocation);
     notes = rawNotes;

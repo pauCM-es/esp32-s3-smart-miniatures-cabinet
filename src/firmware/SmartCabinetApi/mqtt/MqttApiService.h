@@ -55,6 +55,9 @@ private:
     bool readMiniatureFields(
         ArduinoJson::JsonDocument& doc,
         String& name,
+        String& collection,
+        String& artist,
+        String& date,
         uint16_t& shelf,
         uint16_t& location,
         String& notes,

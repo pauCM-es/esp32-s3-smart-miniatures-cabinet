@@ -3,6 +3,7 @@
 #include "../screens/ui_overview_screen.h"   // LVGL widget externs
 
 #include "app/AppContext.h"
+#include "app/CatalogueContext.h"
 #include "lighting/SceneRepository.h"
 
 #ifdef ESP_PLATFORM
@@ -25,7 +26,7 @@ ViewModel buildViewModel()
     const AppState s = app.state();
     return {
         /* sceneName      */ SceneRepository::get(s.activeScene).name,
-        /* miniatureCount */ s.miniatureCount,
+        /* miniatureCount */ catalogue.all().size(),
         /* lightsOn       */ s.pwmCabinetOn || s.rgbwCabinetOn,
     };
 }

@@ -132,16 +132,6 @@ void DebugConsole::handleLine(const String& line) {
         return;
     }
 
-    if (std::strcmp(command, "locate") == 0) {
-        int id = -1;
-        if (std::sscanf(line.c_str(), "%*s %d", &id) == 1 && id >= 0 && app_.locateMiniature(static_cast<uint8_t>(id))) {
-            stream_->println("OK");
-        } else {
-            stream_->println("ERR locate");
-        }
-        return;
-    }
-
     if (std::strcmp(command, "test") == 0) {
         int shelf = -1;
         int location = -1;
@@ -171,7 +161,6 @@ void DebugConsole::printHelp() {
     stream_->println("  mini on|off|toggle|brightness N");
     stream_->println("  mini color R G B");
     stream_->println("  mini effect static|breathe|rainbow");
-    stream_->println("  locate MINIATURE_ID");
     stream_->println("  test SHELF LOCATION");
 }
 
@@ -186,9 +175,7 @@ void DebugConsole::printState() {
     stream_->printf("Mini available=%d on=%d brightness=%u%% color=%u,%u,%u\n",
                     s.miniatureLightsAvailable, s.miniatureLightsOn, s.miniatureBrightness,
                     s.miniatureColor.r, s.miniatureColor.g, s.miniatureColor.b);
-    stream_->printf("Scene=%u miniatures=%u highlighted=%d\n",
-                    static_cast<unsigned>(s.activeScene),
-                    static_cast<unsigned>(s.miniatureCount), s.highlightedMiniatureId);
+    stream_->printf("Scene=%u\n", static_cast<unsigned>(s.activeScene));
 }
 
 void DebugConsole::printLayout() {

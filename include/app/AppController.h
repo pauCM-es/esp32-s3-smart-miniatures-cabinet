@@ -7,7 +7,6 @@
 #include "cabinet/CabinetLayout.h"
 #include "hardware/EncoderInput.h"
 #include "lighting/LightingManager.h"
-#include "miniatures/MiniatureRepository.h"
 
 namespace smartcabinet {
 
@@ -15,7 +14,6 @@ class AppController {
 public:
     AppController(LightingManager& lighting,
                   CabinetLayout& layout,
-                  MiniatureRepository& miniatures,
                   EncoderInput& encoder);
 
     void begin();
@@ -41,15 +39,10 @@ public:
 
     void applyScene(SceneId id);
 
-    bool locateMiniature(uint8_t miniatureId, uint32_t durationMs = 0);
     bool highlightLocation(uint8_t shelfIndex, uint8_t locationIndex, uint32_t durationMs = 0);
     bool testLocation(LocationId locationId, uint32_t durationMs = 0);
     bool testLocationPersistent(LocationId locationId);  // no auto-expire
     void clearHighlight();
-
-    const Miniature* miniatureByIndex(size_t index) const;
-    const Miniature* miniatureById(uint8_t id) const;
-    size_t miniatureCount() const;
 
     bool setShelfCount(uint8_t count);
     bool setShelfLedCount(uint8_t shelfIndex, uint16_t ledCount);
@@ -73,10 +66,7 @@ public:
 private:
     LightingManager& lighting_;
     CabinetLayout& layout_;
-    MiniatureRepository& miniatures_;
     EncoderInput& encoder_;
-
-    int16_t highlightedMiniatureId_{-1};
     uint32_t highlightExpiresAtMs_{0};
 
     uint8_t selectedShelfIndex_{0};

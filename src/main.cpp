@@ -14,7 +14,6 @@
 #include "lighting/AddressableCabinetLight.h"
 #include "lighting/LightingManager.h"
 #include "lighting/MiniatureLights.h"
-#include "miniatures/MiniatureRepository.h"
 #include "secrets.h"
 #include "ui/ui.h"
 
@@ -28,9 +27,8 @@ AddressableCabinetLight rgbwCabinetLight;
 MiniatureLights miniatureLights;
 LightingManager lightingManager(pwmCabinetLight, rgbwCabinetLight, miniatureLights);
 CabinetLayout cabinetLayout;
-MiniatureRepository miniatureRepository;
 EncoderInput encoder;
-AppController app(lightingManager, cabinetLayout, miniatureRepository, encoder);
+AppController app(lightingManager, cabinetLayout, encoder);
 DebugConsole debugConsole(app);
 Display display;
 

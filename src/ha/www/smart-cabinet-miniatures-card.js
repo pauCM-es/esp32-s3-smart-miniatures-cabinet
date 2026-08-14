@@ -1,36 +1,34 @@
 class SmartCabinetMiniaturesCard extends HTMLElement {
-  setConfig(config) {
-    this.config = {
-      title: config.title || "Miniatures",
-      catalog_entity:
-        config.catalog_entity ||
-        "sensor.smart_cabinet_miniatures",
-      command_topic:
-        config.command_topic ||
-        "smartcabinet/cabinet01/api/command",
-    };
+	setConfig(config) {
+		this.config = {
+			title: config.title || "Miniatures",
+			catalog_entity:
+				config.catalog_entity || "sensor.smart_cabinet_miniatures",
+			command_topic:
+				config.command_topic || "smartcabinet/cabinet01/api/command",
+		};
 
-    this._editingId = null;
-    this._rendered = false;
-  }
+		this._editingId = null;
+		this._rendered = false;
+	}
 
-  set hass(hass) {
-    this._hass = hass;
+	set hass(hass) {
+		this._hass = hass;
 
-    if (!this._rendered) {
-      this._render();
-      this._rendered = true;
-    }
+		if (!this._rendered) {
+			this._render();
+			this._rendered = true;
+		}
 
-    this._updateList();
-  }
+		this._updateList();
+	}
 
-  getCardSize() {
-    return 6;
-  }
+	getCardSize() {
+		return 6;
+	}
 
-  _render() {
-    this.innerHTML = `
+	_render() {
+		this.innerHTML = `
       <ha-card>
         <div class="card-content">
           <div class="title-row">
@@ -45,6 +43,22 @@ class SmartCabinetMiniaturesCard extends HTMLElement {
               Name
               <input class="name-input" type="text" maxlength="80" />
             </label>
+
+            <label>
+              Collection
+              <input class="collection-input" type="text" maxlength="80" />
+            </label>
+
+            <div class="position-row">
+              <label>
+                Artist
+                <input class="artist-input" type="text" maxlength="80" />
+              </label>
+              <label>
+                Date
+                <input class="date-input" type="text" maxlength="40" />
+              </label>
+            </div>
 
             <div class="position-row">
               <label>
@@ -232,49 +246,44 @@ class SmartCabinetMiniaturesCard extends HTMLElement {
       </ha-card>
     `;
 
-    this.querySelector(".title").textContent =
-      this.config.title;
+		this.querySelector(".title").textContent = this.config.title;
 
-    this.querySelector(".save-button").addEventListener(
-      "click",
-      () => this._save()
-    );
+		this.querySelector(".save-button").addEventListener("click", () =>
+			this._save(),
+		);
 
-    this.querySelector(".cancel-button").addEventListener(
-      "click",
-      () => this._resetEditor()
-    );
-  }
+		this.querySelector(".cancel-button").addEventListener("click", () =>
+			this._resetEditor(),
+		);
+	}
 
-  _items() {
-    const entity =
-      this._hass?.states[this.config.catalog_entity];
+	_items() {
+		const entity = this._hass?.states[this.config.catalog_entity];
 
-    const items = entity?.attributes?.items;
+		const items = entity?.attributes?.items;
 
-    return Array.isArray(items) ? items : [];
-  }
+		return Array.isArray(items) ? items : [];
+	}
 
-  _updateList() {
-    if (!this._hass || !this._rendered) {
-      return;
-    }
+	_updateList() {
+		if (!this._hass || !this._rendered) {
+			return;
+		}
 
-    const items = this._items();
-    const list = this.querySelector(".list");
+		const items = this._items();
+		const list = this.querySelector(".list");
 
-    this.querySelector(".count").textContent =
-      `${items.length} item${items.length === 1 ? "" : "s"}`;
+		this.querySelector(".count").textContent =
+			`${items.length} item${items.length === 1 ? "" : "s"}`;
 
-    if (items.length === 0) {
-      list.innerHTML =
-        `<div class="empty">No miniatures yet.</div>`;
-      return;
-    }
+		if (items.length === 0) {
+			list.innerHTML = `<div class="empty">No miniatures yet.</div>`;
+			return;
+		}
 
-    list.innerHTML = items
-      .map(
-        (item) => `
+		list.innerHTML = items
+			.map(
+				(item) => `
           <div class="item" data-id="${this._escapeAttr(item.id)}">
             <div class="item-header">
               <div class="item-name">
@@ -287,12 +296,24 @@ class SmartCabinetMiniaturesCard extends HTMLElement {
             </div>
 
             ${
-              item.notes
-                ? `<div class="item-notes">
+				item.collection || item.artist || item.date
+					? `
+              <div class="item-notes">
+                ${[item.collection, item.artist, item.date]
+					.filter(Boolean)
+					.map((v) => this._escapeHtml(v))
+					.join(" · ")}
+              </div>`
+					: ""
+			}
+
+            ${
+				item.notes
+					? `<div class="item-notes">
                     ${this._escapeHtml(item.notes)}
                    </div>`
-                : ""
-            }
+					: ""
+			}
 
             <div class="item-actions">
               <button
@@ -312,188 +333,178 @@ class SmartCabinetMiniaturesCard extends HTMLElement {
               </button>
             </div>
           </div>
-        `
-      )
-      .join("");
+        `,
+			)
+			.join("");
 
-    list.querySelectorAll(".item").forEach((element) => {
-      const id = element.dataset.id;
-      const item = items.find((candidate) => candidate.id === id);
+		list.querySelectorAll(".item").forEach((element) => {
+			const id = element.dataset.id;
+			const item = items.find((candidate) => candidate.id === id);
 
-      if (!item) {
-        return;
-      }
+			if (!item) {
+				return;
+			}
 
-      element
-        .querySelector('[data-action="highlight"]')
-        .addEventListener(
-          "click",
-          () => this._highlight(item)
-        );
+			element
+				.querySelector('[data-action="highlight"]')
+				.addEventListener("click", () => this._highlight(item));
 
-      element
-        .querySelector('[data-action="edit"]')
-        .addEventListener(
-          "click",
-          () => this._edit(item)
-        );
+			element
+				.querySelector('[data-action="edit"]')
+				.addEventListener("click", () => this._edit(item));
 
-      element
-        .querySelector('[data-action="delete"]')
-        .addEventListener(
-          "click",
-          () => this._delete(item)
-        );
-    });
-  }
+			element
+				.querySelector('[data-action="delete"]')
+				.addEventListener("click", () => this._delete(item));
+		});
+	}
 
-  _save() {
-    const name =
-      this.querySelector(".name-input").value.trim();
+	_save() {
+		const name = this.querySelector(".name-input").value.trim();
+		const collection = this.querySelector(".collection-input").value.trim();
+		const artist = this.querySelector(".artist-input").value.trim();
+		const date = this.querySelector(".date-input").value.trim();
 
-    const shelf = Number(
-      this.querySelector(".shelf-input").value
-    );
+		const shelf = Number(this.querySelector(".shelf-input").value);
 
-    const location = Number(
-      this.querySelector(".location-input").value
-    );
+		const location = Number(this.querySelector(".location-input").value);
 
-    const notes =
-      this.querySelector(".notes-input").value.trim();
+		const notes = this.querySelector(".notes-input").value.trim();
 
-    if (
-      !name ||
-      !Number.isInteger(shelf) ||
-      !Number.isInteger(location) ||
-      shelf < 1 ||
-      location < 1
-    ) {
-      return;
-    }
+		if (
+			!name ||
+			!Number.isInteger(shelf) ||
+			!Number.isInteger(location) ||
+			shelf < 1 ||
+			location < 1
+		) {
+			return;
+		}
 
-    if (this._editingId) {
-      this._publish({
-        action: "updateMiniature",
-        id: this._editingId,
-        name,
-        shelf,
-        location,
-        notes,
-      });
-    } else {
-      this._publish({
-        action: "createMiniature",
-        name,
-        shelf,
-        location,
-        notes,
-      });
-    }
+		if (this._editingId) {
+			this._publish({
+				action: "updateMiniature",
+				id: this._editingId,
+				name,
+				collection,
+				artist,
+				date,
+				shelf,
+				location,
+				notes,
+			});
+		} else {
+			this._publish({
+				action: "createMiniature",
+				name,
+				collection,
+				artist,
+				date,
+				shelf,
+				location,
+				notes,
+			});
+		}
 
-    this._resetEditor();
-  }
+		this._resetEditor();
+	}
 
-  _edit(item) {
-    this._editingId = item.id;
+	_edit(item) {
+		this._editingId = item.id;
 
-    this.querySelector(".editor-title").textContent =
-      "Edit miniature";
+		this.querySelector(".editor-title").textContent = "Edit miniature";
 
-    this.querySelector(".save-button").textContent =
-      "Save";
+		this.querySelector(".save-button").textContent = "Save";
 
-    this.querySelector(".cancel-button").hidden = false;
+		this.querySelector(".cancel-button").hidden = false;
 
-    this.querySelector(".name-input").value =
-      item.name || "";
+		this.querySelector(".name-input").value = item.name || "";
+		this.querySelector(".collection-input").value = item.collection || "";
+		this.querySelector(".artist-input").value = item.artist || "";
+		this.querySelector(".date-input").value = item.date || "";
 
-    this.querySelector(".shelf-input").value =
-      Number(item.shelf) || 1;
+		this.querySelector(".shelf-input").value = Number(item.shelf) || 1;
 
-    this.querySelector(".location-input").value =
-      Number(item.location) || 1;
+		this.querySelector(".location-input").value =
+			Number(item.location) || 1;
 
-    this.querySelector(".notes-input").value =
-      item.notes || "";
-  }
+		this.querySelector(".notes-input").value = item.notes || "";
+	}
 
-  _delete(item) {
-    const accepted = window.confirm(
-      `Delete "${item.name}"?`
-    );
+	_delete(item) {
+		const accepted = window.confirm(`Delete "${item.name}"?`);
 
-    if (!accepted) {
-      return;
-    }
+		if (!accepted) {
+			return;
+		}
 
-    this._publish({
-      action: "deleteMiniature",
-      id: item.id,
-    });
+		this._publish({
+			action: "deleteMiniature",
+			id: item.id,
+		});
 
-    if (this._editingId === item.id) {
-      this._resetEditor();
-    }
-  }
+		if (this._editingId === item.id) {
+			this._resetEditor();
+		}
+	}
 
-  _highlight(item) {
-    this._publish({
-      action: "highlightLocation",
-      shelf: Number(item.shelf),
-      location: Number(item.location),
-    });
-  }
+	_highlight(item) {
+		this._publish({
+			action: "highlightLocation",
+			shelf: Number(item.shelf),
+			location: Number(item.location),
+		});
+	}
 
-  _resetEditor() {
-    this._editingId = null;
+	_resetEditor() {
+		this._editingId = null;
 
-    this.querySelector(".editor-title").textContent =
-      "Add miniature";
+		this.querySelector(".editor-title").textContent = "Add miniature";
 
-    this.querySelector(".save-button").textContent =
-      "Add";
+		this.querySelector(".save-button").textContent = "Add";
 
-    this.querySelector(".cancel-button").hidden = true;
+		this.querySelector(".cancel-button").hidden = true;
 
-    this.querySelector(".name-input").value = "";
-    this.querySelector(".shelf-input").value = "1";
-    this.querySelector(".location-input").value = "1";
-    this.querySelector(".notes-input").value = "";
-  }
+		this.querySelector(".name-input").value = "";
+		this.querySelector(".collection-input").value = "";
+		this.querySelector(".artist-input").value = "";
+		this.querySelector(".date-input").value = "";
+		this.querySelector(".shelf-input").value = "1";
+		this.querySelector(".location-input").value = "1";
+		this.querySelector(".notes-input").value = "";
+	}
 
-  _publish(payload) {
-    this._hass.callService("mqtt", "publish", {
-      topic: this.config.command_topic,
-      payload: JSON.stringify(payload),
-      qos: 0,
-      retain: false,
-    });
-  }
+	_publish(payload) {
+		this._hass.callService("mqtt", "publish", {
+			topic: this.config.command_topic,
+			payload: JSON.stringify(payload),
+			qos: 0,
+			retain: false,
+		});
+	}
 
-  _escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
+	_escapeHtml(value) {
+		return String(value ?? "")
+			.replaceAll("&", "&amp;")
+			.replaceAll("<", "&lt;")
+			.replaceAll(">", "&gt;")
+			.replaceAll('"', "&quot;")
+			.replaceAll("'", "&#039;");
+	}
 
-  _escapeAttr(value) {
-    return this._escapeHtml(value);
-  }
+	_escapeAttr(value) {
+		return this._escapeHtml(value);
+	}
 }
 
 customElements.define(
-  "smart-cabinet-miniatures-card",
-  SmartCabinetMiniaturesCard
+	"smart-cabinet-miniatures-card",
+	SmartCabinetMiniaturesCard,
 );
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "smart-cabinet-miniatures-card",
-  name: "Smart Cabinet Miniatures",
-  description:
-    "Basic CRUD catalogue for the DIY Smart Miniature Cabinet",
+	type: "smart-cabinet-miniatures-card",
+	name: "Smart Cabinet Miniatures",
+	description: "Basic CRUD catalogue for the DIY Smart Miniature Cabinet",
 });
