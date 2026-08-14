@@ -11,6 +11,7 @@ lv_obj_t * ui_header = NULL;
 lv_obj_t * ui_go_back_btn = NULL;
 lv_obj_t * ui_header_icon = NULL;
 lv_obj_t * ui_time_label = NULL;
+lv_obj_t * ui_wifi_label = NULL;
 lv_obj_t * ui_overviewTitle_text = NULL;
 lv_obj_t * ui_navbar = NULL;
 lv_obj_t * ui_screenLights_btn = NULL;
@@ -135,6 +136,17 @@ void ui_overview_screen_screen_init(void)
     ui_object_set_themeable_style_property(ui_time_label, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA,
                                            _ui_theme_alpha_Cyan____________);
     lv_obj_set_style_text_font(ui_time_label, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_wifi_label = lv_label_create(ui_header);
+    lv_obj_set_width(ui_wifi_label, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_wifi_label, LV_SIZE_CONTENT);
+    lv_obj_set_align(ui_wifi_label, LV_ALIGN_RIGHT_MID);
+    lv_obj_set_x(ui_wifi_label, -90);
+    lv_obj_set_y(ui_wifi_label, 0);
+    lv_label_set_text(ui_wifi_label, "WIFI");
+    lv_obj_set_style_text_font(ui_wifi_label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_wifi_label, lv_color_hex(0x555577), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_wifi_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_overviewTitle_text = lv_label_create(ui_header);
     lv_obj_set_width(ui_overviewTitle_text, LV_SIZE_CONTENT);   /// 1
@@ -556,6 +568,7 @@ void ui_overview_screen_screen_destroy(void)
     ui_go_back_btn = NULL;
     ui_header_icon = NULL;
     ui_time_label = NULL;
+    ui_wifi_label = NULL;
     ui_overviewTitle_text = NULL;
     ui_navbar = NULL;
     ui_screenLights_btn = NULL;

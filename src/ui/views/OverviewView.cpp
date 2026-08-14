@@ -5,6 +5,11 @@
 #include "app/AppContext.h"
 #include "lighting/SceneRepository.h"
 
+#ifdef ESP_PLATFORM
+#include <WiFi.h>
+#include <time.h>
+#endif
+
 using namespace smartcabinet;
 
 namespace OverviewView {
@@ -22,6 +27,33 @@ ViewModel buildViewModel()
         /* miniatureCount */ s.miniatureCount,
         /* lightsOn       */ s.pwmCabinetOn || s.rgbwCabinetOn,
     };
+}
+
+lv_timer_t* s_clockTimer = nullptr;
+
+void clockTimerCb(lv_timer_t*)
+{
+#ifdef ESP_PLATFORM
+    if (ui_wifi_label) {
+        const bool connected = (WiFi.status() == WL_CONNECTED);
+        lv_obj_set_style_text_color(
+            ui_wifi_label,
+            connected ? lv_color_hex(0x00E4F6) : lv_color_hex(0x555577),
+            LV_PART_MAIN | LV_STATE_DEFAULT
+        );
+    }
+
+    if (ui_time_label) {
+        const time_t now = time(nullptr);
+        if (now > 1609459200L) {  // after 2021-01-01, i.e. NTP has synced
+            struct tm timeinfo;
+            localtime_r(&now, &timeinfo);
+            char buf[6];
+            strftime(buf, sizeof(buf), "%H:%M", &timeinfo);
+            lv_label_set_text(ui_time_label, buf);
+        }
+    }
+#endif
 }
 }  // namespace
 
@@ -60,6 +92,13 @@ void render(const ViewModel& model)
     setCurrentScene(model.sceneName);
     setMiniatureCount(model.miniatureCount);
     setLightsOn(model.lightsOn);
+}
+
+void startClock()
+{
+    if (s_clockTimer) return;
+    s_clockTimer = lv_timer_create(clockTimerCb, 1000, nullptr);
+    clockTimerCb(nullptr);  // populate immediately, don't wait 1 s
 }
 
 }  // namespace OverviewView

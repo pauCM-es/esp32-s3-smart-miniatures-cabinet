@@ -1,6 +1,7 @@
 #include "OverviewEvents.h"
 
 #include "app/AppContext.h"
+#include "app/SmartCabinetContext.h"
 #include "ui/views/OverviewView.h"
 
 using namespace smartcabinet;
@@ -42,16 +43,13 @@ void overview_on_prev_scene(void)
 
 void overview_on_lights_switched(int on)
 {
-    const bool enabled = (on != 0);
-    app.setPwmCabinetPower(enabled);
-    if (app.state().rgbwCabinetAvailable) {
-        app.setRgbwCabinetPower(enabled);
-    }
+    smartCabinet.setPower(on != 0);
 }
 
 void overview_on_screen_opened(void)
 {
     OverviewView::refresh();
+    OverviewView::startClock();
 }
 
 }  // extern "C"

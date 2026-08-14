@@ -96,6 +96,7 @@ void setup() {
     }
     if (WiFi.status() == WL_CONNECTED) {
         Serial.printf("[WiFi] Connected, IP: %s\n", WiFi.localIP().toString().c_str());
+        configTime(0, 0, "pool.ntp.org");  // UTC; set TZ string via setenv("TZ",...) if needed
     } else {
         Serial.println("[WiFi] Not connected — MQTT will retry in loop");
     }
