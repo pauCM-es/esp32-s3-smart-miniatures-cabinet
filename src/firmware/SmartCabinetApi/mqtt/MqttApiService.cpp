@@ -30,7 +30,8 @@ MqttApiService::MqttApiService(
     : config_(config),
       mqtt_(networkClient),
       cabinetHandler_(smartCabinet, mqtt_, config_),
-      catalogueHandler_(miniatures, mqtt_, config_)
+      catalogueHandler_(miniatures, mqtt_, config_),
+      miniLightsHandler_(smartCabinet, mqtt_, config_)
 {
     smartCabinet.setStateChangedCallback(
         [this](const CabinetRuntimeState&) {
@@ -105,6 +106,7 @@ void MqttApiService::subscribeTopics() {
     mqtt_.subscribe(MqttUtils::topic(config_, "/api/command").c_str());
     mqtt_.subscribe(MqttUtils::topic(config_, "/ha/power/set").c_str());
     mqtt_.subscribe(MqttUtils::topic(config_, "/ha/brightness/set").c_str());
+    mqtt_.subscribe(MqttUtils::topic(config_, "/ha/mini_lights/set").c_str());
     mqtt_.subscribe(HA_STATUS_TOPIC);
 }
 
@@ -134,6 +136,10 @@ void MqttApiService::handleMessage(
     }
     if (incoming == MqttUtils::topic(config_, "/ha/brightness/set")) {
         cabinetHandler_.handleBrightnessSet(payload, length);
+        return;
+    }
+    if (incoming == MqttUtils::topic(config_, "/ha/mini_lights/set")) {
+        miniLightsHandler_.handleSet(payload, length);
     }
 }
 
@@ -155,6 +161,7 @@ void MqttApiService::handleApiCommand(
 
 void MqttApiService::publishState() {
     cabinetHandler_.publishState();
+    miniLightsHandler_.publishState();
 }
 
 void MqttApiService::publishMiniatures() {
@@ -165,4 +172,5 @@ void MqttApiService::publishDiscovery() {
     if (!mqtt_.connected()) return;
     cabinetHandler_.publishDiscovery();
     catalogueHandler_.publishDiscovery();
+    miniLightsHandler_.publishDiscovery();
 }

@@ -9,6 +9,7 @@
 #include "MqttApiConfig.h"
 #include "MqttCabinetHandler.h"
 #include "MqttCatalogueHandler.h"
+#include "MqttMiniatureLightsHandler.h"
 
 class MqttApiService {
 public:
@@ -44,10 +45,11 @@ private:
     );
 
     // Declaration order matters: mqtt_ must precede the handlers.
-    MqttApiConfig         config_;
-    PubSubClient          mqtt_;
-    MqttCabinetHandler    cabinetHandler_;
-    MqttCatalogueHandler  catalogueHandler_;
+    MqttApiConfig              config_;
+    PubSubClient               mqtt_;
+    MqttCabinetHandler         cabinetHandler_;
+    MqttCatalogueHandler       catalogueHandler_;
+    MqttMiniatureLightsHandler miniLightsHandler_;
 
     uint32_t lastReconnectAttemptMs_ = 0;
 };
