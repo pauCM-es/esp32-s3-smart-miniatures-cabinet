@@ -66,6 +66,9 @@ public:
 
     const CabinetLayout& layout() const;
 
+    // Consume encoder delta this tick; called before app.update() processes it.
+    int8_t consumeEncoderEvent(uint32_t nowMs);
+
 private:
     LightingManager& lighting_;
     CabinetLayout& layout_;

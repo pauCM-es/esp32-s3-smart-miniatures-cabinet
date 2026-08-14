@@ -34,6 +34,9 @@ void shelves_on_clear_location(void);
 /* Called when the user taps a LED bar in the mapping row. */
 void shelves_on_led_selected(uint16_t ledIndex);
 
+void shelves_on_screen_opened(void);
+void shelves_on_screen_closed(void);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

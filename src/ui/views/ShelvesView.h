@@ -41,4 +41,7 @@ void closeLocationEditor(uint8_t shelfIndex);
 // Re-colour the LED mapping bar for one shelf from the current CabinetLayout.
 void refreshLedStates(uint8_t shelfIndex);
 
+// Toggle TEST button visual state (cyan + full opacity = active, purple + dim = idle).
+void setTestBtnActive(uint8_t shelfIndex, bool active);
+
 }  // namespace ShelvesView

@@ -252,4 +252,8 @@ void AppController::setHighlightTimeout(uint32_t nowMs, uint32_t durationMs) {
     highlightExpiresAtMs_ = durationMs == 0 ? 0 : nowMs + durationMs;
 }
 
+int8_t AppController::consumeEncoderEvent(uint32_t nowMs) {
+    return encoder_.update(nowMs).delta;
+}
+
 }  // namespace smartcabinet

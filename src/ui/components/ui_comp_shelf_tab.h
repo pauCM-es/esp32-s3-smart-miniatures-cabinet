@@ -1,57 +1,40 @@
 #pragma once
 
-#include <stdint.h>
-#include "lvgl/lvgl.h"
-#include "ui_comp_led_item.h"
+#include "../ui.h"
+
+#define UI_MAX_SHELVES 5
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * Aggregates all addressable sub-widgets of a single shelf tab.
- * Stored in an array (ui_shelf_tabs[]) indexed by shelf number.
- */
+// Tracks widget references for one shelf tab.
 typedef struct {
-    lv_obj_t *tabContent;              /**< The tab content object from lv_tabview_add_tab() */
-    lv_obj_t *locationInShef_label;    /**< Label showing the location count */
-    lv_obj_t *ledsInShef_label;        /**< Label showing the LED count */
-    lv_obj_t *locationSelectorCont;    /**< Scrollable row of hex position items */
-    lv_obj_t *ledMappingCont;          /**< Row of LED bar items */
-    lv_obj_t *autoMapBtn;              /**< AUTO MAP button */
-    lv_obj_t *testLedsBtn;             /**< TEST LEDS button */
-    lv_obj_t *saveBtn;                 /**< SAVE button */
-    lv_obj_t *overlay;                 /**< Hidden overlay for start/end selection */
-    lv_obj_t *overlayStartLed_label;   /**< Start LED index inside overlay */
-    lv_obj_t *overlayEndLed_label;     /**< End LED index inside overlay */
-    lv_obj_t *overlayTotalLedsValue;   /**< LED count stepper value in overlay */
+    lv_obj_t *locationSelectorCont;   /* scrollable hex row */
+    lv_obj_t *locationCountLabel;     /* counter display in inputs row */
+    lv_obj_t *ledMappingCont;         /* scrollable LED bar row */
+    lv_obj_t *ledCountLabel;          /* counter display in inputs row */
+    lv_obj_t *overlay;                /* top info overlay (hidden by default) */
+    lv_obj_t *actionsOverlay;         /* bottom actions overlay (hidden by default) */
+    lv_obj_t *overlayStartLed_label;  /* start LED label inside top overlay */
+    lv_obj_t *overlayTotalLedsValue;  /* section LED count value inside top overlay */
+    lv_obj_t *overlayEndLed_label;    /* end LED label inside top overlay */
+    lv_obj_t *testBtn;                /* TEST action button */
 } ui_shelf_tab_t;
 
-/**
- * Create one shelf tab inside @p tabview and populate it with:
- *  - inputs row (locations + LEDs up/down)
- *  - location selector (hex position items)
- *  - LED mapping bar (one ui_led_item per LED, all UNASSIGNED)
- *  - action buttons (AUTO MAP / TEST LEDS / SAVE)
- *  - hidden overlay for start-LED selection
- *
- * @param tabview        Parent tabview object.
- * @param shelf_index    0-based shelf index (tab label = shelf_index + 1).
- * @param led_count      Number of LED items to render in the mapping bar.
- * @param location_count Number of hex position items to render.
- * @return               Populated ui_shelf_tab_t struct.
- */
-ui_shelf_tab_t ui_shelf_tab_create(lv_obj_t *tabview,
-                                   uint8_t   shelf_index,
-                                   uint16_t  led_count,
-                                   uint8_t   location_count);
+extern ui_shelf_tab_t ui_shelf_tabs[UI_MAX_SHELVES];
+extern uint8_t        ui_shelf_tab_count;
 
-/** Rebuild the location-selector row and update the count label. */
+// Rebuild dynamic tab content for shelfCount shelves.
+// leds[i] = total LED count for shelf i, locs[i] = location count.
+void ui_shelves_screen_rebuild(uint8_t shelfCount, const uint16_t *leds, const uint8_t *locs);
+
+// Clear and recreate location hex items for one tab.
 void ui_shelf_tab_set_location_count(ui_shelf_tab_t *tab, uint8_t count);
 
-/** Rebuild the LED-mapping bar and update the count label. */
+// Clear and recreate LED bar items for one tab.
 void ui_shelf_tab_set_led_count(ui_shelf_tab_t *tab, uint16_t count);
 
 #ifdef __cplusplus
-} /*extern "C"*/
+}
 #endif

@@ -52,8 +52,8 @@ constexpr uint16_t kEncoderButtonDebounceMs = 35;
 constexpr uint8_t kEncoderBrightnessStep = 5;
 
 constexpr uint8_t kDefaultShelfCount = 1;
-constexpr uint16_t kDefaultLedsPerShelf = 160;
-constexpr uint8_t kDefaultLocationsPerShelf = 26;
+constexpr uint16_t kDefaultLedsPerShelf = 80;
+constexpr uint8_t kDefaultLocationsPerShelf = 12;
 
 constexpr uint8_t kMaxShelves = 5;
 constexpr uint8_t kMaxLocationsPerShelf = 26;

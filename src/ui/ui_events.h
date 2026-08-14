@@ -38,6 +38,8 @@ void clearLedsLocation(lv_event_t * e);
 void autoMapLeds(lv_event_t * e);
 void clearAllLedsLocation(lv_event_t * e);
 void testLedsLocation(lv_event_t * e);
+void ui_event_shelves_screen_loaded(lv_event_t * e);
+void ui_event_shelves_screen_unloaded(lv_event_t * e);
 
 
 // Mini info events

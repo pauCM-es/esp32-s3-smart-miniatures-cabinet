@@ -11,26 +11,27 @@ using namespace smartcabinet;
 
 /* ── Sequential shelf test state ─────────────────────────────────────── */
 
-static lv_timer_t *s_shelf_test_timer = NULL;
-static uint8_t     s_test_shelf       = 0;
-static uint8_t     s_test_loc_idx     = 0;
-static uint8_t     s_test_loc_count   = 0;
+static lv_timer_t *s_test_encoder_timer = NULL;
+static uint8_t     s_test_shelf         = 0;
+static uint8_t     s_test_loc_idx       = 0;
+static bool        s_miniatures_were_on  = false;
 
-static void shelf_test_advance(lv_timer_t *t)
+static void _test_encoder_tick(lv_timer_t *t)
 {
     (void)t;
-    s_test_loc_idx++;
-    if (s_test_loc_idx >= s_test_loc_count) {
-        lv_timer_del(s_shelf_test_timer);
-        s_shelf_test_timer = NULL;
-        app.clearHighlight();
-        Serial.printf("[Shelves] shelf %u test complete\n", s_test_shelf);
-        return;
-    }
+    int8_t delta = app.consumeEncoderEvent(lv_tick_get());
+    if (delta == 0) return;
+
+    const Shelf* shelf = app.layout().shelf(s_test_shelf);
+    if (!shelf || shelf->locationCount == 0) return;
+
+    int next = (int)s_test_loc_idx + delta;
+    if (next < 0) next += (int)shelf->locationCount;
+    s_test_loc_idx = (uint8_t)(next % (int)shelf->locationCount);
+
     LocationId id = CabinetLayout::makeLocationId(s_test_shelf, s_test_loc_idx);
     app.testLocationPersistent(id);
     ShelvesView::setSelectedLocation(s_test_shelf, s_test_loc_idx);
-    Serial.printf("[Shelves] testing shelf %u location %u\n", s_test_shelf, s_test_loc_idx);
 }
 
 extern "C" {
@@ -115,11 +116,12 @@ void shelves_on_auto_assign(void)
 
 void shelves_on_test_pressed(void)
 {
-    if (s_shelf_test_timer) {
-        lv_timer_del(s_shelf_test_timer);
-        s_shelf_test_timer = NULL;
+    if (s_test_encoder_timer) {
+        lv_timer_del(s_test_encoder_timer);
+        s_test_encoder_timer = NULL;
         app.clearHighlight();
-        Serial.printf("[Shelves] shelf test stopped\n");
+        ShelvesView::setTestBtnActive(s_test_shelf, false);
+        Serial.printf("[Shelves] shelf test mode disabled\n");
         return;
     }
 
@@ -127,16 +129,13 @@ void shelves_on_test_pressed(void)
     const Shelf* shelf = app.layout().shelf(s_test_shelf);
     if (!shelf || shelf->locationCount == 0) return;
 
-    s_test_loc_count = shelf->locationCount;
-    s_test_loc_idx   = 0;
-
+    s_test_loc_idx = 0;
     LocationId id = CabinetLayout::makeLocationId(s_test_shelf, 0);
     app.testLocationPersistent(id);
     ShelvesView::setSelectedLocation(s_test_shelf, 0);
-    Serial.printf("[Shelves] testing shelf %u location 0\n", s_test_shelf);
-
-    s_shelf_test_timer = lv_timer_create(shelf_test_advance,
-                                          config::kLocationTestDurationMs, NULL);
+    ShelvesView::setTestBtnActive(s_test_shelf, true);
+    s_test_encoder_timer = lv_timer_create(_test_encoder_tick, 20, NULL);
+    Serial.printf("[Shelves] shelf test mode enabled on shelf %u\n", s_test_shelf);
 }
 
 void shelves_on_clear_shelf(void)
@@ -219,6 +218,28 @@ void shelves_on_led_selected(uint16_t ledIndex)
         {(uint16_t)(loc->ledStart + 1u), loc->ledCount,
          (uint16_t)(loc->ledStart + loc->ledCount)});
     ShelvesView::refreshLedStates(shelf);
+}
+
+void shelves_on_screen_opened(void)
+{
+    const AppState st = app.state();
+    s_miniatures_were_on = st.miniatureLightsOn;
+    if (!s_miniatures_were_on)
+        app.setMiniaturePower(true);
+    ShelvesView::refresh();
+}
+
+void shelves_on_screen_closed(void)
+{
+    if (s_test_encoder_timer) {
+        lv_timer_del(s_test_encoder_timer);
+        s_test_encoder_timer = NULL;
+        app.clearHighlight();
+        ShelvesView::setTestBtnActive(s_test_shelf, false);
+        Serial.printf("[Shelves] shelf test mode disabled on screen exit\n");
+    }
+    if (!s_miniatures_were_on)
+        app.setMiniaturePower(false);
 }
 
 }  // extern "C"

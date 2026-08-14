@@ -1,7 +1,8 @@
 #include "ShelvesView.h"
 
-#include "../screens/ui_shelves_screen.h"
+#include "../ui.h"
 #include "../components/ui_comp_shelf_tab.h"
+#include "../components/ui_comp_led_item.h"
 
 #include "app/AppContext.h"
 #include "cabinet/CabinetLayout.h"
@@ -92,6 +93,14 @@ void setSelectedLocation(uint8_t shelfIndex, uint8_t locationIndex)
                 LV_STYLE_BG_IMG_RECOLOR_OPA, _ui_theme_alpha_Purple__________);
         }
     }
+
+    /* Scroll led mapping to this location's start LED if assigned */
+    const Location* loc = app.layout().location(shelfIndex, locationIndex);
+    lv_obj_t *ledMap = ui_shelf_tabs[shelfIndex].ledMappingCont;
+    if (loc && loc->ledCount > 0 && ledMap) {
+        lv_obj_t *startItem = lv_obj_get_child(ledMap, (int32_t)loc->relativeLedStart);
+        if (startItem) lv_obj_scroll_to_view(startItem, LV_ANIM_ON);
+    }
 }
 
 void updateLocationEditorValues(uint8_t shelfIndex, const LocationEditorViewModel& model)
@@ -115,12 +124,14 @@ void openLocationEditor(uint8_t shelfIndex, const LocationEditorViewModel& model
     if (shelfIndex >= ui_shelf_tab_count) return;
     updateLocationEditorValues(shelfIndex, model);
     lv_obj_clear_flag(ui_shelf_tabs[shelfIndex].overlay, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui_shelf_tabs[shelfIndex].actionsOverlay, LV_OBJ_FLAG_HIDDEN);
 }
 
 void closeLocationEditor(uint8_t shelfIndex)
 {
     if (shelfIndex >= ui_shelf_tab_count) return;
     lv_obj_add_flag(ui_shelf_tabs[shelfIndex].overlay, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui_shelf_tabs[shelfIndex].actionsOverlay, LV_OBJ_FLAG_HIDDEN);
 }
 
 void refreshLedStates(uint8_t shelfIndex)
@@ -156,6 +167,29 @@ void refreshLedStates(uint8_t shelfIndex)
         }
 
         ui_led_item_set_state(item, state);
+    }
+}
+
+void setTestBtnActive(uint8_t shelfIndex, bool active)
+{
+    if (shelfIndex >= ui_shelf_tab_count) return;
+    lv_obj_t *btn = ui_shelf_tabs[shelfIndex].testBtn;
+    if (!btn) return;
+
+    if (active) {
+        lv_obj_set_style_bg_color(btn, lv_color_hex(0x00E4F6), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(btn, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+        ui_object_set_themeable_style_property(btn, LV_PART_MAIN | LV_STATE_DEFAULT,
+            LV_STYLE_BORDER_COLOR, _ui_theme_color_Cyan____________);
+        ui_object_set_themeable_style_property(btn, LV_PART_MAIN | LV_STATE_DEFAULT,
+            LV_STYLE_BORDER_OPA, _ui_theme_alpha_Cyan____________);
+    } else {
+        lv_obj_set_style_bg_color(btn, lv_color_hex(0x531F71), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(btn, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+        ui_object_set_themeable_style_property(btn, LV_PART_MAIN | LV_STATE_DEFAULT,
+            LV_STYLE_BORDER_COLOR, _ui_theme_color_Purple__________);
+        ui_object_set_themeable_style_property(btn, LV_PART_MAIN | LV_STATE_DEFAULT,
+            LV_STYLE_BORDER_OPA, _ui_theme_alpha_Purple__________);
     }
 }
 

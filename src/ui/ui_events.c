@@ -189,3 +189,15 @@ void ui_event_overview_screen_loaded(lv_event_t * e)
     (void)e;
     overview_on_screen_opened();
 }
+
+void ui_event_shelves_screen_loaded(lv_event_t * e)
+{
+    (void)e;
+    shelves_on_screen_opened();
+}
+
+void ui_event_shelves_screen_unloaded(lv_event_t * e)
+{
+    (void)e;
+    shelves_on_screen_closed();
+}
