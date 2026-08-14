@@ -50,6 +50,9 @@ constexpr uint16_t kEncoderButtonDebounceMs = 35;
 // constexpr int kEncoderPinA = 38;
 // constexpr int kEncoderPinB = 39;
 constexpr uint8_t kEncoderBrightnessStep = 5;
+// Quadrature steps accumulated before one output tick fires.
+// 4 = one output per physical detent on most encoders; try 2 if under-sensitive.
+constexpr int8_t kEncoderStepsPerTick = 4;
 
 constexpr uint8_t kDefaultShelfCount = 1;
 constexpr uint16_t kDefaultLedsPerShelf = 80;

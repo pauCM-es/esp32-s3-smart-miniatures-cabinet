@@ -223,6 +223,7 @@ void AppController::handleEncoder(uint32_t nowMs) {
     const EncoderEvent event = encoder_.update(nowMs);
     if (event.delta != 0) {
         if (encoderNavigationCallback_) {
+            Serial.printf("[Encoder] nav delta=%+d\n", event.delta);
             encoderNavigationCallback_(event.delta);
         } else if (lighting_.pwmCabinet().available()) {
             const int next = static_cast<int>(lighting_.pwmCabinet().brightness()) +

@@ -102,8 +102,10 @@ void minis_on_screen_opened()
             s_currentIndex = (s_currentIndex > 0) ? s_currentIndex - 1 : count - 1;
         }
         Serial.printf("[Minis] encoder delta=%d -> index=%zu\n", delta, s_currentIndex + 1);
+        // Highlight immediately (no LVGL calls — safe inside handleEncoder).
+        highlightCurrent();
+        // UI labels updated by the 50ms timer to avoid blocking the encoder loop.
         s_pendingUpdate = true;
-        // showCurrent() is NOT called here; the timer handles it next cycle.
     });
 }
 
