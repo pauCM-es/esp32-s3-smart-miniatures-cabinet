@@ -8,6 +8,7 @@
 #ifdef ESP_PLATFORM
 #include <WiFi.h>
 #include <time.h>
+#include "app/MqttApiContext.h"
 #endif
 
 using namespace smartcabinet;
@@ -35,10 +36,18 @@ void clockTimerCb(lv_timer_t*)
 {
 #ifdef ESP_PLATFORM
     if (ui_wifi_label) {
-        const bool connected = (WiFi.status() == WL_CONNECTED);
+        const bool wifiOk = (WiFi.status() == WL_CONNECTED);
         lv_obj_set_style_text_color(
             ui_wifi_label,
-            connected ? lv_color_hex(0x00E4F6) : lv_color_hex(0x555577),
+            wifiOk ? lv_color_hex(0x00E4F6) : lv_color_hex(0x555577),
+            LV_PART_MAIN | LV_STATE_DEFAULT
+        );
+    }
+
+    if (ui_mqtt_label) {
+        lv_obj_set_style_text_color(
+            ui_mqtt_label,
+            mqttApi.connected() ? lv_color_hex(0xF04EB9) : lv_color_hex(0x555577),
             LV_PART_MAIN | LV_STATE_DEFAULT
         );
     }

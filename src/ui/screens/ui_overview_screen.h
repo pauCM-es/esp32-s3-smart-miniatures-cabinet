@@ -20,6 +20,7 @@ extern lv_obj_t * ui_go_back_btn;
 extern lv_obj_t * ui_header_icon;
 extern lv_obj_t * ui_time_label;
 extern lv_obj_t * ui_wifi_label;
+extern lv_obj_t * ui_mqtt_label;
 extern lv_obj_t * ui_overviewTitle_text;
 extern lv_obj_t * ui_navbar;
 extern void ui_event_screenLights_btn(lv_event_t * e);

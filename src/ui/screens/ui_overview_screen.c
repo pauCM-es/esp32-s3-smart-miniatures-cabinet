@@ -12,6 +12,7 @@ lv_obj_t * ui_go_back_btn = NULL;
 lv_obj_t * ui_header_icon = NULL;
 lv_obj_t * ui_time_label = NULL;
 lv_obj_t * ui_wifi_label = NULL;
+lv_obj_t * ui_mqtt_label = NULL;
 lv_obj_t * ui_overviewTitle_text = NULL;
 lv_obj_t * ui_navbar = NULL;
 lv_obj_t * ui_screenLights_btn = NULL;
@@ -147,6 +148,17 @@ void ui_overview_screen_screen_init(void)
     lv_obj_set_style_text_font(ui_wifi_label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_wifi_label, lv_color_hex(0x555577), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_wifi_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_mqtt_label = lv_label_create(ui_header);
+    lv_obj_set_width(ui_mqtt_label, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_mqtt_label, LV_SIZE_CONTENT);
+    lv_obj_set_align(ui_mqtt_label, LV_ALIGN_RIGHT_MID);
+    lv_obj_set_x(ui_mqtt_label, -150);
+    lv_obj_set_y(ui_mqtt_label, 0);
+    lv_label_set_text(ui_mqtt_label, "MQTT");
+    lv_obj_set_style_text_font(ui_mqtt_label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_mqtt_label, lv_color_hex(0x555577), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_mqtt_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_overviewTitle_text = lv_label_create(ui_header);
     lv_obj_set_width(ui_overviewTitle_text, LV_SIZE_CONTENT);   /// 1
@@ -569,6 +581,7 @@ void ui_overview_screen_screen_destroy(void)
     ui_header_icon = NULL;
     ui_time_label = NULL;
     ui_wifi_label = NULL;
+    ui_mqtt_label = NULL;
     ui_overviewTitle_text = NULL;
     ui_navbar = NULL;
     ui_screenLights_btn = NULL;
