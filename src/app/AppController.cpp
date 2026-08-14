@@ -131,6 +131,18 @@ bool AppController::testLocation(LocationId locationId, uint32_t durationMs) {
     return true;
 }
 
+bool AppController::highlightLocationPersistent(
+    uint8_t shelfIndex, uint8_t locationIndex, RgbColor color
+) {
+    const Location* loc = layout_.location(
+        CabinetLayout::makeLocationId(shelfIndex, locationIndex)
+    );
+    if (loc == nullptr || loc->ledCount == 0) return false;
+    if (!lighting_.highlightMiniatureSegment(loc->ledStart, loc->ledCount, color)) return false;
+    highlightExpiresAtMs_ = 0;
+    return true;
+}
+
 bool AppController::testLocationPersistent(LocationId locationId) {
     const Location* loc = layout_.location(locationId);
     if (loc == nullptr || loc->ledCount == 0) return false;

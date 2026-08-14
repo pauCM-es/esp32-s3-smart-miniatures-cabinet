@@ -20,5 +20,6 @@ struct RgbwColor {
 constexpr RgbColor kCyan{0, 220, 255};
 constexpr RgbColor kPurple{170, 40, 255};
 constexpr RgbColor kWarmWhiteRgb{255, 180, 110};
+constexpr RgbColor kWhite{255, 255, 255};
 
 }  // namespace smartcabinet
