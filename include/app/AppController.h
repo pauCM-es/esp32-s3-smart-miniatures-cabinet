@@ -43,8 +43,10 @@ public:
     bool highlightLocation(uint8_t shelfIndex, uint8_t locationIndex, uint32_t durationMs = 0);
     bool highlightLocationPersistent(uint8_t shelfIndex, uint8_t locationIndex, RgbColor color = kPurple);
     bool testLocation(LocationId locationId, uint32_t durationMs = 0);
-    bool testLocationPersistent(LocationId locationId);  // no auto-expire
+    bool testLocationPersistent(LocationId locationId);
     void clearHighlight();
+
+    void resetLayout();
 
     bool setShelfCount(uint8_t count);
     bool setShelfLedCount(uint8_t shelfIndex, uint16_t ledCount);

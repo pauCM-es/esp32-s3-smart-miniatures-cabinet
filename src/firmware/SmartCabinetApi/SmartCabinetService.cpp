@@ -118,6 +118,8 @@ void SmartCabinetService::highlightLocationWhite(uint16_t shelf, uint16_t locati
         state_.highlightShelf = 0;
         state_.highlightLocation = 0;
     } else {
+        // Ensure the miniature LEDs are on so the highlight is visible.
+        appController_.setMiniatureLightPower(true);
         appController_.highlightLocationPersistentWhite(shelf, location);
         state_.hasHighlight = true;
         state_.highlightShelf = shelf;

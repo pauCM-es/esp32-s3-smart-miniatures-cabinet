@@ -158,6 +158,14 @@ void AppController::clearHighlight() {
     highlightExpiresAtMs_ = 0;
 }
 
+void AppController::resetLayout() {
+    layout_.loadDefaults();
+    Serial.printf("[Layout] reset to defaults: %u shelf(ves), %u LEDs, %u locations\n",
+                  layout_.shelfCount(),
+                  layout_.shelf(0) ? layout_.shelf(0)->ledCount : 0u,
+                  layout_.shelf(0) ? layout_.shelf(0)->locationCount : 0u);
+}
+
 bool AppController::setShelfCount(uint8_t count) {
     return layout_.setShelfCount(count);
 }

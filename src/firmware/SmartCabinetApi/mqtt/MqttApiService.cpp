@@ -41,7 +41,11 @@ MqttApiService::MqttApiService(
     );
     miniatures.setChangedCallback(
         [this](const std::vector<Miniature>&) {
-            if (mqtt_.connected()) publishMiniatures();
+            if (mqtt_.connected()) {
+                publishMiniatures();
+                // Republish discovery so the Highlight Miniature slider max stays current.
+                highlightHandler_.publishDiscovery();
+            }
         }
     );
 }
