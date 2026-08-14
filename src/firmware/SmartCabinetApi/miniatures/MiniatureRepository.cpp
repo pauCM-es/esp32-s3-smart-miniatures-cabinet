@@ -187,9 +187,18 @@ void CatalogueRepository::seedDefaults() {
         uint16_t shelf;
         uint16_t location;
     } seeds[] = {
-        {"mini-seed-1", "Warrior Knight",   "Fantasy Heroes", "Unknown", 1, 1},
-        {"mini-seed-2", "Dark Sorceress",   "Fantasy Heroes", "Unknown", 1, 2},
-        {"mini-seed-3", "Dragon Hatchling", "Creatures",      "Unknown", 1, 3},
+        {"mini-seed-01", "Warrior Knight",    "Fantasy Heroes", "Unknown", 1,  1},
+        {"mini-seed-02", "Dark Sorceress",    "Fantasy Heroes", "Unknown", 1,  2},
+        {"mini-seed-03", "Dragon Hatchling",  "Creatures",      "Unknown", 1,  3},
+        {"mini-seed-04", "Elven Ranger",      "Fantasy Heroes", "Unknown", 1,  4},
+        {"mini-seed-05", "Undead Skeleton",   "Undead",         "Unknown", 1,  5},
+        {"mini-seed-06", "Dwarf Berserker",   "Fantasy Heroes", "Unknown", 1,  6},
+        {"mini-seed-07", "Cave Troll",        "Creatures",      "Unknown", 1,  7},
+        {"mini-seed-08", "Necromancer",       "Undead",         "Unknown", 1,  8},
+        {"mini-seed-09", "Paladin Captain",   "Fantasy Heroes", "Unknown", 1,  9},
+        {"mini-seed-10", "Giant Spider",      "Creatures",      "Unknown", 1, 10},
+        {"mini-seed-11", "Orc Warchief",      "Orcs",           "Unknown", 1, 11},
+        {"mini-seed-12", "High Priestess",    "Fantasy Heroes", "Unknown", 1, 12},
     };
     for (const auto& s : seeds) {
         Miniature item;
