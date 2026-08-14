@@ -89,6 +89,10 @@ void LightingManager::setRgbwCabinetEffect(LightEffect effect) {
     markManual();
 }
 
+void LightingManager::setMiniatureShelfCount(uint8_t count) {
+    miniatures_.setShelfCount(count);
+}
+
 void LightingManager::setMiniaturePower(bool on) {
     miniatures_.setPower(on);
     markManual();

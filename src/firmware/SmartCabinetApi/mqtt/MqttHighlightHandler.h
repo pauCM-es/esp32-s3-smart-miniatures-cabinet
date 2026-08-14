@@ -42,6 +42,6 @@ private:
     const MqttApiConfig&  config_;
 
     uint16_t miniIndex_  = 0;  // 1-based, 0 = none
-    uint16_t shelf_      = 0;
+    uint16_t shelf_      = 1;  // defaults to shelf 1; set to 0 via shelf slider to clear
     uint16_t location_   = 0;
 };

@@ -34,8 +34,8 @@ constexpr uint16_t kRgbwCabinetLedCount = 30;  // Replace with measured strip co
 
 constexpr int kMiniatureLedDataPin = 45;
 constexpr uint16_t kMiniatureLedCount = 400;    // ~2.5 m at 160 LED/m.
-constexpr uint8_t kMiniatureMaxBrightness = 96; // Conservative until current is measured.
-constexpr uint16_t kMiniaturePowerLimitMilliAmps = 2200;
+constexpr uint8_t kMiniatureMaxBrightness = 255; // Power budget enforced by kMiniaturePowerLimitMilliAmps.
+constexpr uint16_t kMiniaturePowerPerShelfMilliAmps = 400;
 
 // Encoder via PCF8575 I2C expander (original — commented out).
 constexpr int kI2cSdaPin = 38;

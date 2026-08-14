@@ -15,6 +15,8 @@ public:
     void update(uint32_t nowMs);
     bool available() const;
 
+    void setShelfCount(uint8_t count);
+
     void setPower(bool on);
     void toggle();
     void setBrightness(uint8_t percent);
