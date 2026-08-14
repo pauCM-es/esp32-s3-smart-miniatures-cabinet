@@ -14,8 +14,7 @@ bool CatalogueRepository::begin() {
 
     if (!store_.load(loaded)) {
         items_.clear();
-
-        // First boot is a valid empty catalogue.
+        seedDefaults();
         return store_.save(items_);
     }
 
@@ -167,6 +166,31 @@ void CatalogueRepository::setChangedCallback(
     ChangedCallback callback
 ) {
     changedCallback_ = callback;
+}
+
+void CatalogueRepository::seedDefaults() {
+    static const struct {
+        const char* id;
+        const char* name;
+        const char* collection;
+        const char* artist;
+        uint16_t shelf;
+        uint16_t location;
+    } seeds[] = {
+        {"mini-seed-1", "Warrior Knight",   "Fantasy Heroes", "Unknown", 1, 1},
+        {"mini-seed-2", "Dark Sorceress",   "Fantasy Heroes", "Unknown", 1, 2},
+        {"mini-seed-3", "Dragon Hatchling", "Creatures",      "Unknown", 1, 3},
+    };
+    for (const auto& s : seeds) {
+        Miniature item;
+        item.id         = s.id;
+        item.name       = s.name;
+        item.collection = s.collection;
+        item.artist     = s.artist;
+        item.shelf      = s.shelf;
+        item.location   = s.location;
+        items_.push_back(item);
+    }
 }
 
 String CatalogueRepository::generateId() const {

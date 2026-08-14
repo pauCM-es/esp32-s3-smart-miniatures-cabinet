@@ -56,6 +56,7 @@ public:
 
 private:
     String generateId() const;
+    void seedDefaults();
     bool validate(
         const String& name,
         uint16_t shelf,
