@@ -2,12 +2,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 
 #include "app/AppState.h"
 #include "cabinet/CabinetLayout.h"
 #include "hardware/EncoderInput.h"
 #include "lighting/LightingManager.h"
-#include "miniatures/MiniatureRepository.h"
 
 namespace smartcabinet {
 
@@ -15,7 +15,6 @@ class AppController {
 public:
     AppController(LightingManager& lighting,
                   CabinetLayout& layout,
-                  MiniatureRepository& miniatures,
                   EncoderInput& encoder);
 
     void begin();
@@ -41,14 +40,13 @@ public:
 
     void applyScene(SceneId id);
 
-    bool locateMiniature(uint8_t miniatureId, uint32_t durationMs = 0);
+    bool highlightLocation(uint8_t shelfIndex, uint8_t locationIndex, uint32_t durationMs = 0);
+    bool highlightLocationPersistent(uint8_t shelfIndex, uint8_t locationIndex, RgbColor color = kPurple);
     bool testLocation(LocationId locationId, uint32_t durationMs = 0);
-    bool testLocationPersistent(LocationId locationId);  // no auto-expire
+    bool testLocationPersistent(LocationId locationId);
     void clearHighlight();
 
-    const Miniature* miniatureByIndex(size_t index) const;
-    const Miniature* miniatureById(uint8_t id) const;
-    size_t miniatureCount() const;
+    void resetLayout();
 
     bool setShelfCount(uint8_t count);
     bool setShelfLedCount(uint8_t shelfIndex, uint16_t ledCount);
@@ -69,17 +67,22 @@ public:
     // Consume encoder delta this tick; called before app.update() processes it.
     int8_t consumeEncoderEvent(uint32_t nowMs);
 
+    using EncoderBrightnessCallback  = std::function<void(uint8_t percent)>;
+    using EncoderNavigationCallback = std::function<void(int8_t delta)>;
+    void setEncoderBrightnessCallback(EncoderBrightnessCallback cb);
+    // When set, encoder drives navigation instead of brightness.
+    void setEncoderNavigationCallback(EncoderNavigationCallback cb);
+
 private:
     LightingManager& lighting_;
     CabinetLayout& layout_;
-    MiniatureRepository& miniatures_;
     EncoderInput& encoder_;
-
-    int16_t highlightedMiniatureId_{-1};
     uint32_t highlightExpiresAtMs_{0};
 
     uint8_t selectedShelfIndex_{0};
     uint8_t selectedLocationIndex_{0};
+    EncoderBrightnessCallback  encoderBrightnessCallback_;
+    EncoderNavigationCallback encoderNavigationCallback_;
 
     void handleEncoder(uint32_t nowMs);
     void setHighlightTimeout(uint32_t nowMs, uint32_t durationMs);

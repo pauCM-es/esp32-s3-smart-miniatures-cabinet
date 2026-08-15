@@ -1,0 +1,4 @@
+type: custom:smart-cabinet-miniatures-card
+title: Miniatures
+catalog_entity: sensor.smart_cabinet_miniatures
+command_topic: smartcabinet/cabinet01/api/command

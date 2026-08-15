@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "app/AppContext.h"
+#include "app/SmartCabinetContext.h"
 
 using namespace smartcabinet;
 
@@ -34,7 +35,7 @@ void lights_on_cabinet_intensity_changed(uint8_t percent)
 {
     if (app.state().pwmCabinetAvailable) {
         Serial.printf("[Lights] cabinet intensity (PWM): %u%%\n", percent);
-        app.setPwmCabinetBrightness(percent);
+        smartCabinet.setBrightness(percent);
     } else if (app.state().rgbwCabinetAvailable) {
         Serial.printf("[Lights] cabinet intensity (RGBW): %u%%\n", percent);
         app.setRgbwCabinetBrightness(percent);

@@ -26,8 +26,6 @@ struct AppState {
     LightEffect miniatureEffect{LightEffect::Static};
 
     SceneId activeScene{SceneId::Manual};
-    int16_t highlightedMiniatureId{-1};
-    size_t miniatureCount{0};
 };
 
 }  // namespace smartcabinet

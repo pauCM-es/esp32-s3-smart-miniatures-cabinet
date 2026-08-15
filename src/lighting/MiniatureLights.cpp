@@ -2,16 +2,26 @@
 
 #include "models/ValueUtils.h"
 
+#include <cstring>
+
 namespace smartcabinet {
+bool gHighlightMask[config::kMiniatureLedCount] = {};
+
 
 void MiniatureLights::begin() {
 #if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
     FastLED.addLeds<MINIATURE_LED_TYPE, config::kMiniatureLedDataPin, MINIATURE_LED_COLOR_ORDER>(
         leds_, config::kMiniatureLedCount);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, config::kMiniaturePowerLimitMilliAmps);
-    FastLED.setBrightness(static_cast<uint8_t>(
-        (static_cast<uint16_t>(percentToByte(brightness_)) * config::kMiniatureMaxBrightness) / 255U));
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, config::kDefaultShelfCount * config::kMiniaturePowerPerShelfMilliAmps);
+    FastLED.setBrightness(percentToByte(brightness_));
     FastLED.clear(true);
+#endif
+}
+
+void MiniatureLights::setShelfCount(uint8_t count) {
+    (void)count;
+#if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, count * config::kMiniaturePowerPerShelfMilliAmps);
 #endif
 }
 
@@ -48,10 +58,7 @@ void MiniatureLights::toggle() {
 void MiniatureLights::setBrightness(uint8_t percent) {
     brightness_ = clampPercent(percent);
 #if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
-    const uint8_t requested = percentToByte(brightness_);
-    const uint8_t limited = static_cast<uint8_t>(
-        (static_cast<uint16_t>(requested) * config::kMiniatureMaxBrightness) / 255U);
-    FastLED.setBrightness(limited);
+    FastLED.setBrightness(percentToByte(brightness_));
 #endif
     dirty_ = true;
 }
@@ -74,6 +81,9 @@ bool MiniatureLights::highlightSegment(uint16_t start, uint16_t count, RgbColor 
     highlightStart_ = start;
     highlightCount_ = count;
     highlightColor_ = color;
+    for (uint16_t i = 0; i < count; ++i) {
+        gHighlightMask[start + i] = true;
+    }
     dirty_ = true;
     return true;
 }
@@ -81,6 +91,7 @@ bool MiniatureLights::highlightSegment(uint16_t start, uint16_t count, RgbColor 
 void MiniatureLights::clearHighlight() {
     highlightActive_ = false;
     highlightCount_ = 0;
+    std::memset(gHighlightMask, 0, sizeof(gHighlightMask));
     dirty_ = true;
 }
 
@@ -149,8 +160,8 @@ void MiniatureLights::renderBase(uint32_t nowMs) {
 void MiniatureLights::renderHighlight() {
     fill_solid(leds_, config::kMiniatureLedCount, CRGB::Black);
     const CRGB c = toCrgb(highlightColor_);
-    for (uint16_t i = 0; i < highlightCount_; ++i) {
-        leds_[highlightStart_ + i] = c;
+    for (uint16_t i = 0; i < config::kMiniatureLedCount; ++i) {
+        if (gHighlightMask[i]) leds_[i] = c;
     }
 }
 

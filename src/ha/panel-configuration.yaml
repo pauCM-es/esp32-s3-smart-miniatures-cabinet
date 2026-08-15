@@ -1,0 +1,12 @@
+panel_custom:
+    - name: ha-panel-smart-cabinet
+      sidebar_title: Smart Cabinet
+      sidebar_icon: mdi:file-cabinet
+      url_path: smart-cabinet
+      module_url: /local/smart-cabinet-panel.js?v=2
+      embed_iframe: false
+      require_admin: false
+      config:
+          command_topic: smartcabinet/cabinet01/api/command
+          layout_entity: sensor.smart_cabinet_layout
+          miniatures_entity: sensor.smart_cabinet_miniatures

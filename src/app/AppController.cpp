@@ -9,12 +9,12 @@ namespace smartcabinet {
 
 AppController::AppController(LightingManager& lighting,
                              CabinetLayout& layout,
-                             MiniatureRepository& miniatures,
                              EncoderInput& encoder)
-    : lighting_(lighting), layout_(layout), miniatures_(miniatures), encoder_(encoder) {}
+    : lighting_(lighting), layout_(layout), encoder_(encoder) {}
 
 void AppController::begin() {
     lighting_.begin();
+    lighting_.setMiniatureShelfCount(layout_.shelfCount());
     encoder_.begin();
     Serial.printf("[Encoder] available=%d  PWM available=%d\n",
                   encoder_.available(), lighting_.pwmCabinet().available());
@@ -54,8 +54,6 @@ AppState AppController::state() const {
     value.miniatureEffect = miniatureLights.effect();
 
     value.activeScene = lighting_.activeScene();
-    value.highlightedMiniatureId = highlightedMiniatureId_;
-    value.miniatureCount = miniatures_.count();
     return value;
 }
 
@@ -116,24 +114,8 @@ void AppController::applyScene(SceneId id) {
     lighting_.applyScene(id);
 }
 
-bool AppController::locateMiniature(uint8_t miniatureId, uint32_t durationMs) {
-    const Miniature* miniature = miniatures_.byId(miniatureId);
-    if (miniature == nullptr) {
-        return false;
-    }
-
-    const Location* loc = layout_.location(miniature->locationId);
-    if (loc == nullptr || loc->ledCount == 0) {
-        return false;
-    }
-
-    if (!lighting_.highlightMiniatureSegment(loc->ledStart, loc->ledCount, kCyan)) {
-        return false;
-    }
-
-    highlightedMiniatureId_ = miniatureId;
-    setHighlightTimeout(millis(), durationMs == 0 ? config::kLocateDurationMs : durationMs);
-    return true;
+bool AppController::highlightLocation(uint8_t shelfIndex, uint8_t locationIndex, uint32_t durationMs) {
+    return testLocation(CabinetLayout::makeLocationId(shelfIndex, locationIndex), durationMs);
 }
 
 bool AppController::testLocation(LocationId locationId, uint32_t durationMs) {
@@ -146,8 +128,19 @@ bool AppController::testLocation(LocationId locationId, uint32_t durationMs) {
         return false;
     }
 
-    highlightedMiniatureId_ = -1;
     setHighlightTimeout(millis(), durationMs == 0 ? config::kLocationTestDurationMs : durationMs);
+    return true;
+}
+
+bool AppController::highlightLocationPersistent(
+    uint8_t shelfIndex, uint8_t locationIndex, RgbColor color
+) {
+    const Location* loc = layout_.location(
+        CabinetLayout::makeLocationId(shelfIndex, locationIndex)
+    );
+    if (loc == nullptr || loc->ledCount == 0) return false;
+    if (!lighting_.highlightMiniatureSegment(loc->ledStart, loc->ledCount, color)) return false;
+    highlightExpiresAtMs_ = 0;
     return true;
 }
 
@@ -157,31 +150,28 @@ bool AppController::testLocationPersistent(LocationId locationId) {
     if (!lighting_.highlightMiniatureSegment(loc->ledStart, loc->ledCount, kPurple)) {
         return false;
     }
-    highlightedMiniatureId_ = -1;
     highlightExpiresAtMs_ = 0;
     return true;
 }
 
 void AppController::clearHighlight() {
     lighting_.clearMiniatureHighlight();
-    highlightedMiniatureId_ = -1;
     highlightExpiresAtMs_ = 0;
 }
 
-const Miniature* AppController::miniatureByIndex(size_t index) const {
-    return miniatures_.byIndex(index);
-}
-
-const Miniature* AppController::miniatureById(uint8_t id) const {
-    return miniatures_.byId(id);
-}
-
-size_t AppController::miniatureCount() const {
-    return miniatures_.count();
+void AppController::resetLayout() {
+    layout_.loadDefaults();
+    lighting_.setMiniatureShelfCount(layout_.shelfCount());
+    Serial.printf("[Layout] reset to defaults: %u shelf(ves), %u LEDs, %u locations\n",
+                  layout_.shelfCount(),
+                  layout_.shelf(0) ? layout_.shelf(0)->ledCount : 0u,
+                  layout_.shelf(0) ? layout_.shelf(0)->locationCount : 0u);
 }
 
 bool AppController::setShelfCount(uint8_t count) {
-    return layout_.setShelfCount(count);
+    if (!layout_.setShelfCount(count)) return false;
+    lighting_.setMiniatureShelfCount(count);
+    return true;
 }
 
 bool AppController::setShelfLedCount(uint8_t shelfIndex, uint16_t ledCount) {
@@ -232,17 +222,21 @@ bool AppController::clearShelfAllLocations(uint8_t shelfIndex) {
 
 void AppController::handleEncoder(uint32_t nowMs) {
     (void)nowMs;
-    if (!encoder_.available() || !lighting_.pwmCabinet().available()) {
-        return;
-    }
+    if (!encoder_.available()) return;
 
     const EncoderEvent event = encoder_.update(nowMs);
     if (event.delta != 0) {
-        const int next = static_cast<int>(lighting_.pwmCabinet().brightness()) +
-                         event.delta * config::kEncoderBrightnessStep;
-        const uint8_t clamped = clampPercent(next);
-        Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
-        lighting_.setPwmCabinetBrightness(clamped);
+        if (encoderNavigationCallback_) {
+            Serial.printf("[Encoder] nav delta=%+d\n", event.delta);
+            encoderNavigationCallback_(event.delta);
+        } else if (lighting_.pwmCabinet().available()) {
+            const int next = static_cast<int>(lighting_.pwmCabinet().brightness()) +
+                             event.delta * config::kEncoderBrightnessStep;
+            const uint8_t clamped = clampPercent(next);
+            Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
+            lighting_.setPwmCabinetBrightness(clamped);
+            if (encoderBrightnessCallback_) encoderBrightnessCallback_(clamped);
+        }
     }
     // No button — toggle disabled:
     // if (event.pressed) { lighting_.togglePwmCabinet(); }
@@ -254,6 +248,14 @@ void AppController::setHighlightTimeout(uint32_t nowMs, uint32_t durationMs) {
 
 int8_t AppController::consumeEncoderEvent(uint32_t nowMs) {
     return encoder_.update(nowMs).delta;
+}
+
+void AppController::setEncoderBrightnessCallback(EncoderBrightnessCallback cb) {
+    encoderBrightnessCallback_ = std::move(cb);
+}
+
+void AppController::setEncoderNavigationCallback(EncoderNavigationCallback cb) {
+    encoderNavigationCallback_ = std::move(cb);
 }
 
 }  // namespace smartcabinet

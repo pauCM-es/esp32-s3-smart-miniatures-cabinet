@@ -5,6 +5,9 @@
 .vscode/ipch
 .vscode/settings.json
 
+# Wi-Fi and MQTT credentials — copy secrets.example.h and fill in yours
+include/secrets.h
+
 # Simulator build output and downloaded dependencies
 simulator/build/
 simulator/deps/
@@ -14,3 +17,4 @@ lib/
 assets-to-convert/
 docs
 squareline-ui
+panel/

@@ -4,6 +4,7 @@
 // Project name: minis_cabinet
 
 #include "../ui.h"
+#include "../events/MiniaturesEvents.h"
 
 lv_obj_t * uic_header1_Container2;
 lv_obj_t * ui_miniatures_screen = NULL;
@@ -62,6 +63,7 @@ void ui_event_locationSelector_slider(lv_event_t * e)
 
     if(event_code == LV_EVENT_VALUE_CHANGED) {
         _ui_slider_set_text_value(ui_currentMini_label, target, "", "");
+        minis_on_slider_changed(lv_slider_get_value(target));
     }
 }
 
@@ -634,6 +636,13 @@ void ui_miniatures_screen_screen_init(void)
     lv_obj_add_event_cb(ui_uiSliderSelectNewMiniLocation, ui_event_uiSliderSelectNewMiniLocation, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_uiBtnActionSwapMini, ui_event_uiBtnActionSwapMini, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_uiBtnActionCancelSwapMini, ui_event_uiBtnActionCancelSwapMini, LV_EVENT_ALL, NULL);
+
+    /* App-layer events */
+    lv_obj_add_event_cb(ui_miniatures_screen, ui_event_miniatures_screen_loaded, LV_EVENT_SCREEN_LOADED, NULL);
+    lv_obj_add_event_cb(ui_miniatures_screen, ui_event_miniatures_screen_unloaded, LV_EVENT_SCREEN_UNLOADED, NULL);
+    lv_obj_add_event_cb(ui_previousMini_btn, ui_event_previousMini_btn, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(ui_nextMini_btn, ui_event_nextMini_btn, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(ui_minisCards_container, ui_event_minis_locate, LV_EVENT_CLICKED, NULL);
     uic_header1_Container2 = ui_comp_get_child(ui_header1, UI_COMP_HEADER2_CONTAINER2);
 
 }

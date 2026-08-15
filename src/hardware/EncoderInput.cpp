@@ -45,17 +45,21 @@ EncoderEvent EncoderInput::update(uint32_t nowMs) {
     const uint8_t transition = static_cast<uint8_t>((previousState_ << 2U) | currentState);
     previousState_ = currentState;
 
-    accumulator_ += kEncoderTable[transition];
-    if (accumulator_ >= 4) {
+    const int8_t step = kEncoderTable[transition];
+    if (step != 0) {
+        accumulator_ += step;
+        Serial.printf("[Enc] A=%u B=%u step=%+d accum=%d\n", a, b, step, accumulator_);
+    }
+
+    if (accumulator_ >= config::kEncoderStepsPerTick) {
         event.delta = 1;
         accumulator_ = 0;
-    } else if (accumulator_ <= -4) {
+        Serial.println("[Enc] -> delta=+1");
+    } else if (accumulator_ <= -config::kEncoderStepsPerTick) {
         event.delta = -1;
         accumulator_ = 0;
+        Serial.println("[Enc] -> delta=-1");
     }
-    // No button — debounce logic removed:
-    // const bool rawButton = ...
-    // if (event.pressed) ...
 #endif
     return event;
 }

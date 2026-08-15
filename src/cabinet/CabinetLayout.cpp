@@ -33,27 +33,34 @@ bool CabinetLayout::setShelfCount(uint8_t count) {
         return false;
     }
 
+    const uint8_t previousCount = shelfCount_;
     uint32_t prospectiveTotal = 0;
     for (uint8_t i = 0; i < count; ++i) {
-        prospectiveTotal += i < shelfCount_ ? shelves_[i].ledCount : config::kDefaultLedsPerShelf;
+        prospectiveTotal += i < previousCount ? shelves_[i].ledCount : config::kDefaultLedsPerShelf;
     }
     if (prospectiveTotal > config::kMiniatureLedCount) {
         return false;
     }
 
-    if (count > shelfCount_) {
-        for (uint8_t i = shelfCount_; i < count; ++i) {
+    if (count > previousCount) {
+        for (uint8_t i = previousCount; i < count; ++i) {
             shelves_[i].index = i;
             shelves_[i].ledCount = config::kDefaultLedsPerShelf;
             shelves_[i].locationCount = config::kDefaultLocationsPerShelf;
+            for (uint8_t j = 0; j < config::kMaxLocationsPerShelf; ++j) {
+                Location& loc = locations_[i][j];
+                loc.id = makeLocationId(i, j);
+                loc.shelfIndex = i;
+                loc.locationIndex = j;
+                loc.relativeLedStart = 0;
+                loc.ledStart = 0;
+                loc.ledCount = 0;
+            }
         }
     }
 
     shelfCount_ = count;
     recalculateShelfOffsets();
-    for (uint8_t i = 0; i < shelfCount_; ++i) {
-        rebuildShelfLocations(i);
-    }
     return true;
 }
 
@@ -70,7 +77,20 @@ bool CabinetLayout::setShelfLedCount(uint8_t shelfIndex, uint16_t count) {
 
     shelves_[shelfIndex].ledCount = count;
     recalculateShelfOffsets();
-    rebuildShelfLocations(shelfIndex);
+
+    // Keep manual mappings when the shelf length changes. Any location that
+    // no longer fits is cleared instead of silently re-running auto-map.
+    for (uint8_t i = 0; i < shelves_[shelfIndex].locationCount; ++i) {
+        Location& loc = locations_[shelfIndex][i];
+        if (loc.ledCount > 0 &&
+            static_cast<uint32_t>(loc.relativeLedStart) + loc.ledCount > count) {
+            loc.relativeLedStart = 0;
+            loc.ledStart = 0;
+            loc.ledCount = 0;
+        } else if (loc.ledCount > 0) {
+            loc.ledStart = shelves_[shelfIndex].ledStart + loc.relativeLedStart;
+        }
+    }
     return true;
 }
 
@@ -79,8 +99,22 @@ bool CabinetLayout::setShelfLocationCount(uint8_t shelfIndex, uint8_t count) {
         return false;
     }
 
+    const uint8_t previousCount = shelves_[shelfIndex].locationCount;
     shelves_[shelfIndex].locationCount = count;
-    rebuildShelfLocations(shelfIndex);
+
+    // Preserve existing mappings. New locations start empty so auto-map is
+    // always an explicit user action.
+    for (uint8_t i = 0; i < config::kMaxLocationsPerShelf; ++i) {
+        Location& loc = locations_[shelfIndex][i];
+        loc.id = makeLocationId(shelfIndex, i);
+        loc.shelfIndex = shelfIndex;
+        loc.locationIndex = i;
+        if (i >= count || i >= previousCount) {
+            loc.relativeLedStart = 0;
+            loc.ledStart = 0;
+            loc.ledCount = 0;
+        }
+    }
     return true;
 }
 
@@ -90,9 +124,19 @@ bool CabinetLayout::setLocationRange(uint8_t shelfIndex, uint8_t locationIndex,
         return false;
     }
     const Shelf& s = shelves_[shelfIndex];
-    if (locationIndex >= s.locationCount || ledCount == 0) {
+    if (locationIndex >= s.locationCount) {
         return false;
     }
+
+    // A zero-length range is the explicit "unmapped" state.
+    if (ledCount == 0) {
+        Location& loc = locations_[shelfIndex][locationIndex];
+        loc.relativeLedStart = 0;
+        loc.ledStart = 0;
+        loc.ledCount = 0;
+        return true;
+    }
+
     if (static_cast<uint32_t>(relativeLedStart) + ledCount > s.ledCount) {
         return false;
     }
@@ -177,7 +221,9 @@ void CabinetLayout::rebuildShelfLocations(uint8_t shelfIndex) {
         loc.locationIndex = i;
 
         if (i < s.locationCount) {
-            const uint16_t size = base + (i < remainder ? 1 : 0);
+            // Keep all equal groups first and assign the full remainder to
+            // the final location, matching the physical cabinet workflow.
+            const uint16_t size = base + (i == s.locationCount - 1 ? remainder : 0);
             loc.relativeLedStart = cursor;
             loc.ledStart = s.ledStart + cursor;
             loc.ledCount = size;

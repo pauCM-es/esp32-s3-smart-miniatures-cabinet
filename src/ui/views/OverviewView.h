@@ -20,6 +20,10 @@ struct ViewModel {
 // Call this whenever application state changes and the screen may be visible.
 void refresh();
 
+// Start the 1-second LVGL timer that updates the clock and WiFi indicator.
+// Idempotent — safe to call on every screen load.
+void startClock();
+
 // Full refresh from a pre-built model.
 void render(const ViewModel& model);
 
