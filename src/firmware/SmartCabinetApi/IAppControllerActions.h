@@ -14,6 +14,7 @@ public:
 
     virtual void setPower(bool enabled) = 0;
     virtual void setBrightness(uint8_t percent) = 0;
+    virtual void applyScene(uint8_t scene) = 0;
     virtual void highlightLocation(uint16_t shelf, uint16_t location) = 0;
 
     virtual void setMiniatureLightPower(bool enabled) = 0;

@@ -26,6 +26,12 @@ public:
         app_.setPwmCabinetBrightness(percent);
     }
 
+    void applyScene(uint8_t scene) override {
+        if (scene <= static_cast<uint8_t>(SceneId::Showcase)) {
+            app_.applyScene(static_cast<SceneId>(scene));
+        }
+    }
+
     void highlightLocation(uint16_t shelf, uint16_t location) override {
         if (shelf == 0 || location == 0) return;
         app_.highlightLocation(

@@ -14,7 +14,6 @@ AppController::AppController(LightingManager& lighting,
 
 void AppController::begin() {
     lighting_.begin();
-    lighting_.setMiniatureShelfCount(layout_.shelfCount());
     encoder_.begin();
     Serial.printf("[Encoder] available=%d  PWM available=%d\n",
                   encoder_.available(), lighting_.pwmCabinet().available());
@@ -161,7 +160,6 @@ void AppController::clearHighlight() {
 
 void AppController::resetLayout() {
     layout_.loadDefaults();
-    lighting_.setMiniatureShelfCount(layout_.shelfCount());
     Serial.printf("[Layout] reset to defaults: %u shelf(ves), %u LEDs, %u locations\n",
                   layout_.shelfCount(),
                   layout_.shelf(0) ? layout_.shelf(0)->ledCount : 0u,
@@ -170,7 +168,6 @@ void AppController::resetLayout() {
 
 bool AppController::setShelfCount(uint8_t count) {
     if (!layout_.setShelfCount(count)) return false;
-    lighting_.setMiniatureShelfCount(count);
     return true;
 }
 

@@ -16,6 +16,7 @@ struct CabinetSettings {
 struct CabinetRuntimeState {
     bool power = false;
     uint8_t brightness = 50;
+    uint8_t activeScene = 0;  // 0=Manual, 1=Off, 2=Display, 3=Showcase
 
     bool hasHighlight = false;
     uint16_t highlightShelf = 0;

@@ -3,10 +3,12 @@ panel_custom:
       sidebar_title: Smart Cabinet
       sidebar_icon: mdi:file-cabinet
       url_path: smart-cabinet
-      module_url: /local/smart-cabinet-panel.js?v=2
+      module_url: /local/smart-cabinet-panel.js?v=3
       embed_iframe: false
       require_admin: false
       config:
           command_topic: smartcabinet/cabinet01/api/command
           layout_entity: sensor.smart_cabinet_layout
           miniatures_entity: sensor.smart_cabinet_miniatures
+          scene_entity: sensor.smart_cabinet_scene
+          mini_lights_command_topic: smartcabinet/cabinet01/ha/mini_lights/set

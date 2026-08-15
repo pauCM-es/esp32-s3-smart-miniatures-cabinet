@@ -40,6 +40,7 @@ void SmartCabinetService::setPower(bool enabled) {
 
     appController_.setPower(enabled);
 
+    state_.activeScene = 0;
     state_.power = enabled;
     settingsRepository_.setPower(enabled);
 
@@ -55,6 +56,7 @@ void SmartCabinetService::setBrightness(uint8_t percent) {
 
     appController_.setBrightness(clamped);
 
+    state_.activeScene = 0;
     state_.brightness = clamped;
     settingsRepository_.setBrightness(clamped);
 
@@ -71,6 +73,18 @@ void SmartCabinetService::setBrightness(uint8_t percent) {
     } else if (!state_.power) {
         setPower(true);
     }
+}
+
+bool SmartCabinetService::applyScene(uint8_t scene) {
+    if (scene < 1 || scene > 3) return false;
+
+    appController_.applyScene(scene);
+    state_.activeScene = scene;
+    state_.hasHighlight = false;
+    state_.highlightShelf = 0;
+    state_.highlightLocation = 0;
+    notifyStateChanged();
+    return true;
 }
 
 bool SmartCabinetService::highlightLocation(
@@ -122,6 +136,7 @@ void SmartCabinetService::setHighlightColor(uint8_t r, uint8_t g, uint8_t b) {
 void SmartCabinetService::setMiniatureLightPower(bool enabled) {
     if (state_.miniLightPower == enabled) return;
     appController_.setMiniatureLightPower(enabled);
+    state_.activeScene = 0;
     state_.miniLightPower = enabled;
     notifyStateChanged();
 }
@@ -129,12 +144,14 @@ void SmartCabinetService::setMiniatureLightPower(bool enabled) {
 void SmartCabinetService::setMiniatureLightBrightness(uint8_t percent) {
     const uint8_t clamped = percent > 100 ? 100 : percent;
     appController_.setMiniatureLightBrightness(clamped);
+    state_.activeScene = 0;
     state_.miniLightBrightness = clamped;
     notifyStateChanged();
 }
 
 void SmartCabinetService::setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b) {
     appController_.setMiniatureLightColor(r, g, b);
+    state_.activeScene = 0;
     state_.miniLightR = r;
     state_.miniLightG = g;
     state_.miniLightB = b;

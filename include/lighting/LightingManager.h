@@ -32,8 +32,6 @@ public:
     void setRgbwCabinetColor(RgbwColor color);
     void setRgbwCabinetEffect(LightEffect effect);
 
-    void setMiniatureShelfCount(uint8_t count);
-
     void setMiniaturePower(bool on);
     void toggleMiniatures();
     void setMiniatureBrightness(uint8_t percent);

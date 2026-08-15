@@ -2,6 +2,8 @@ const DEFAULT_CONFIG = {
   command_topic: "smartcabinet/cabinet01/api/command",
   layout_entity: "sensor.smart_cabinet_layout",
   miniatures_entity: "sensor.smart_cabinet_miniatures",
+  scene_entity: "sensor.smart_cabinet_scene",
+  mini_lights_command_topic: "smartcabinet/cabinet01/ha/mini_lights/set",
 };
 
 class HaPanelSmartCabinet extends HTMLElement {
@@ -20,6 +22,8 @@ class HaPanelSmartCabinet extends HTMLElement {
     this._dataSignature = null;
     this._searchQuery = "";
     this._searchField = "all";
+    this._viewIndex = 0;
+    this._viewTimer = null;
   }
 
   set narrow(value) {
@@ -38,7 +42,8 @@ class HaPanelSmartCabinet extends HTMLElement {
     this._hass = value;
     const layoutState = value?.states?.[this._config.layout_entity];
     const miniState = value?.states?.[this._config.miniatures_entity];
-    const signature = `${layoutState?.last_updated || ""}|${miniState?.last_updated || ""}`;
+    const sceneState = value?.states?.[this._config.scene_entity];
+    const signature = `${layoutState?.last_updated || ""}|${miniState?.last_updated || ""}|${sceneState?.last_updated || ""}`;
     if (signature !== this._dataSignature) {
       this._dataSignature = signature;
       this._render();
@@ -57,10 +62,24 @@ class HaPanelSmartCabinet extends HTMLElement {
     return this._hass?.states?.[this._config.miniatures_entity]?.attributes?.items || [];
   }
 
+  get _assignedMiniatures() {
+    return this._miniatures.filter((item) => Number(item.shelf) > 0 && Number(item.location) > 0);
+  }
+
   async _command(payload) {
     if (!this._hass) return;
     await this._hass.callService("mqtt", "publish", {
       topic: this._config.command_topic,
+      payload: JSON.stringify(payload),
+      qos: 0,
+      retain: false,
+    });
+  }
+
+  async _miniLightsCommand(payload) {
+    if (!this._hass) return;
+    await this._hass.callService("mqtt", "publish", {
+      topic: this._config.mini_lights_command_topic,
       payload: JSON.stringify(payload),
       qos: 0,
       retain: false,
@@ -243,10 +262,59 @@ class HaPanelSmartCabinet extends HTMLElement {
       </section>`;
   }
 
+  _viewItem(index) {
+    const items = this._assignedMiniatures;
+    if (!items.length) return null;
+    return items[((index % items.length) + items.length) % items.length];
+  }
+
+  _viewPickerContent() {
+    const items = this._assignedMiniatures;
+    const unassigned = this._miniatures.length - items.length;
+    if (!items.length) {
+      return `<section class="panel-card view-card empty-state"><b>No assigned miniatures</b><span>${unassigned} unassigned miniature${unassigned === 1 ? "" : "s"}. Assign a shelf and location in the catalogue to browse it here.</span></section>`;
+    }
+    this._viewIndex = ((this._viewIndex % items.length) + items.length) % items.length;
+    return `
+      <section class="panel-card view-card">
+        <div class="section-heading"><div><div class="eyebrow">CABINET VIEW</div><h2>Browse miniatures</h2></div><span class="position-badge unassigned">${unassigned} unassigned</span></div>
+        <div id="view-selection">${this._viewSelectionContent()}</div>
+        <div class="picker-shell">
+          <div class="picker-caption">SWIPE OR DRAG TO LOCATE</div>
+          <div id="view-dial" class="picker-dial">${this._viewDialContent()}</div>
+        </div>
+        <div class="view-actions"><button data-action="clear-view-highlight">Stop locating</button></div>
+      </section>
+      ${this._sceneAndLightsContent()}`;
+  }
+
+  _viewSelectionContent() {
+    const item = this._viewItem(this._viewIndex);
+    if (!item) return "";
+    return `<div class="view-mini-card"><div class="mini-avatar">${this._escape(item.name?.[0] || "?")}</div><div><div class="eyebrow">${this._viewIndex + 1} / ${this._assignedMiniatures.length}</div><h3>${this._escape(item.name)}</h3><p>${this._escape(item.collection || "No collection")} · ${this._escape(item.artist || "Unknown artist")}</p></div></div><div class="view-position">SHELF ${item.shelf} <span>·</span> LOCATION ${item.location}</div>`;
+  }
+
+  _viewDialContent() {
+    const total = this._assignedMiniatures.length;
+    return [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
+      const index = ((this._viewIndex + offset) % total + total) % total;
+      return `<span class="dial-tick ${offset === 0 ? "active" : ""}"><i></i><b>${index + 1}</b></span>`;
+    }).join("");
+  }
+
+  _sceneAndLightsContent() {
+    const currentScene = this._hass?.states?.[this._config.scene_entity]?.state || "Manual";
+    return `<div class="view-controls-grid">
+      <section class="panel-card view-control-card"><div class="eyebrow">SCENES</div><h3>Current: ${this._escape(currentScene)}</h3><p>Choosing a scene stops locating and restores the full strip output.</p><div class="scene-list">${["Off", "Display", "Showcase"].map((scene) => `<button class="scene-button ${currentScene === scene ? "active" : ""}" data-action="apply-scene" data-scene="${scene.toLowerCase()}">${scene}</button>`).join("")}</div></section>
+      <section class="panel-card view-control-card"><div class="eyebrow">MINIATURE STRIP</div><h3>All miniatures</h3><p>Colour or brightness stops locating and applies to the complete strip.</p><div class="strip-controls"><label><span>Colour</span><input id="view-mini-color" type="color" value="#00beff"></label><label><span>Brightness</span><input id="view-mini-brightness" type="range" min="0" max="100" value="45"></label><output id="view-mini-brightness-value">45%</output></div></section>
+    </div>`;
+  }
+
   _render() {
     if (!this.shadowRoot) return;
     const content = this._active === "configuration" ? this._layoutContent()
       : this._active === "miniatures" ? this._miniaturesContent()
+      : this._active === "view" ? this._viewPickerContent()
       : this._searchContent();
 
     this.shadowRoot.innerHTML = `
@@ -258,9 +326,10 @@ class HaPanelSmartCabinet extends HTMLElement {
             <div class="brand"><div class="brand-icon">SC</div><div><b>Smart Cabinet</b><span>Control & catalogue</span></div></div>
           </div>
           <nav>
-            <button class="nav-tab ${this._active === "configuration" ? "active" : ""}" data-tab="configuration">Configuration</button>
-            <button class="nav-tab ${this._active === "miniatures" ? "active" : ""}" data-tab="miniatures">Miniatures</button>
-            <button class="nav-tab ${this._active === "search" ? "active" : ""}" data-tab="search">Search</button>
+            <button class="nav-tab ${this._active === "view" ? "active" : ""}" data-tab="view" aria-label="View" title="View"><svg viewBox="0 0 24 24"><path d="M4 19V5m5 14V9m5 10V4m5 15v-8"/></svg></button>
+            <button class="nav-tab ${this._active === "configuration" ? "active" : ""}" data-tab="configuration" aria-label="Configuration" title="Configuration"><svg viewBox="0 0 24 24"><path d="M4 4h16v5H4zm0 11h16v5H4zm4-6v6m8-6v6"/></svg></button>
+            <button class="nav-tab ${this._active === "miniatures" ? "active" : ""}" data-tab="miniatures" aria-label="Miniatures" title="Miniatures"><svg viewBox="0 0 24 24"><path d="M7 20v-2a5 5 0 0 1 10 0v2M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg></button>
+            <button class="nav-tab ${this._active === "search" ? "active" : ""}" data-tab="search" aria-label="Search" title="Search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5"/></svg></button>
           </nav>
         </header>
         <div class="page">${content}</div>
@@ -273,6 +342,7 @@ class HaPanelSmartCabinet extends HTMLElement {
     this.shadowRoot.querySelectorAll("[data-tab]").forEach((button) => button.onclick = () => {
       this._active = button.dataset.tab;
       this._render();
+      if (this._active === "view") this._scheduleViewHighlight();
     });
 
     this.shadowRoot.querySelectorAll("[data-action]").forEach((button) => button.onclick = () => this._action(button));
@@ -288,6 +358,27 @@ class HaPanelSmartCabinet extends HTMLElement {
     const field = this.shadowRoot.querySelector("#search-field");
     if (query) query.oninput = () => { this._searchQuery = query.value; this._scheduleSearch(); };
     if (field) field.onchange = () => { this._searchField = field.value; this._scheduleSearch(); };
+
+    this._bindViewDial();
+
+    const miniColor = this.shadowRoot.querySelector("#view-mini-color");
+    if (miniColor) miniColor.onchange = async () => {
+      clearTimeout(this._viewTimer);
+      await this._command({ action: "clearHighlight" });
+      await this._miniLightsCommand({ state: "ON", color: this._hexToRgb(miniColor.value) });
+    };
+
+    const miniBrightness = this.shadowRoot.querySelector("#view-mini-brightness");
+    if (miniBrightness) miniBrightness.oninput = () => {
+      const value = Number(miniBrightness.value);
+      const output = this.shadowRoot.querySelector("#view-mini-brightness-value");
+      if (output) output.textContent = `${value}%`;
+      clearTimeout(this._viewTimer);
+      this._viewTimer = setTimeout(async () => {
+        await this._command({ action: "clearHighlight" });
+        await this._miniLightsCommand({ state: "ON", brightness: value });
+      }, 180);
+    };
   }
 
   async _action(button) {
@@ -346,7 +437,62 @@ class HaPanelSmartCabinet extends HTMLElement {
     } else if (action === "highlight-one") {
       const item = this._miniatures.find((mini) => mini.id === button.dataset.id);
       if (item?.shelf) await this._command({ action: "highlightLocation", shelf: item.shelf, location: item.location });
+    } else if (action === "clear-view-highlight") {
+      clearTimeout(this._viewTimer);
+      await this._command({ action: "clearHighlight" });
+    } else if (action === "apply-scene") {
+      clearTimeout(this._viewTimer);
+      await this._command({ action: "applyScene", scene: button.dataset.scene });
     }
+  }
+
+  _setViewIndex(index) {
+    const items = this._assignedMiniatures;
+    if (!items.length) return;
+    this._viewIndex = ((index % items.length) + items.length) % items.length;
+    const selection = this.shadowRoot.querySelector("#view-selection");
+    const dial = this.shadowRoot.querySelector("#view-dial");
+    if (selection) selection.innerHTML = this._viewSelectionContent();
+    if (dial) dial.innerHTML = this._viewDialContent();
+    this._scheduleViewHighlight();
+  }
+
+  _bindViewDial() {
+    const dial = this.shadowRoot.querySelector("#view-dial");
+    if (!dial) return;
+    let startX = 0;
+    let startIndex = 0;
+    let lastSteps = 0;
+    let active = false;
+    const stepPixels = 36;
+
+    dial.onpointerdown = (event) => {
+      active = true;
+      startX = event.clientX;
+      startIndex = this._viewIndex;
+      lastSteps = 0;
+      dial.setPointerCapture?.(event.pointerId);
+      dial.classList.add("dragging");
+    };
+    dial.onpointermove = (event) => {
+      if (!active) return;
+      const steps = Math.trunc((startX - event.clientX) / stepPixels);
+      if (steps === lastSteps) return;
+      lastSteps = steps;
+      this._setViewIndex(startIndex + steps);
+    };
+    const finish = () => { active = false; dial.classList.remove("dragging"); };
+    dial.onpointerup = finish;
+    dial.onpointercancel = finish;
+  }
+
+  _scheduleViewHighlight() {
+    const item = this._viewItem(this._viewIndex);
+    if (!item) return;
+    clearTimeout(this._viewTimer);
+    this._viewTimer = setTimeout(() => this._command({
+      action: "highlightLocation", shelf: Number(item.shelf), location: Number(item.location),
+    }), 220);
   }
 
   _previewLocation() {
@@ -443,7 +589,8 @@ class HaPanelSmartCabinet extends HTMLElement {
       .brand-icon { display:grid; place-items:center; width:38px; height:38px; border-radius:11px; background:var(--primary-color); color:var(--text-primary-color); font-weight:800; font-size:13px; }
       .brand b,.brand span { display:block; } .brand span { margin-top:2px; color:var(--secondary-text-color); font-size:12px; }
       nav { display:flex; gap:4px; padding:4px; border-radius:12px; background:var(--secondary-background-color); }
-      .nav-tab { border:0; background:transparent; color:var(--secondary-text-color); padding:9px 15px; border-radius:9px; font-weight:600; }
+      .nav-tab { display:grid; place-items:center; width:42px; height:38px; border:0; background:transparent; color:var(--secondary-text-color); padding:0; border-radius:9px; }
+      .nav-tab svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
       .nav-tab.active { background:var(--card-background-color); color:var(--primary-text-color); box-shadow:0 1px 4px rgba(0,0,0,.09); }
       .page { max-width:1500px; margin:0 auto; padding:28px; }
       .panel-card { border:1px solid var(--divider-color); background:var(--card-background-color); border-radius:18px; box-shadow:var(--ha-card-box-shadow, 0 2px 8px rgba(0,0,0,.04)); }
@@ -493,9 +640,12 @@ class HaPanelSmartCabinet extends HTMLElement {
       .search-card { max-width:980px; margin:0 auto; } .search-controls { display:grid; grid-template-columns:1fr 180px; gap:10px; margin-top:20px; } .search-summary { margin:12px 2px; }
       .search-results { display:grid; gap:7px; } .search-result { display:grid; grid-template-columns:38px 1fr auto; align-items:center; gap:12px; width:100%; padding:10px; border:1px solid var(--divider-color); border-radius:12px; background:transparent; color:inherit; text-align:left; }
       .search-result:hover:not(:disabled) { border-color:var(--primary-color); } .search-result-main b,.search-result-main span { display:block; } .search-result-main span { margin-top:3px; color:var(--secondary-text-color); font-size:11px; }
+      .view-card { max-width:760px; margin:0 auto; padding:22px; } .view-mini-card { display:flex; align-items:center; justify-content:flex-start; gap:13px; min-height:94px; padding:14px 32px 14px 14px; text-align:left; border-radius:14px; background:var(--secondary-background-color); } .view-mini-card h3 { font-size:18px; } .view-mini-card p { max-width:390px; } .view-position { margin:12px 0 2px; text-align:center; color:var(--primary-color); font-size:11px; font-weight:800; letter-spacing:.11em; } .view-position span { padding:0 5px; color:var(--secondary-text-color); }
+      .picker-shell { position:relative; margin:24px auto 4px; padding:18px 20px 12px; overflow:hidden; border:1px solid var(--divider-color); border-radius:14px; background:var(--primary-background-color); } .picker-caption { margin-bottom:9px; color:var(--secondary-text-color); text-align:center; font-size:9px; font-weight:800; letter-spacing:.22em; } .picker-dial { display:grid; grid-template-columns:repeat(7,1fr); align-items:end; min-height:58px; border-top:1px solid var(--divider-color); background:repeating-linear-gradient(90deg, transparent 0 7px, color-mix(in srgb, var(--divider-color) 70%, transparent) 7px 8px); cursor:grab; touch-action:pan-y; user-select:none; } .picker-dial.dragging { cursor:grabbing; } .dial-tick { display:grid; justify-items:center; gap:4px; color:var(--secondary-text-color); font-size:12px; pointer-events:none; } .dial-tick i { display:block; width:1px; height:12px; background:currentColor; } .dial-tick b { font-size:14px; } .dial-tick.active { color:var(--primary-color); transform:translateY(-4px); } .dial-tick.active i { width:2px; height:22px; } .dial-tick.active b { font-size:19px; } .view-actions { display:flex; justify-content:center; margin-top:13px; }
+      .view-controls-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; max-width:760px; margin:18px auto 0; } .view-control-card { padding:20px; } .scene-list { display:flex; gap:7px; margin-top:15px; flex-wrap:wrap; } .scene-button.active { border-color:var(--primary-color)!important; color:var(--primary-color)!important; } .strip-controls { display:grid; grid-template-columns:auto 1fr auto; align-items:end; gap:12px; margin-top:15px; } .strip-controls label span { margin-bottom:5px; } .strip-controls input[type=color] { width:38px; height:38px; } .strip-controls input[type=range] { min-height:30px; padding:0; accent-color:var(--primary-color); } .strip-controls output { min-width:34px; padding-bottom:9px; color:var(--secondary-text-color); font-size:11px; font-weight:700; }
       .empty-state { display:grid; gap:5px; place-items:center; padding:40px 18px; text-align:center; color:var(--secondary-text-color); } .empty-state b { color:var(--primary-text-color); }
-      @media (max-width:900px) { .configuration-grid,.miniatures-grid { grid-template-columns:1fr; } .mini-editor { position:static; } .locations-layout { grid-template-columns:1fr; } .topbar { align-items:flex-start; flex-direction:column; padding:calc(10px + env(safe-area-inset-top, 0px)) 16px 12px; } .topbar-main { width:100%; } nav { width:100%; } .nav-tab { flex:1; } .page { padding:16px 16px calc(32px + env(safe-area-inset-bottom, 0px)); } }
-      @media (max-width:600px) { .brand-icon { width:36px; height:36px; } .general-card { align-items:flex-start; flex-direction:column; } .general-values { width:100%; } .metric,.color-control { flex:1; } .form-grid.two,.search-controls { grid-template-columns:1fr; } .mini-row { grid-template-columns:38px 1fr auto; } .mini-artist { grid-column:2; } .mini-row .row-actions { grid-column:2 / -1; } .position-badge { grid-column:3; grid-row:1 / span 2; } }
+      @media (max-width:900px) { .configuration-grid,.miniatures-grid,.view-controls-grid { grid-template-columns:1fr; } .mini-editor { position:static; } .locations-layout { grid-template-columns:1fr; } .topbar { align-items:flex-start; flex-direction:column; padding:calc(10px + env(safe-area-inset-top, 0px)) 16px 12px; } .topbar-main { width:100%; } nav { width:100%; justify-content:space-between; } .nav-tab { flex:0 0 42px; } .page { padding:16px 16px calc(32px + env(safe-area-inset-bottom, 0px)); } }
+      @media (max-width:600px) { .brand-icon { width:36px; height:36px; } .general-card { align-items:flex-start; flex-direction:column; } .general-values { width:100%; } .metric,.color-control { flex:1; } .form-grid.two,.search-controls { grid-template-columns:1fr; } .mini-row { grid-template-columns:38px 1fr auto; } .mini-artist { grid-column:2; } .mini-row .row-actions { grid-column:2 / -1; } .position-badge { grid-column:3; grid-row:1 / span 2; } .view-card { padding:16px; } .picker-shell { padding-left:10px; padding-right:10px; } .dial-tick b { font-size:11px; } .dial-tick.active b { font-size:16px; } }
     `;
   }
 }

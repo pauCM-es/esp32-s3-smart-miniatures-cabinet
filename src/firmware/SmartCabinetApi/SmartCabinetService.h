@@ -22,6 +22,7 @@ public:
 
     void setPower(bool enabled);
     void setBrightness(uint8_t percent);
+    bool applyScene(uint8_t scene);
     bool highlightLocation(uint16_t shelf, uint16_t location);
     bool appendHighlightLocation(uint16_t shelf, uint16_t location);
     void clearHighlight();

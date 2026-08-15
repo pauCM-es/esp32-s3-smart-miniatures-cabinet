@@ -12,16 +12,8 @@ void MiniatureLights::begin() {
 #if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
     FastLED.addLeds<MINIATURE_LED_TYPE, config::kMiniatureLedDataPin, MINIATURE_LED_COLOR_ORDER>(
         leds_, config::kMiniatureLedCount);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, config::kDefaultShelfCount * config::kMiniaturePowerPerShelfMilliAmps);
-    FastLED.setBrightness(percentToByte(brightness_));
+    FastLED.setBrightness(percentToByte(brightness_, config::kMiniatureMaxBrightness));
     FastLED.clear(true);
-#endif
-}
-
-void MiniatureLights::setShelfCount(uint8_t count) {
-    (void)count;
-#if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, count * config::kMiniaturePowerPerShelfMilliAmps);
 #endif
 }
 
@@ -58,7 +50,7 @@ void MiniatureLights::toggle() {
 void MiniatureLights::setBrightness(uint8_t percent) {
     brightness_ = clampPercent(percent);
 #if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
-    FastLED.setBrightness(percentToByte(brightness_));
+    FastLED.setBrightness(percentToByte(brightness_, config::kMiniatureMaxBrightness));
 #endif
     dirty_ = true;
 }

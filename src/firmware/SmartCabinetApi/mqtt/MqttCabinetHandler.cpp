@@ -4,6 +4,26 @@
 #include <ArduinoJson.h>
 #include <cstdlib>
 
+namespace {
+
+const char* sceneName(uint8_t scene) {
+    switch (scene) {
+        case 1: return "Off";
+        case 2: return "Display";
+        case 3: return "Showcase";
+        default: return "Manual";
+    }
+}
+
+uint8_t parseScene(const char* scene) {
+    if (strcmp(scene, "off") == 0) return 1;
+    if (strcmp(scene, "display") == 0) return 2;
+    if (strcmp(scene, "showcase") == 0) return 3;
+    return 0;
+}
+
+}  // namespace
+
 MqttCabinetHandler::MqttCabinetHandler(
     SmartCabinetService& smartCabinet,
     PubSubClient& mqtt,
@@ -17,6 +37,14 @@ bool MqttCabinetHandler::handleCommand(
     const char* action,
     ArduinoJson::JsonDocument& doc
 ) {
+    if (strcmp(action, "applyScene") == 0) {
+        const char* scene = doc["scene"] | "";
+        const uint8_t id = parseScene(scene);
+        const bool ok = smartCabinet_.applyScene(id);
+        MqttUtils::publishResult(mqtt_, config_, ok, action, ok ? nullptr : "invalid_scene");
+        return true;
+    }
+
     if (strcmp(action, "setPower") == 0) {
         if (!doc["value"].is<bool>()) {
             MqttUtils::publishResult(mqtt_, config_, false, action, "value_must_be_boolean");
@@ -156,6 +184,7 @@ void MqttCabinetHandler::publishState() {
     JsonDocument doc;
     doc["power"]              = state.power;
     doc["brightness"]         = state.brightness;
+    doc["scene"]              = sceneName(state.activeScene);
     doc["has_highlight"]      = state.hasHighlight;
     doc["highlight_shelf"]    = state.highlightShelf;
     doc["highlight_location"] = state.highlightLocation;
@@ -230,5 +259,20 @@ void MqttCabinetHandler::publishDiscovery() {
         String payload;
         serializeJson(doc, payload);
         mqtt_.publish(MqttUtils::discoveryTopic(config_, "sensor", "last_highlight").c_str(), payload.c_str(), true);
+    }
+    // Active-scene sensor
+    {
+        JsonDocument doc;
+        doc["name"]              = "Scene";
+        doc["unique_id"]         = String(config_.deviceId) + "_scene";
+        doc["default_entity_id"] = "sensor.smart_cabinet_scene";
+        doc["state_topic"]       = MqttUtils::topic(config_, "/api/state");
+        doc["value_template"]    = "{{ value_json.scene }}";
+        doc["icon"]              = "mdi:palette";
+        MqttUtils::addAvailability(doc, config_);
+        MqttUtils::addDeviceInfo(doc, config_);
+        String payload;
+        serializeJson(doc, payload);
+        mqtt_.publish(MqttUtils::discoveryTopic(config_, "sensor", "scene").c_str(), payload.c_str(), true);
     }
 }
