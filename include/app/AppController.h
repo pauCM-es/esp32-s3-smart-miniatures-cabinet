@@ -51,6 +51,7 @@ public:
     bool setShelfCount(uint8_t count);
     bool setShelfLedCount(uint8_t shelfIndex, uint16_t ledCount);
     bool setShelfLocationCount(uint8_t shelfIndex, uint8_t locationCount);
+    bool setShelfMirrored(uint8_t shelfIndex, bool mirrored);
     bool setLocationRange(uint8_t shelfIndex, uint8_t locationIndex,
                           uint16_t relativeLedStart, uint16_t ledCount);
     bool clearShelfLocation(uint8_t shelfIndex, uint8_t locationIndex);

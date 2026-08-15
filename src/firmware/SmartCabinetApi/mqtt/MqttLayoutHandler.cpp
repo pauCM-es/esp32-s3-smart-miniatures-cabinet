@@ -28,6 +28,7 @@ std::vector<MqttLayoutHandler::ShelfSnapshot> MqttLayoutHandler::snapshot() cons
         ShelfSnapshot snap;
         snap.leds = shelf->ledCount;
         snap.locations = shelf->locationCount;
+        snap.mirrored = shelf->mirrored;
         snap.mapping.reserve(shelf->locationCount);
         for (uint8_t l = 0; l < shelf->locationCount; ++l) {
             const auto* loc = layout_.location(s, l);
@@ -53,6 +54,7 @@ bool MqttLayoutHandler::applySnapshot(const std::vector<ShelfSnapshot>& shelves)
         const ShelfSnapshot& snap = shelves[s];
         if (!actions_.setShelfLedCount(s, snap.leds)) return false;
         if (!actions_.setShelfLocationCount(s, snap.locations)) return false;
+        if (!actions_.setShelfMirrored(s, snap.mirrored)) return false;
         if (!actions_.clearShelfAllLocations(s)) return false;
         for (uint8_t l = 0; l < snap.mapping.size() && l < snap.locations; ++l) {
             const auto& loc = snap.mapping[l];
@@ -68,12 +70,13 @@ bool MqttLayoutHandler::saveLayout() {
     if (!file) return false;
 
     JsonDocument doc;
-    doc["schema_version"] = 1;
+    doc["schema_version"] = 2;
     JsonArray shelves = doc["shelves"].to<JsonArray>();
     for (const auto& shelf : snapshot()) {
         JsonObject outShelf = shelves.add<JsonObject>();
         outShelf["total_leds"] = shelf.leds;
         outShelf["total_locations"] = shelf.locations;
+        outShelf["mirrored"] = shelf.mirrored;
         JsonArray locations = outShelf["locations"].to<JsonArray>();
         for (const auto& loc : shelf.mapping) {
             JsonObject outLoc = locations.add<JsonObject>();
@@ -103,6 +106,7 @@ bool MqttLayoutHandler::loadLayout() {
         ShelfSnapshot snap;
         snap.leds = shelf["total_leds"] | 0;
         snap.locations = shelf["total_locations"] | 0;
+        snap.mirrored = shelf["mirrored"] | false;
         if (snap.leds == 0 || snap.locations == 0) return false;
         JsonArrayConst locations = shelf["locations"].as<JsonArrayConst>();
         for (JsonObjectConst loc : locations) {
@@ -183,6 +187,16 @@ bool MqttLayoutHandler::insertShelf(uint8_t position) {
     return saveLayout();
 }
 
+bool MqttLayoutHandler::duplicateShelf(uint8_t shelf) {
+    auto shelves = snapshot();
+    if (shelf < 1 || shelf > shelves.size() || shelves.size() >= smartcabinet::config::kMaxShelves) return false;
+    const ShelfSnapshot duplicate = shelves[shelf - 1];
+    shelves.insert(shelves.begin() + shelf, duplicate);
+    if (!applySnapshot(shelves)) return false;
+    updateMiniaturesForInsert(shelf + 1);
+    return saveLayout();
+}
+
 bool MqttLayoutHandler::deleteShelf(uint8_t shelf) {
     auto shelves = snapshot();
     if (shelves.size() <= 1 || shelf < 1 || shelf > shelves.size()) return false;
@@ -211,6 +225,12 @@ bool MqttLayoutHandler::setShelfConfig(uint8_t shelf, uint16_t leds, uint8_t loc
     if (locations < current->locationCount) unassignMiniaturesPastLocation(shelf, locations);
     if (!actions_.setShelfLedCount(shelf - 1, leds)) return false;
     if (!actions_.setShelfLocationCount(shelf - 1, locations)) return false;
+    return saveLayout();
+}
+
+bool MqttLayoutHandler::setShelfDirection(uint8_t shelf, bool mirrored) {
+    if (shelf < 1 || shelf > layout_.shelfCount()) return false;
+    if (!actions_.setShelfMirrored(shelf - 1, mirrored)) return false;
     return saveLayout();
 }
 
@@ -260,6 +280,8 @@ bool MqttLayoutHandler::handleCommand(const char* action, ArduinoJson::JsonDocum
     }
     if (strcmp(action, "insertShelf") == 0) {
         ok = insertShelf(static_cast<uint8_t>(doc["position"] | 0));
+    } else if (strcmp(action, "duplicateShelf") == 0) {
+        ok = duplicateShelf(static_cast<uint8_t>(doc["shelf"] | 0));
     } else if (strcmp(action, "deleteShelf") == 0) {
         ok = deleteShelf(static_cast<uint8_t>(doc["shelf"] | 0));
     } else if (strcmp(action, "moveShelf") == 0) {
@@ -267,6 +289,8 @@ bool MqttLayoutHandler::handleCommand(const char* action, ArduinoJson::JsonDocum
     } else if (strcmp(action, "setShelfConfig") == 0) {
         ok = setShelfConfig(static_cast<uint8_t>(doc["shelf"] | 0),
             static_cast<uint16_t>(doc["total_leds"] | 0), static_cast<uint8_t>(doc["total_locations"] | 0));
+    } else if (strcmp(action, "setShelfDirection") == 0) {
+        ok = setShelfDirection(static_cast<uint8_t>(doc["shelf"] | 0), doc["mirrored"] | false);
     } else if (strcmp(action, "setLocationConfig") == 0) {
         ok = setLocationConfig(static_cast<uint8_t>(doc["shelf"] | 0), static_cast<uint8_t>(doc["location"] | 0),
             static_cast<uint16_t>(doc["start_led"] | 0), static_cast<uint16_t>(doc["leds"] | 0));
@@ -304,6 +328,7 @@ void MqttLayoutHandler::publishLayout() {
         outShelf["shelf"] = s + 1;
         outShelf["total_leds"] = shelf->ledCount;
         outShelf["total_locations"] = shelf->locationCount;
+        outShelf["mirrored"] = shelf->mirrored;
         JsonArray locations = outShelf["locations"].to<JsonArray>();
         for (uint8_t l = 0; l < shelf->locationCount; ++l) {
             const auto* loc = layout_.location(s, l);

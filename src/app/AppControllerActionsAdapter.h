@@ -88,6 +88,10 @@ public:
         return app_.setShelfLocationCount(shelfIndex, locationCount);
     }
 
+    bool setShelfMirrored(uint8_t shelfIndex, bool mirrored) override {
+        return app_.setShelfMirrored(shelfIndex, mirrored);
+    }
+
     bool setLocationRange(
         uint8_t shelfIndex, uint8_t locationIndex, uint16_t relativeLedStart, uint16_t ledCount
     ) override {

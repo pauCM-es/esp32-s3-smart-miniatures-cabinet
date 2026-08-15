@@ -38,6 +38,7 @@ private:
     struct ShelfSnapshot {
         uint16_t leds = 0;
         uint8_t locations = 0;
+        bool mirrored = false;
         std::vector<LocationSnapshot> mapping;
     };
 
@@ -47,9 +48,11 @@ private:
     bool loadLayout();
 
     bool insertShelf(uint8_t position1Based);
+    bool duplicateShelf(uint8_t shelf1Based);
     bool deleteShelf(uint8_t shelf1Based);
     bool moveShelf(uint8_t from1Based, uint8_t to1Based);
     bool setShelfConfig(uint8_t shelf1Based, uint16_t leds, uint8_t locations);
+    bool setShelfDirection(uint8_t shelf1Based, bool mirrored);
     bool setLocationConfig(uint8_t shelf1Based, uint8_t location1Based, uint16_t start, uint16_t leds);
     bool previewLocation(uint8_t shelf1Based, uint8_t location1Based, uint16_t start, uint16_t leds);
     void updateMiniaturesForInsert(uint8_t position1Based);

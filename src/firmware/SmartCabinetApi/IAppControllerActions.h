@@ -31,6 +31,7 @@ public:
     virtual bool setShelfCount(uint8_t count) = 0;
     virtual bool setShelfLedCount(uint8_t shelfIndex, uint16_t ledCount) = 0;
     virtual bool setShelfLocationCount(uint8_t shelfIndex, uint8_t locationCount) = 0;
+    virtual bool setShelfMirrored(uint8_t shelfIndex, bool mirrored) = 0;
     virtual bool setLocationRange(
         uint8_t shelfIndex, uint8_t locationIndex, uint16_t relativeLedStart, uint16_t ledCount
     ) = 0;

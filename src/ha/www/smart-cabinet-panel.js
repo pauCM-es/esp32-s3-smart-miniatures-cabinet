@@ -24,6 +24,11 @@ class HaPanelSmartCabinet extends HTMLElement {
     this._searchField = "all";
     this._viewIndex = 0;
     this._viewTimer = null;
+    this._mappingStart = null;
+    this._mappingEnd = null;
+    this._mappingTimer = null;
+    this._showAllMappings = false;
+    this._ledZoom = 1;
   }
 
   set narrow(value) {
@@ -176,12 +181,14 @@ class HaPanelSmartCabinet extends HTMLElement {
           </div>
           <div class="button-row">
             <button class="primary" data-action="save-shelf">Save shelf</button>
+            <button data-action="duplicate-shelf" data-shelf="${selected.shelf}">Duplicate shelf</button>
             <button data-action="auto-map">Auto map</button>
             <button data-action="clear-map">Clear mapping</button>
           </div>
 
           <div class="divider"></div>
-          <div class="locations-layout">
+          ${this._ledMappingContent(selected, selectedLocation)}
+          <div class="locations-layout legacy-mapping">
             <div>
               <div class="section-heading"><div><div class="eyebrow">LOCATIONS</div><h3>LED mapping</h3></div><span class="muted">Select to highlight</span></div>
               <div class="location-list">${locationRows}</div>
@@ -360,6 +367,9 @@ class HaPanelSmartCabinet extends HTMLElement {
     if (field) field.onchange = () => { this._searchField = field.value; this._scheduleSearch(); };
 
     this._bindViewDial();
+    this._bindMappingLocationDial();
+    const showAll = this.shadowRoot.querySelector("#show-all-mappings");
+    if (showAll) showAll.onchange = () => { this._showAllMappings = showAll.checked; this._render(); };
 
     const miniColor = this.shadowRoot.querySelector("#view-mini-color");
     if (miniColor) miniColor.onchange = async () => {
@@ -393,6 +403,8 @@ class HaPanelSmartCabinet extends HTMLElement {
       this._render();
     } else if (action === "insert-shelf") {
       await this._command({ action: "insertShelf", position: Number(button.dataset.position) });
+    } else if (action === "duplicate-shelf") {
+      await this._command({ action: "duplicateShelf", shelf: Number(button.dataset.shelf) });
     } else if (action === "delete-shelf") {
       if (confirm(`Delete Shelf ${button.dataset.shelf}? Miniatures on it will become Unassigned.`)) {
         await this._command({ action: "deleteShelf", shelf: Number(button.dataset.shelf) });
@@ -413,6 +425,31 @@ class HaPanelSmartCabinet extends HTMLElement {
       if (confirm("Clear every location mapping on this shelf?")) {
         await this._command({ action: "clearShelfMapping", shelf: this._selectedShelf });
       }
+    } else if (action === "toggle-direction") {
+      const shelf = this._layout.shelves?.[this._selectedShelf - 1];
+      await this._command({ action: "setShelfDirection", shelf: this._selectedShelf, mirrored: !shelf?.mirrored });
+    } else if (action === "zoom-in") {
+      this._ledZoom = Math.min(2, this._ledZoom + .25); this._render();
+    } else if (action === "zoom-out") {
+      this._ledZoom = Math.max(.5, this._ledZoom - .25); this._render();
+    } else if (action === "select-led") {
+      const led = Number(button.dataset.led);
+      if (this._mappingStart === null || this._mappingEnd !== null) {
+        this._mappingStart = led; this._mappingEnd = null;
+      } else {
+        this._mappingEnd = led;
+        const start = Math.min(this._mappingStart, this._mappingEnd);
+        await this._command({ action: "previewLocation", shelf: this._selectedShelf, location: this._selectedLocation, start_led: start, leds: Math.abs(this._mappingEnd - this._mappingStart) + 1 });
+      }
+      this._render();
+    } else if (action === "reset-led-range") {
+      this._mappingStart = null; this._mappingEnd = null;
+      await this._command({ action: "highlightLocation", shelf: this._selectedShelf, location: this._selectedLocation });
+      this._render();
+    } else if (action === "save-led-range") {
+      const start = Math.min(this._mappingStart, this._mappingEnd);
+      await this._command({ action: "setLocationConfig", shelf: this._selectedShelf, location: this._selectedLocation, start_led: start, leds: Math.abs(this._mappingEnd - this._mappingStart) + 1 });
+      this._mappingStart = null; this._mappingEnd = null;
     } else if (action === "save-location") {
       await this._command({
         action: "setLocationConfig",
@@ -457,6 +494,39 @@ class HaPanelSmartCabinet extends HTMLElement {
     this._scheduleViewHighlight();
   }
 
+  _ledMappingContent(shelf, selectedLocation) {
+    const total = shelf.total_leds;
+    const firstRun = Math.ceil(total / 2);
+    const ids = shelf.mirrored
+      ? [[...Array(firstRun).keys()].reverse(), [...Array(total - firstRun).keys()].map((i) => firstRun + i)]
+      : [[...Array(firstRun).keys()], [...Array(total - firstRun).keys()].map((i) => total - 1 - i)];
+    const start = this._mappingStart ?? (selectedLocation?.mapped ? selectedLocation.start_led : null);
+    const end = this._mappingEnd ?? (selectedLocation?.mapped ? selectedLocation.start_led + selectedLocation.leds - 1 : null);
+    const cells = (run) => run.map((led) => {
+      const selected = start !== null && end !== null && led >= Math.min(start, end) && led <= Math.max(start, end);
+      const assigned = this._showAllMappings && (shelf.locations || []).some((loc) => loc.mapped && led >= loc.start_led && led < loc.start_led + loc.leds);
+      const endpoint = led === start ? " range-start" : led === end ? " range-end" : "";
+      return `<button class="led-cell ${assigned ? "assigned" : ""} ${selected ? "selected" : ""}${endpoint}" data-action="select-led" data-led="${led}" title="LED ${led + 1}"><i></i>${led % 5 === 0 ? `<small>${led + 1}</small>` : ""}</button>`;
+    }).join("");
+    const range = start === null || end === null ? "Tap the start LED" : `LED ${Math.min(start, end) + 1} → ${Math.max(start, end) + 1} · ${Math.abs(end - start) + 1} LEDs`;
+    const dial = this._mappingDialTicks(shelf.total_locations);
+    return `<section class="mapping-visual">
+      <div class="section-heading"><div><div class="eyebrow">LOCATIONS</div><h3>LED mapping</h3></div><label class="mapping-toggle"><input id="show-all-mappings" type="checkbox" ${this._showAllMappings ? "checked" : ""}><span class="mapping-toggle-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6m-5 3h4m-6.5-6.5a6 6 0 1 1 9 0c-.9.8-1.5 1.8-1.5 3.5h-6c0-1.7-.6-2.7-1.5-3.5Z"/></svg></span><span>Show all assigned</span></label></div>
+      <div id="mapping-location-dial" class="picker-dial compact">${dial}</div>
+      <div class="mapping-tools"><button data-action="toggle-direction">${shelf.mirrored ? "Start at right" : "Start at left"}</button><button class="icon-button" data-action="zoom-out">−</button><button class="icon-button" data-action="zoom-in">＋</button><b>${range}</b></div>
+      <p>Selected location: <b id="mapping-selected-label">${this._selectedLocation}</b>. Tap first and last LED to preview; save commits the range. Overlaps are allowed.</p>
+      <div class="led-runs ${shelf.mirrored ? "mirrored" : ""}" style="--led-size:${this._ledZoom * 9}px"><div class="led-run"><div class="power-mark" aria-label="Strip power">⚡</div>${cells(ids[0])}</div><span class="strip-connector" aria-hidden="true"></span><div class="led-run return">${cells(ids[1])}</div></div>
+      <div class="button-row end"><button data-action="reset-led-range">Go back</button><button class="primary" data-action="save-led-range" ${start === null || end === null ? "disabled" : ""}>Save location</button></div>
+    </section>`;
+  }
+
+  _mappingDialTicks(totalLocations) {
+    return [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
+      const location = (this._selectedLocation - 1 + offset + totalLocations) % totalLocations + 1;
+      return `<span class="dial-tick ${offset === 0 ? "active" : ""}">${offset === 0 ? "<em>LOCATION</em>" : ""}<i></i><b>${location}</b></span>`;
+    }).join("");
+  }
+
   _bindViewDial() {
     const dial = this.shadowRoot.querySelector("#view-dial");
     if (!dial) return;
@@ -484,6 +554,60 @@ class HaPanelSmartCabinet extends HTMLElement {
     const finish = () => { active = false; dial.classList.remove("dragging"); };
     dial.onpointerup = finish;
     dial.onpointercancel = finish;
+  }
+
+  _bindMappingLocationDial() {
+    const dial = this.shadowRoot.querySelector("#mapping-location-dial");
+    const shelf = this._layout.shelves?.[this._selectedShelf - 1];
+    if (!dial || !shelf) return;
+    let startX = 0;
+    let initial = 0;
+    let lastSteps = 0;
+    let active = false;
+    let changed = false;
+    dial.onpointerdown = (event) => {
+      active = true; changed = false; startX = event.clientX; initial = this._selectedLocation - 1; lastSteps = 0;
+      dial.setPointerCapture?.(event.pointerId); dial.classList.add("dragging");
+    };
+    dial.onpointermove = (event) => {
+      if (!active) return;
+      const steps = Math.trunc((startX - event.clientX) / 36);
+      if (steps === lastSteps) return;
+      lastSteps = steps;
+      this._selectedLocation = ((initial + steps) % shelf.total_locations + shelf.total_locations) % shelf.total_locations + 1;
+      this._mappingStart = null; this._mappingEnd = null;
+      dial.innerHTML = this._mappingDialTicks(shelf.total_locations);
+      const label = this.shadowRoot.querySelector("#mapping-selected-label");
+      if (label) label.textContent = this._selectedLocation;
+      this._refreshMappingLeds(shelf);
+      this._scheduleMappingHighlight();
+      changed = true;
+    };
+    const finish = () => {
+      active = false; dial.classList.remove("dragging");
+      if (changed) this._render();
+    };
+    dial.onpointerup = finish; dial.onpointercancel = finish;
+  }
+
+  _scheduleMappingHighlight() {
+    clearTimeout(this._mappingTimer);
+    this._mappingTimer = setTimeout(() => this._command({
+      action: "highlightLocation", shelf: this._selectedShelf, location: this._selectedLocation,
+    }), 220);
+  }
+
+  _refreshMappingLeds(shelf) {
+    const current = this.shadowRoot.querySelector(".led-runs");
+    const selected = shelf.locations?.[this._selectedLocation - 1];
+    if (!current || !selected) return;
+    const scratch = document.createElement("div");
+    scratch.innerHTML = this._ledMappingContent(shelf, selected);
+    const next = scratch.querySelector(".led-runs");
+    if (!next) return;
+    current.className = next.className;
+    current.style.cssText = next.style.cssText;
+    current.innerHTML = next.innerHTML;
   }
 
   _scheduleViewHighlight() {
@@ -581,7 +705,7 @@ class HaPanelSmartCabinet extends HTMLElement {
       button, input, select { font:inherit; }
       button { cursor:pointer; }
       button:disabled { cursor:not-allowed; opacity:.42; }
-      .app-shell { min-height:100vh; padding-bottom:env(safe-area-inset-bottom, 0px); }
+      .app-shell { min-height:100vh; overflow-x:hidden; padding-bottom:env(safe-area-inset-bottom, 0px); }
       .topbar { position:sticky; top:0; z-index:4; display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 28px; border-bottom:1px solid var(--divider-color); background:var(--app-header-background-color, var(--card-background-color)); box-shadow:0 1px 8px rgba(0,0,0,.06); }
       .topbar-main { display:flex; align-items:center; gap:10px; min-width:0; }
       .ha-native-menu { flex:0 0 auto; margin-left:-6px; }
@@ -592,7 +716,7 @@ class HaPanelSmartCabinet extends HTMLElement {
       .nav-tab { display:grid; place-items:center; width:42px; height:38px; border:0; background:transparent; color:var(--secondary-text-color); padding:0; border-radius:9px; }
       .nav-tab svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
       .nav-tab.active { background:var(--card-background-color); color:var(--primary-text-color); box-shadow:0 1px 4px rgba(0,0,0,.09); }
-      .page { max-width:1500px; margin:0 auto; padding:28px; }
+      .page { max-width:1500px; margin:0 auto; overflow-x:hidden; padding:28px; }
       .panel-card { border:1px solid var(--divider-color); background:var(--card-background-color); border-radius:18px; box-shadow:var(--ha-card-box-shadow, 0 2px 8px rgba(0,0,0,.04)); }
       .general-card { display:flex; justify-content:space-between; align-items:center; gap:30px; padding:22px 24px; margin-bottom:18px; }
       h2,h3,p { margin:0; } h2 { font-size:22px; } h3 { font-size:16px; }
@@ -602,7 +726,8 @@ class HaPanelSmartCabinet extends HTMLElement {
       .metric,.color-control { min-width:110px; padding:10px 13px; background:var(--secondary-background-color); border-radius:12px; }
       .metric span,.color-control span { display:block; color:var(--secondary-text-color); font-size:11px; margin-bottom:5px; } .metric b { font-size:20px; }
       .color-control { display:grid; grid-template-columns:1fr auto; column-gap:12px; align-items:center; min-width:170px; } .color-control span { margin:0; } input[type=color] { width:34px; height:28px; border:0; padding:0; background:none; }
-      .configuration-grid { display:grid; grid-template-columns:300px minmax(0,1fr); gap:18px; align-items:start; }
+      .configuration-grid { display:grid; grid-template-columns:300px minmax(0,1fr); min-width:0; gap:18px; align-items:start; }
+      .shelf-detail { min-width:0; overflow:hidden; }
       .shelf-list,.shelf-detail,.mini-editor,.mini-list-card,.search-card { padding:20px; }
       .section-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
       .shelf-items { display:grid; gap:5px; }
@@ -624,6 +749,9 @@ class HaPanelSmartCabinet extends HTMLElement {
       button.ghost { background:transparent!important; } button.danger { color:var(--error-color)!important; } button.full { width:100%; margin-top:14px; }
       .divider { height:1px; background:var(--divider-color); margin:22px 0; }
       .locations-layout { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr); gap:18px; }
+      .legacy-mapping { display:none; }
+      .mapping-visual { min-width:0; } .mapping-toggle { display:flex; align-items:center; gap:7px; color:var(--secondary-text-color); font-size:11px; } .mapping-toggle input { width:auto; min-height:auto; accent-color:var(--primary-color); } .picker-dial.compact { margin:10px 0 14px; min-height:48px; } .picker-dial.compact .dial-tick em { display:none; } .picker-dial.compact .dial-tick.active b { font-size:22px; } .mapping-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; } .mapping-tools b { margin-left:auto; color:var(--secondary-text-color); font-size:11px; } .led-runs { display:grid; gap:20px; max-width:100%; margin-top:16px; overflow-x:auto; padding:4px 0 20px; } .led-run { display:grid; grid-auto-flow:column; grid-auto-columns:var(--led-size); width:max-content; min-height:calc(var(--led-size) + 18px); } .led-run.return { margin-left:auto; } .led-cell { position:relative; width:var(--led-size); height:var(--led-size); min-width:var(--led-size); padding:0; border:1px solid var(--divider-color); border-radius:1px; background:var(--secondary-background-color); } .led-cell.selected { background:#fff; border-color:#fff; } .led-cell.assigned { background:color-mix(in srgb, var(--primary-color) 35%, var(--secondary-background-color)); } .led-cell.range-start { background:#e83e8c; border-color:#e83e8c; } .led-cell.range-end { background:#ff8a00; border-color:#ff8a00; } .led-cell small { position:absolute; top:calc(var(--led-size) * 4 + 4px); left:50%; transform:translateX(-50%); color:var(--secondary-text-color); font-size:8px; font-weight:600; }
+      .mapping-visual { min-width:0; max-width:100%; overflow:hidden; } .led-runs { position:relative; display:flex; flex-direction:column; align-items:flex-end; contain:inline-size; min-width:0; max-width:100%; width:100%; gap:44px; overflow-x:auto; overflow-y:hidden; padding:8px 32px 24px 28px; } .led-run { gap:2px; position:relative; } .led-cell { min-height:0!important; height:calc(var(--led-size) * 4)!important; min-width:var(--led-size)!important; width:var(--led-size)!important; padding:0!important; border-radius:1px!important; } .led-cell.assigned { background:color-mix(in srgb, var(--primary-color) 35%, var(--secondary-background-color))!important; } .led-cell.selected { background:#fff!important; border-color:#fff!important; } .led-cell.range-start { background:#e83e8c!important; border-color:#e83e8c!important; } .led-cell.range-end { background:#ff8a00!important; border-color:#ff8a00!important; } .power-mark { position:absolute; top:4px; left:-20px; display:grid; place-items:center; width:1rem; height:1rem; border-radius:50%; background:var(--primary-color); color:var(--text-primary-color); font-size:10px; z-index:2; } .led-runs.mirrored .power-mark { left:auto; right:-20px; } .led-run:first-of-type::after { content:none; } .strip-connector { position:absolute; z-index:3; top:calc(var(--led-size) * 2 + 12px); right:12px; width:16px; height:70px; border:2px dashed var(--secondary-text-color); border-left:0; border-radius:0 10px 10px 0; opacity:.9; pointer-events:none; } .led-runs.mirrored { align-items:flex-start; } .led-runs.mirrored .strip-connector { right:auto; left:12px; transform:scaleX(-1); } .led-run.return { margin-left:0; } .mapping-toggle input { position:absolute; opacity:0; pointer-events:none; } .mapping-toggle-icon { display:grid; place-items:center; width:28px; height:28px; border:1px solid var(--divider-color); border-radius:50%; background:var(--secondary-background-color); } .mapping-toggle-icon svg { width:15px; height:15px; fill:none; stroke:var(--secondary-text-color); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; } .mapping-toggle input:checked + .mapping-toggle-icon { border-color:var(--primary-color); background:color-mix(in srgb, var(--primary-color) 18%, var(--secondary-background-color)); } .mapping-toggle input:checked + .mapping-toggle-icon svg { stroke:var(--primary-color); fill:color-mix(in srgb, var(--primary-color) 20%, transparent); }
       .location-list { display:grid; gap:5px; max-height:470px; overflow:auto; padding-right:4px; }
       .location-row { display:grid; grid-template-columns:38px 1fr auto; align-items:center; gap:10px; width:100%; min-height:48px; border:1px solid var(--divider-color); border-radius:11px; padding:7px 10px; background:transparent; color:inherit; text-align:left; }
       .location-row.selected { border-color:var(--primary-color); background:color-mix(in srgb, var(--primary-color) 9%, transparent); } .location-row.unmapped { opacity:.66; }
@@ -645,7 +773,7 @@ class HaPanelSmartCabinet extends HTMLElement {
       .view-controls-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; max-width:760px; margin:18px auto 0; } .view-control-card { padding:20px; } .scene-list { display:flex; gap:7px; margin-top:15px; flex-wrap:wrap; } .scene-button.active { border-color:var(--primary-color)!important; color:var(--primary-color)!important; } .strip-controls { display:grid; grid-template-columns:auto 1fr auto; align-items:end; gap:12px; margin-top:15px; } .strip-controls label span { margin-bottom:5px; } .strip-controls input[type=color] { width:38px; height:38px; } .strip-controls input[type=range] { min-height:30px; padding:0; accent-color:var(--primary-color); } .strip-controls output { min-width:34px; padding-bottom:9px; color:var(--secondary-text-color); font-size:11px; font-weight:700; }
       .empty-state { display:grid; gap:5px; place-items:center; padding:40px 18px; text-align:center; color:var(--secondary-text-color); } .empty-state b { color:var(--primary-text-color); }
       @media (max-width:900px) { .configuration-grid,.miniatures-grid,.view-controls-grid { grid-template-columns:1fr; } .mini-editor { position:static; } .locations-layout { grid-template-columns:1fr; } .topbar { align-items:flex-start; flex-direction:column; padding:calc(10px + env(safe-area-inset-top, 0px)) 16px 12px; } .topbar-main { width:100%; } nav { width:100%; justify-content:space-between; } .nav-tab { flex:0 0 42px; } .page { padding:16px 16px calc(32px + env(safe-area-inset-bottom, 0px)); } }
-      @media (max-width:600px) { .brand-icon { width:36px; height:36px; } .general-card { align-items:flex-start; flex-direction:column; } .general-values { width:100%; } .metric,.color-control { flex:1; } .form-grid.two,.search-controls { grid-template-columns:1fr; } .mini-row { grid-template-columns:38px 1fr auto; } .mini-artist { grid-column:2; } .mini-row .row-actions { grid-column:2 / -1; } .position-badge { grid-column:3; grid-row:1 / span 2; } .view-card { padding:16px; } .picker-shell { padding-left:10px; padding-right:10px; } .dial-tick b { font-size:11px; } .dial-tick.active b { font-size:16px; } }
+      @media (max-width:600px) { .brand-icon { width:36px; height:36px; } .general-card { align-items:flex-start; flex-direction:column; } .general-values { width:100%; } .metric,.color-control { flex:1; } .form-grid.two,.search-controls { grid-template-columns:1fr; } .mini-row { grid-template-columns:38px 1fr auto; } .mini-artist { grid-column:2; } .mini-row .row-actions { grid-column:2 / -1; } .position-badge { grid-column:3; grid-row:1 / span 2; } .view-card { padding:16px; } .picker-shell { padding-left:10px; padding-right:10px; } .dial-tick b { font-size:11px; } .dial-tick.active b { font-size:16px; } .picker-dial.compact { min-height:68px; } .picker-dial.compact .dial-tick em { display:block; min-height:10px; color:var(--primary-color); font-size:8px; font-style:normal; font-weight:800; letter-spacing:.1em; } }
     `;
   }
 }

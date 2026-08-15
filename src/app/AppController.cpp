@@ -179,6 +179,10 @@ bool AppController::setShelfLocationCount(uint8_t shelfIndex, uint8_t locationCo
     return layout_.setShelfLocationCount(shelfIndex, locationCount);
 }
 
+bool AppController::setShelfMirrored(uint8_t shelfIndex, bool mirrored) {
+    return layout_.setShelfMirrored(shelfIndex, mirrored);
+}
+
 bool AppController::setLocationRange(uint8_t shelfIndex, uint8_t locationIndex,
                                      uint16_t relativeLedStart, uint16_t ledCount) {
     return layout_.setLocationRange(shelfIndex, locationIndex, relativeLedStart, ledCount);
