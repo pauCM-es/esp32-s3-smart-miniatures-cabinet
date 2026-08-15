@@ -65,7 +65,8 @@ MqttApiService mqttApi(
     networkClient,
     mqttConfig,
     smartCabinet,
-    miniatureRepository
+    miniatureRepository,
+    appController.layout()
 );
 
 void setup() {

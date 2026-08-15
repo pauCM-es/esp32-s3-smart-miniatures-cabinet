@@ -11,6 +11,7 @@
 #include "MqttCatalogueHandler.h"
 #include "MqttHighlightHandler.h"
 #include "MqttMiniatureLightsHandler.h"
+#include "cabinet/CabinetLayout.h"
 
 class MqttApiService {
 public:
@@ -18,7 +19,8 @@ public:
         Client& networkClient,
         const MqttApiConfig& config,
         SmartCabinetService& smartCabinet,
-        CatalogueRepository& miniatures
+        CatalogueRepository& miniatures,
+        const smartcabinet::CabinetLayout& layout
     );
 
     void begin();

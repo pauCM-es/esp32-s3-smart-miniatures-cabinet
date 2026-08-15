@@ -25,13 +25,14 @@ MqttApiService::MqttApiService(
     Client& networkClient,
     const MqttApiConfig& config,
     SmartCabinetService& smartCabinet,
-    CatalogueRepository& miniatures
+    CatalogueRepository& miniatures,
+    const smartcabinet::CabinetLayout& layout
 )
     : config_(config),
       mqtt_(networkClient),
       cabinetHandler_(smartCabinet, mqtt_, config_),
       catalogueHandler_(miniatures, mqtt_, config_),
-      highlightHandler_(smartCabinet, miniatures, mqtt_, config_),
+      highlightHandler_(smartCabinet, miniatures, layout, mqtt_, config_),
       miniLightsHandler_(smartCabinet, mqtt_, config_)
 {
     smartCabinet.setStateChangedCallback(
@@ -113,7 +114,6 @@ void MqttApiService::subscribeTopics() {
     mqtt_.subscribe(MqttUtils::topic(config_, "/ha/brightness/set").c_str());
     mqtt_.subscribe(MqttUtils::topic(config_, "/ha/mini_lights/set").c_str());
     mqtt_.subscribe(MqttUtils::topic(config_, "/ha/highlight/mini/set").c_str());
-    mqtt_.subscribe(MqttUtils::topic(config_, "/ha/highlight/shelf/set").c_str());
     mqtt_.subscribe(MqttUtils::topic(config_, "/ha/highlight/location/set").c_str());
     mqtt_.subscribe(HA_STATUS_TOPIC);
 }
@@ -152,10 +152,6 @@ void MqttApiService::handleMessage(
     }
     if (incoming == MqttUtils::topic(config_, "/ha/highlight/mini/set")) {
         highlightHandler_.handleMiniSet(payload, length);
-        return;
-    }
-    if (incoming == MqttUtils::topic(config_, "/ha/highlight/shelf/set")) {
-        highlightHandler_.handleShelfSet(payload, length);
         return;
     }
     if (incoming == MqttUtils::topic(config_, "/ha/highlight/location/set")) {
