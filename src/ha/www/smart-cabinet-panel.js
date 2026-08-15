@@ -319,6 +319,8 @@ class HaPanelSmartCabinet extends HTMLElement {
 
   _render() {
     if (!this.shadowRoot) return;
+    const previousLedRuns = this.shadowRoot.querySelector(".led-runs");
+    if (previousLedRuns) this._ledScrollLeft = previousLedRuns.scrollLeft;
     const content = this._active === "configuration" ? this._layoutContent()
       : this._active === "miniatures" ? this._miniaturesContent()
       : this._active === "view" ? this._viewPickerContent()
@@ -342,6 +344,10 @@ class HaPanelSmartCabinet extends HTMLElement {
         <div class="page">${content}</div>
       </div>`;
     this._bind();
+    const nextLedRuns = this.shadowRoot.querySelector(".led-runs");
+    if (nextLedRuns && Number.isFinite(this._ledScrollLeft)) {
+      nextLedRuns.scrollLeft = this._ledScrollLeft;
+    }
     if (this._active === "search") this._updateSearch(false);
   }
 
