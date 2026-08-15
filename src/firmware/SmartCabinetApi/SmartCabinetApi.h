@@ -17,6 +17,7 @@
 #include "mqtt/MqttCabinetHandler.h"
 #include "mqtt/MqttCatalogueHandler.h"
 #include "mqtt/MqttApiService.h"
+#include "mqtt/MqttOtaHandler.h"
 
 #include "persistence/ISettingsStore.h"
 #include "persistence/NvsSettingsStore.h"

@@ -9,3 +9,5 @@
 #define MQTT_PORT     1883
 #define MQTT_USER     "smartcabinet"
 #define MQTT_PASSWORD "CHANGE_ME"
+
+#define OTA_PASSWORD  "CHANGE_ME"

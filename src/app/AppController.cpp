@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "config/HardwareConfig.h"
+#include "firmware/ota/OtaService.h"
 #include "models/ValueUtils.h"
 
 namespace smartcabinet {
@@ -26,6 +27,10 @@ void AppController::update(uint32_t nowMs) {
     if (highlightExpiresAtMs_ != 0 &&
         static_cast<int32_t>(nowMs - highlightExpiresAtMs_) >= 0) {
         clearHighlight();
+    }
+
+    if (ota_) {
+        cachedOtaRemainingMs_ = ota_->remainingMs(nowMs);
     }
 
     lighting_.update(nowMs);
@@ -54,6 +59,12 @@ AppState AppController::state() const {
     value.miniatureEffect = miniatureLights.effect();
 
     value.activeScene = lighting_.activeScene();
+
+    if (ota_) {
+        value.otaState        = ota_->state();
+        value.otaRemainingMs  = cachedOtaRemainingMs_;
+    }
+
     return value;
 }
 
@@ -256,6 +267,20 @@ void AppController::setEncoderBrightnessCallback(EncoderBrightnessCallback cb) {
 
 void AppController::setEncoderNavigationCallback(EncoderNavigationCallback cb) {
     encoderNavigationCallback_ = std::move(cb);
+}
+
+void AppController::setOtaService(OtaService* ota) {
+    ota_ = ota;
+}
+
+void AppController::enterOtaMode() {
+    Serial.println("[App] Entering OTA maintenance mode");
+    applyScene(SceneId::Off);
+}
+
+void AppController::exitOtaMode() {
+    Serial.println("[App] Exiting OTA maintenance mode");
+    cachedOtaRemainingMs_ = 0;
 }
 
 }  // namespace smartcabinet

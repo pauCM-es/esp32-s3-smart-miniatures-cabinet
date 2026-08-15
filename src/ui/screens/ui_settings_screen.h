@@ -22,6 +22,8 @@ extern lv_obj_t * ui_Label10;
 extern void ui_event_resetCatalogueBtn(lv_event_t * e);
 extern lv_obj_t * ui_resetCatalogueBtn;
 extern lv_obj_t * ui_resetCatalogueLabel;
+extern lv_obj_t * ui_otaBtn;
+extern lv_obj_t * ui_otaBtnLabel;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

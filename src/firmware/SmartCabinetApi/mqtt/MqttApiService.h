@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <Client.h>
+#include <memory>
 #include <PubSubClient.h>
 
 #include "../SmartCabinetService.h"
@@ -12,6 +13,7 @@
 #include "MqttHighlightHandler.h"
 #include "MqttLayoutHandler.h"
 #include "MqttMiniatureLightsHandler.h"
+#include "MqttOtaHandler.h"
 #include "cabinet/CabinetLayout.h"
 
 class MqttApiService {
@@ -34,6 +36,8 @@ public:
     void publishState();
     void publishMiniatures();
     void publishDiscovery();
+
+    void setOtaService(smartcabinet::OtaService& ota);
 
 private:
     bool ensureConnected();
@@ -58,6 +62,7 @@ private:
     MqttHighlightHandler       highlightHandler_;
     MqttMiniatureLightsHandler miniLightsHandler_;
     MqttLayoutHandler          layoutHandler_;
+    std::unique_ptr<MqttOtaHandler> otaHandler_;
 
     uint32_t lastReconnectAttemptMs_ = 0;
 };

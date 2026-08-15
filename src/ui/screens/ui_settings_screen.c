@@ -12,6 +12,10 @@ lv_obj_t * ui_recordBtn = NULL;
 lv_obj_t * ui_Label10 = NULL;
 lv_obj_t * ui_resetCatalogueBtn = NULL;
 lv_obj_t * ui_resetCatalogueLabel = NULL;
+lv_obj_t * ui_otaBtn = NULL;
+lv_obj_t * ui_otaBtnLabel = NULL;
+
+static lv_timer_t * s_ota_timer = NULL;
 // event funtions
 void ui_event_recordBtn(lv_event_t * e)
 {

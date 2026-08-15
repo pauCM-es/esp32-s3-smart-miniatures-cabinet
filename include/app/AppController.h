@@ -11,6 +11,8 @@
 
 namespace smartcabinet {
 
+class OtaService;  // forward declaration — avoids pulling in OtaService.h
+
 class AppController {
 public:
     AppController(LightingManager& lighting,
@@ -73,6 +75,10 @@ public:
     // When set, encoder drives navigation instead of brightness.
     void setEncoderNavigationCallback(EncoderNavigationCallback cb);
 
+    void setOtaService(OtaService* ota);
+    void enterOtaMode();
+    void exitOtaMode();
+
 private:
     LightingManager& lighting_;
     CabinetLayout& layout_;
@@ -83,6 +89,9 @@ private:
     uint8_t selectedLocationIndex_{0};
     EncoderBrightnessCallback  encoderBrightnessCallback_;
     EncoderNavigationCallback encoderNavigationCallback_;
+
+    OtaService* ota_{nullptr};
+    uint32_t cachedOtaRemainingMs_{0};
 
     void handleEncoder(uint32_t nowMs);
     void setHighlightTimeout(uint32_t nowMs, uint32_t durationMs);

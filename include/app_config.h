@@ -9,3 +9,5 @@
  */
 static constexpr int UI_WIDTH  = 480;
 static constexpr int UI_HEIGHT = 320;
+
+constexpr const char* kFirmwareVersion = "0.2.0";

@@ -177,7 +177,8 @@ void MqttApiService::handleApiCommand(
     const char* action = doc["action"] | "";
     if (!cabinetHandler_.handleCommand(action, doc) &&
         !catalogueHandler_.handleCommand(action, doc) &&
-        !layoutHandler_.handleCommand(action, doc)) {
+        !layoutHandler_.handleCommand(action, doc) &&
+        !(otaHandler_ && otaHandler_->handleCommand(action, doc))) {
         MqttUtils::publishResult(mqtt_, config_, false, action, "unknown_action");
     }
 }
@@ -186,6 +187,7 @@ void MqttApiService::publishState() {
     cabinetHandler_.publishState();
     miniLightsHandler_.publishState();
     highlightHandler_.publishState();
+    if (otaHandler_) otaHandler_->publishState();
 }
 
 void MqttApiService::publishMiniatures() {
@@ -199,4 +201,9 @@ void MqttApiService::publishDiscovery() {
     miniLightsHandler_.publishDiscovery();
     highlightHandler_.publishDiscovery();
     layoutHandler_.publishDiscovery();
+    if (otaHandler_) otaHandler_->publishDiscovery();
+}
+
+void MqttApiService::setOtaService(smartcabinet::OtaService& ota) {
+    otaHandler_ = std::make_unique<MqttOtaHandler>(ota, mqtt_, config_);
 }

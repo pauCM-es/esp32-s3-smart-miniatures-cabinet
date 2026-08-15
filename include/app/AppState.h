@@ -5,6 +5,7 @@
 
 #include "models/Color.h"
 #include "models/LightingTypes.h"
+#include "models/OtaState.h"
 
 namespace smartcabinet {
 
@@ -26,6 +27,9 @@ struct AppState {
     LightEffect miniatureEffect{LightEffect::Static};
 
     SceneId activeScene{SceneId::Manual};
+
+    OtaState otaState{OtaState::Disabled};
+    uint32_t otaRemainingMs{0};
 };
 
 }  // namespace smartcabinet
