@@ -20,6 +20,15 @@ void MqttMiniatureLightsHandler::handleSet(
     if (deserializeJson(doc, payload, length)) return;
 
     const char* state = doc["state"] | "";
+    const bool hasPower = strcmp(state, "ON") == 0 || strcmp(state, "OFF") == 0;
+    const bool hasBrightness = doc["brightness"].is<int>();
+    const bool hasColor = doc["color"].is<JsonObject>();
+    if (!hasPower && !hasBrightness && !hasColor) return;
+
+    // A normal light command restores full-strip control from location mode.
+    // This also makes OFF work while a highlight overlay is active.
+    smartCabinet_.clearHighlight();
+
     if (strcmp(state, "ON") == 0) {
         smartCabinet_.setMiniatureLightPower(true);
     } else if (strcmp(state, "OFF") == 0) {
@@ -28,14 +37,14 @@ void MqttMiniatureLightsHandler::handleSet(
         return;
     }
 
-    if (doc["brightness"].is<int>()) {
+    if (hasBrightness) {
         const int b = doc["brightness"].as<int>();
         smartCabinet_.setMiniatureLightBrightness(
             static_cast<uint8_t>(b < 0 ? 0 : b > 100 ? 100 : b)
         );
     }
 
-    if (doc["color"].is<JsonObject>()) {
+    if (hasColor) {
         const uint8_t r = static_cast<uint8_t>(doc["color"]["r"] | 0);
         const uint8_t g = static_cast<uint8_t>(doc["color"]["g"] | 0);
         const uint8_t b = static_cast<uint8_t>(doc["color"]["b"] | 0);
