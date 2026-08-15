@@ -16,6 +16,9 @@ bool SmartCabinetService::begin(const CabinetSettings& defaults) {
     state_.hasHighlight = false;
     state_.highlightShelf = 0;
     state_.highlightLocation = 0;
+    state_.highlightR = settings.highlightR;
+    state_.highlightG = settings.highlightG;
+    state_.highlightB = settings.highlightB;
 
     // Restore persisted state into the existing AppController.
     appController_.setBrightness(state_.brightness);
@@ -74,19 +77,46 @@ bool SmartCabinetService::highlightLocation(
     uint16_t shelf,
     uint16_t location
 ) {
+    clearHighlight();
+    return appendHighlightLocation(shelf, location);
+}
+
+bool SmartCabinetService::appendHighlightLocation(
+    uint16_t shelf,
+    uint16_t location
+) {
     if (shelf == 0 || location == 0) {
         return false;
     }
 
-    appController_.highlightLocation(shelf, location);
+    appController_.setMiniatureLightPower(true);
+    if (!appController_.highlightLocationPersistentColor(
+        shelf, location, state_.highlightR, state_.highlightG, state_.highlightB
+    )) {
+        return false;
+    }
 
     state_.hasHighlight = true;
     state_.highlightShelf = shelf;
     state_.highlightLocation = location;
-
     notifyStateChanged();
-
     return true;
+}
+
+void SmartCabinetService::clearHighlight() {
+    appController_.clearHighlight();
+    state_.hasHighlight = false;
+    state_.highlightShelf = 0;
+    state_.highlightLocation = 0;
+    notifyStateChanged();
+}
+
+void SmartCabinetService::setHighlightColor(uint8_t r, uint8_t g, uint8_t b) {
+    state_.highlightR = r;
+    state_.highlightG = g;
+    state_.highlightB = b;
+    settingsRepository_.setHighlightColor(r, g, b);
+    notifyStateChanged();
 }
 
 void SmartCabinetService::setMiniatureLightPower(bool enabled) {
@@ -113,11 +143,9 @@ void SmartCabinetService::setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b
 
 void SmartCabinetService::highlightLocationWhite(uint16_t shelf, uint16_t location) {
     if (shelf == 0 || location == 0) {
-        appController_.clearHighlight();
-        state_.hasHighlight = false;
-        state_.highlightShelf = 0;
-        state_.highlightLocation = 0;
+        clearHighlight();
     } else {
+        appController_.clearHighlight();
         // Ensure the miniature LEDs are on so the highlight is visible.
         appController_.setMiniatureLightPower(true);
         appController_.highlightLocationPersistentWhite(shelf, location);

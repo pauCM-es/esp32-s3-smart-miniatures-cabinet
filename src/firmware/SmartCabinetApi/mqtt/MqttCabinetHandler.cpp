@@ -42,6 +42,50 @@ bool MqttCabinetHandler::handleCommand(
         return true;
     }
 
+    if (strcmp(action, "setHighlightColor") == 0) {
+        if (!doc["r"].is<int>() || !doc["g"].is<int>() || !doc["b"].is<int>()) {
+            MqttUtils::publishResult(mqtt_, config_, false, action, "rgb_required");
+            return true;
+        }
+        const int r = doc["r"].as<int>();
+        const int g = doc["g"].as<int>();
+        const int b = doc["b"].as<int>();
+        if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+            MqttUtils::publishResult(mqtt_, config_, false, action, "rgb_out_of_range");
+            return true;
+        }
+        smartCabinet_.setHighlightColor(r, g, b);
+        MqttUtils::publishResult(mqtt_, config_, true, action);
+        return true;
+    }
+
+    if (strcmp(action, "clearHighlight") == 0) {
+        smartCabinet_.clearHighlight();
+        MqttUtils::publishResult(mqtt_, config_, true, action);
+        return true;
+    }
+
+    if (strcmp(action, "highlightLocations") == 0) {
+        JsonArrayConst locations = doc["locations"].as<JsonArrayConst>();
+        if (locations.isNull()) {
+            MqttUtils::publishResult(mqtt_, config_, false, action, "locations_required");
+            return true;
+        }
+        smartCabinet_.clearHighlight();
+        bool any = false;
+        for (JsonObjectConst item : locations) {
+            const int shelf = item["shelf"] | 0;
+            const int location = item["location"] | 0;
+            if (shelf > 0 && location > 0 && shelf <= 65535 && location <= 65535) {
+                any |= smartCabinet_.appendHighlightLocation(
+                    static_cast<uint16_t>(shelf), static_cast<uint16_t>(location)
+                );
+            }
+        }
+        MqttUtils::publishResult(mqtt_, config_, any, action, any ? nullptr : "no_assigned_locations");
+        return true;
+    }
+
     if (strcmp(action, "highlightLocation") == 0) {
         if (!doc["shelf"].is<int>() || !doc["location"].is<int>()) {
             MqttUtils::publishResult(mqtt_, config_, false, action, "shelf_and_location_must_be_integers");
@@ -115,6 +159,10 @@ void MqttCabinetHandler::publishState() {
     doc["has_highlight"]      = state.hasHighlight;
     doc["highlight_shelf"]    = state.highlightShelf;
     doc["highlight_location"] = state.highlightLocation;
+    JsonObject highlightColor = doc["highlight_color"].to<JsonObject>();
+    highlightColor["r"] = state.highlightR;
+    highlightColor["g"] = state.highlightG;
+    highlightColor["b"] = state.highlightB;
 
     String payload;
     serializeJson(doc, payload);

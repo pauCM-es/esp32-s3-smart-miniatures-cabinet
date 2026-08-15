@@ -34,7 +34,7 @@ constexpr uint16_t kRgbwCabinetLedCount = 30;  // Replace with measured strip co
 
 constexpr int kMiniatureLedDataPin = 45;
 constexpr uint16_t kMiniatureLedCount = 400;    // ~2.5 m at 160 LED/m.
-constexpr uint16_t kMiniaturePowerPerShelfMilliAmps = 400;
+constexpr uint16_t kMiniaturePowerPerShelfMilliAmps = 2000;
 
 // Encoder via PCF8575 I2C expander (original — commented out).
 constexpr int kI2cSdaPin = 38;

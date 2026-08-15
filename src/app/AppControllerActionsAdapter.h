@@ -55,8 +55,45 @@ public:
         );
     }
 
+    bool highlightLocationPersistentColor(
+        uint16_t shelf, uint16_t location, uint8_t r, uint8_t g, uint8_t b
+    ) override {
+        if (shelf == 0 || location == 0) return false;
+        return app_.highlightLocationPersistent(
+            static_cast<uint8_t>(shelf - 1),
+            static_cast<uint8_t>(location - 1),
+            smartcabinet::RgbColor{r, g, b}
+        );
+    }
+
     void clearHighlight() override {
         app_.clearHighlight();
+    }
+
+    bool setShelfCount(uint8_t count) override {
+        return app_.setShelfCount(count);
+    }
+
+    bool setShelfLedCount(uint8_t shelfIndex, uint16_t ledCount) override {
+        return app_.setShelfLedCount(shelfIndex, ledCount);
+    }
+
+    bool setShelfLocationCount(uint8_t shelfIndex, uint8_t locationCount) override {
+        return app_.setShelfLocationCount(shelfIndex, locationCount);
+    }
+
+    bool setLocationRange(
+        uint8_t shelfIndex, uint8_t locationIndex, uint16_t relativeLedStart, uint16_t ledCount
+    ) override {
+        return app_.setLocationRange(shelfIndex, locationIndex, relativeLedStart, ledCount);
+    }
+
+    bool distributeShelfEvenly(uint8_t shelfIndex) override {
+        return app_.distributeShelfEvenly(shelfIndex);
+    }
+
+    bool clearShelfAllLocations(uint8_t shelfIndex) override {
+        return app_.clearShelfAllLocations(shelfIndex);
     }
 
 private:

@@ -9,7 +9,7 @@ struct Miniature {
     String collection;
     String artist;
     String date;
-    uint16_t shelf = 1;
-    uint16_t location = 1;
+    uint16_t shelf = 0;
+    uint16_t location = 0;
     String notes;
 };

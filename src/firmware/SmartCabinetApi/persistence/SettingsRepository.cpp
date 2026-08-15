@@ -52,6 +52,16 @@ void SettingsRepository::setBrightness(uint8_t percent) {
     markDirty();
 }
 
+void SettingsRepository::setHighlightColor(uint8_t r, uint8_t g, uint8_t b) {
+    if (settings_.highlightR == r && settings_.highlightG == g && settings_.highlightB == b) {
+        return;
+    }
+    settings_.highlightR = r;
+    settings_.highlightG = g;
+    settings_.highlightB = b;
+    markDirty();
+}
+
 void SettingsRepository::loop() {
     if (!dirty_) {
         return;

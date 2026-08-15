@@ -61,7 +61,10 @@ static MqttApiConfig makeMqttConfig() {
 }
 static const MqttApiConfig mqttConfig = makeMqttConfig();
 
-MqttApiService mqttApi(wifiClient, mqttConfig, smartCabinet, catalogue, smartcabinet::cabinetLayout);
+MqttApiService mqttApi(
+    wifiClient, mqttConfig, smartCabinet, appActions, catalogue,
+    smartcabinet::cabinetLayout, LittleFS
+);
 
 void setup() {
     Serial.begin(115200);

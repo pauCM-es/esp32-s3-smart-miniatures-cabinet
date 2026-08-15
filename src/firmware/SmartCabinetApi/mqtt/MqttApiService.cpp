@@ -25,15 +25,18 @@ MqttApiService::MqttApiService(
     Client& networkClient,
     const MqttApiConfig& config,
     SmartCabinetService& smartCabinet,
+    IAppControllerActions& actions,
     CatalogueRepository& miniatures,
-    const smartcabinet::CabinetLayout& layout
+    smartcabinet::CabinetLayout& layout,
+    fs::FS& fs
 )
     : config_(config),
       mqtt_(networkClient),
       cabinetHandler_(smartCabinet, mqtt_, config_),
       catalogueHandler_(miniatures, mqtt_, config_),
       highlightHandler_(smartCabinet, miniatures, layout, mqtt_, config_),
-      miniLightsHandler_(smartCabinet, mqtt_, config_)
+      miniLightsHandler_(smartCabinet, mqtt_, config_),
+      layoutHandler_(smartCabinet, actions, layout, miniatures, fs, mqtt_, config_)
 {
     smartCabinet.setStateChangedCallback(
         [this](const CabinetRuntimeState&) {
@@ -52,6 +55,7 @@ MqttApiService::MqttApiService(
 }
 
 void MqttApiService::begin() {
+    layoutHandler_.begin();
     mqtt_.setServer(config_.host, config_.port);
     mqtt_.setBufferSize(config_.packetBufferSize);
     mqtt_.setCallback(
@@ -104,6 +108,7 @@ bool MqttApiService::ensureConnected() {
     mqtt_.publish(availabilityTopic.c_str(), "online", true);
     publishDiscovery();
     publishState();
+    layoutHandler_.publishLayout();
     publishMiniatures();
     return true;
 }
@@ -129,6 +134,7 @@ void MqttApiService::handleMessage(
         if (payloadEquals(payload, length, "online")) {
             publishDiscovery();
             publishState();
+            layoutHandler_.publishLayout();
             publishMiniatures();
         }
         return;
@@ -170,7 +176,8 @@ void MqttApiService::handleApiCommand(
     }
     const char* action = doc["action"] | "";
     if (!cabinetHandler_.handleCommand(action, doc) &&
-        !catalogueHandler_.handleCommand(action, doc)) {
+        !catalogueHandler_.handleCommand(action, doc) &&
+        !layoutHandler_.handleCommand(action, doc)) {
         MqttUtils::publishResult(mqtt_, config_, false, action, "unknown_action");
     }
 }
@@ -191,4 +198,5 @@ void MqttApiService::publishDiscovery() {
     catalogueHandler_.publishDiscovery();
     miniLightsHandler_.publishDiscovery();
     highlightHandler_.publishDiscovery();
+    layoutHandler_.publishDiscovery();
 }

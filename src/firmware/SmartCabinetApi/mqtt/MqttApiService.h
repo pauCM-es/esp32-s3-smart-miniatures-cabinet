@@ -10,6 +10,7 @@
 #include "MqttCabinetHandler.h"
 #include "MqttCatalogueHandler.h"
 #include "MqttHighlightHandler.h"
+#include "MqttLayoutHandler.h"
 #include "MqttMiniatureLightsHandler.h"
 #include "cabinet/CabinetLayout.h"
 
@@ -19,8 +20,10 @@ public:
         Client& networkClient,
         const MqttApiConfig& config,
         SmartCabinetService& smartCabinet,
+        IAppControllerActions& actions,
         CatalogueRepository& miniatures,
-        const smartcabinet::CabinetLayout& layout
+        smartcabinet::CabinetLayout& layout,
+        fs::FS& fs
     );
 
     void begin();
@@ -54,6 +57,7 @@ private:
     MqttCatalogueHandler       catalogueHandler_;
     MqttHighlightHandler       highlightHandler_;
     MqttMiniatureLightsHandler miniLightsHandler_;
+    MqttLayoutHandler          layoutHandler_;
 
     uint32_t lastReconnectAttemptMs_ = 0;
 };

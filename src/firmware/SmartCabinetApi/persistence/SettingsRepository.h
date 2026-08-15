@@ -17,6 +17,7 @@ public:
 
     void setPower(bool enabled);
     void setBrightness(uint8_t percent);
+    void setHighlightColor(uint8_t r, uint8_t g, uint8_t b);
 
     void loop();
     bool flush();

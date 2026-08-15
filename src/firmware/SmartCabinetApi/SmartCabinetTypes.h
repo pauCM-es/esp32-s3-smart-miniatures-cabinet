@@ -3,11 +3,14 @@
 #include <cstdint>
 
 struct CabinetSettings {
-    static constexpr uint16_t SCHEMA_VERSION = 1;
+    static constexpr uint16_t SCHEMA_VERSION = 2;
 
     uint16_t schemaVersion = SCHEMA_VERSION;
     bool power = false;
     uint8_t brightness = 50;
+    uint8_t highlightR = 156;
+    uint8_t highlightG = 39;
+    uint8_t highlightB = 176;
 };
 
 struct CabinetRuntimeState {
@@ -17,6 +20,9 @@ struct CabinetRuntimeState {
     bool hasHighlight = false;
     uint16_t highlightShelf = 0;
     uint16_t highlightLocation = 0;
+    uint8_t highlightR = 156;
+    uint8_t highlightG = 39;
+    uint8_t highlightB = 176;
 
     bool miniLightPower = false;
     uint8_t miniLightBrightness = 45;

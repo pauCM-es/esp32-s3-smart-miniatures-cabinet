@@ -32,10 +32,11 @@ bool readItem(
     if (
         strlen(id) == 0 ||
         strlen(name) == 0 ||
-        shelf <= 0 ||
-        location <= 0 ||
+        shelf < 0 ||
+        location < 0 ||
         shelf > 65535 ||
-        location > 65535
+        location > 65535 ||
+        ((shelf == 0) != (location == 0))
     ) {
         return false;
     }

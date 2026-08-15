@@ -234,8 +234,10 @@ bool CatalogueRepository::validate(
         return false;
     }
 
-    if (shelf == 0 || location == 0) {
-        error = "shelf_and_location_are_1_based";
+    const bool unassigned = shelf == 0 && location == 0;
+    const bool assigned = shelf > 0 && location > 0;
+    if (!unassigned && !assigned) {
+        error = "position_must_be_unassigned_or_1_based";
         return false;
     }
 

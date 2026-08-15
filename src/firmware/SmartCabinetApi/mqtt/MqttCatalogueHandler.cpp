@@ -180,8 +180,10 @@ bool MqttCatalogueHandler::readFields(
     const int rawShelf    = doc["shelf"].as<int>();
     const int rawLocation = doc["location"].as<int>();
 
-    if (rawShelf <= 0 || rawLocation <= 0 || rawShelf > 65535 || rawLocation > 65535) {
-        error = "shelf_and_location_are_1_based";
+    const bool unassigned = rawShelf == 0 && rawLocation == 0;
+    const bool assigned = rawShelf > 0 && rawLocation > 0;
+    if ((!unassigned && !assigned) || rawShelf > 65535 || rawLocation > 65535) {
+        error = "position_must_be_unassigned_or_1_based";
         return false;
     }
 

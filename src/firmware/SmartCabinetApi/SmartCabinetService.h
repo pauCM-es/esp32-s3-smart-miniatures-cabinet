@@ -23,6 +23,9 @@ public:
     void setPower(bool enabled);
     void setBrightness(uint8_t percent);
     bool highlightLocation(uint16_t shelf, uint16_t location);
+    bool appendHighlightLocation(uint16_t shelf, uint16_t location);
+    void clearHighlight();
+    void setHighlightColor(uint8_t r, uint8_t g, uint8_t b);
 
     void setMiniatureLightPower(bool enabled);
     void setMiniatureLightBrightness(uint8_t percent);

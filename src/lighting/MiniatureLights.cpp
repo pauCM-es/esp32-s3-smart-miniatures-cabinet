@@ -2,7 +2,11 @@
 
 #include "models/ValueUtils.h"
 
+#include <cstring>
+
 namespace smartcabinet {
+bool gHighlightMask[config::kMiniatureLedCount] = {};
+
 
 void MiniatureLights::begin() {
 #if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
@@ -77,6 +81,9 @@ bool MiniatureLights::highlightSegment(uint16_t start, uint16_t count, RgbColor 
     highlightStart_ = start;
     highlightCount_ = count;
     highlightColor_ = color;
+    for (uint16_t i = 0; i < count; ++i) {
+        gHighlightMask[start + i] = true;
+    }
     dirty_ = true;
     return true;
 }
@@ -84,6 +91,7 @@ bool MiniatureLights::highlightSegment(uint16_t start, uint16_t count, RgbColor 
 void MiniatureLights::clearHighlight() {
     highlightActive_ = false;
     highlightCount_ = 0;
+    std::memset(gHighlightMask, 0, sizeof(gHighlightMask));
     dirty_ = true;
 }
 
@@ -152,8 +160,8 @@ void MiniatureLights::renderBase(uint32_t nowMs) {
 void MiniatureLights::renderHighlight() {
     fill_solid(leds_, config::kMiniatureLedCount, CRGB::Black);
     const CRGB c = toCrgb(highlightColor_);
-    for (uint16_t i = 0; i < highlightCount_; ++i) {
-        leds_[highlightStart_ + i] = c;
+    for (uint16_t i = 0; i < config::kMiniatureLedCount; ++i) {
+        if (gHighlightMask[i]) leds_[i] = c;
     }
 }
 
