@@ -34,7 +34,6 @@ constexpr uint16_t kRgbwCabinetLedCount = 30;  // Replace with measured strip co
 
 constexpr int kMiniatureLedDataPin = 45;
 constexpr uint16_t kMiniatureLedCount = 400;    // ~2.5 m at 160 LED/m.
-constexpr uint8_t kMiniatureMaxBrightness = 255; // Power budget enforced by kMiniaturePowerLimitMilliAmps.
 constexpr uint16_t kMiniaturePowerPerShelfMilliAmps = 400;
 
 // Encoder via PCF8575 I2C expander (original — commented out).
@@ -42,8 +41,8 @@ constexpr int kI2cSdaPin = 38;
 constexpr int kI2cSclPin = 39;
 constexpr uint8_t kPcf8575Address = 0x20;
 constexpr int kEncoderButtonPin = 0;  // P0 → encoder push button
-constexpr int kEncoderPinA = 1;       // P1 → encoder signal A
-constexpr int kEncoderPinB = 2;       // P2 → encoder signal B
+constexpr int kEncoderPinA = 2;       // P1 → encoder signal A
+constexpr int kEncoderPinB = 1;       // P2 → encoder signal B
 constexpr uint16_t kEncoderButtonDebounceMs = 35;
 
 // Encoder wired directly to GPIO (quadrature, no button).
@@ -52,7 +51,7 @@ constexpr uint16_t kEncoderButtonDebounceMs = 35;
 constexpr uint8_t kEncoderBrightnessStep = 5;
 // Quadrature steps accumulated before one output tick fires.
 // 4 = one output per physical detent on most encoders; try 2 if under-sensitive.
-constexpr int8_t kEncoderStepsPerTick = 4;
+constexpr int8_t kEncoderStepsPerTick = 2;
 
 constexpr uint8_t kDefaultShelfCount = 1;
 constexpr uint16_t kDefaultLedsPerShelf = 80;

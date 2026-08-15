@@ -9,8 +9,7 @@ void MiniatureLights::begin() {
     FastLED.addLeds<MINIATURE_LED_TYPE, config::kMiniatureLedDataPin, MINIATURE_LED_COLOR_ORDER>(
         leds_, config::kMiniatureLedCount);
     FastLED.setMaxPowerInVoltsAndMilliamps(5, config::kDefaultShelfCount * config::kMiniaturePowerPerShelfMilliAmps);
-    FastLED.setBrightness(static_cast<uint8_t>(
-        (static_cast<uint16_t>(percentToByte(brightness_)) * config::kMiniatureMaxBrightness) / 255U));
+    FastLED.setBrightness(percentToByte(brightness_));
     FastLED.clear(true);
 #endif
 }
@@ -55,10 +54,7 @@ void MiniatureLights::toggle() {
 void MiniatureLights::setBrightness(uint8_t percent) {
     brightness_ = clampPercent(percent);
 #if SMART_CABINET_ENABLE_MINIATURE_LIGHTS
-    const uint8_t requested = percentToByte(brightness_);
-    const uint8_t limited = static_cast<uint8_t>(
-        (static_cast<uint16_t>(requested) * config::kMiniatureMaxBrightness) / 255U);
-    FastLED.setBrightness(limited);
+    FastLED.setBrightness(percentToByte(brightness_));
 #endif
     dirty_ = true;
 }
