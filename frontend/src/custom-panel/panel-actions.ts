@@ -1,7 +1,9 @@
-const inputValue = (panel, selector) =>
+type Panel = any;
+
+const inputValue = (panel: Panel, selector: string): string | undefined =>
 	panel.shadowRoot.querySelector(selector)?.value;
 
-export const createPanelActions = (p) => ({
+export const createPanelActions = (p: Panel) => ({
 	setHighlightColor: (hex) =>
 		p._command({ action: "setHighlightColor", ...p._hexToRgb(hex) }),
 	selectShelf: (shelf) => {

@@ -5,6 +5,7 @@ import { createPanelActions } from "./panel-actions.js";
 import panelStyles from "./smart-cabinet-panel.css?inline";
 import { panelContent } from "./smart-cabinet-panel-templates.js";
 import { publishMqtt } from "./panel-service.js";
+import type { Hass } from "./panel-types.js";
 
 const DEFAULT_CONFIG = {
 	command_topic: "smartcabinet/cabinet01/api/command",
@@ -15,6 +16,25 @@ const DEFAULT_CONFIG = {
 
 class HaPanelSmartCabinet extends LitElement {
 	static styles = unsafeCSS(panelStyles);
+	_hass: Hass | null = null;
+	_panel: { config?: Record<string, string> } | null = null;
+	_narrow = false;
+	_active = "configuration";
+	_selectedShelf = 1;
+	_selectedLocation = 1;
+	_editingMiniId: string | null = null;
+	_searchTimer: ReturnType<typeof setTimeout> | null = null;
+	_dataSignature: string | null = null;
+	_searchQuery = "";
+	_searchField = "all";
+	_viewIndex = 0;
+	_viewTimer: ReturnType<typeof setTimeout> | null = null;
+	_mappingStart: number | null = null;
+	_mappingEnd: number | null = null;
+	_mappingTimer: ReturnType<typeof setTimeout> | null = null;
+	_showAllMappings = false;
+	_ledZoom = 1;
+	actions: any;
 
 	constructor() {
 		super();
@@ -39,19 +59,19 @@ class HaPanelSmartCabinet extends LitElement {
 		this.actions = createPanelActions(this);
 	}
 
-	set narrow(value) {
+	set narrow(value: boolean) {
 		const next = Boolean(value);
 		if (next === this._narrow) return;
 		this._narrow = next;
 		this._render();
 	}
 
-	set panel(value) {
+	set panel(value: { config?: Record<string, string> } | null) {
 		this._panel = value;
 		this._render();
 	}
 
-	set hass(value) {
+	set hass(value: Hass | null) {
 		this._hass = value;
 		const layout = value?.states?.[this._config.layout_entity];
 		const miniatures = value?.states?.[this._config.miniatures_entity];
@@ -106,7 +126,7 @@ class HaPanelSmartCabinet extends LitElement {
 		};
 	}
 
-	_rgbToHex(color = {}) {
+	_rgbToHex(color: { r?: number; g?: number; b?: number } = {}) {
 		const part = (value) =>
 			Number(value || 0)
 				.toString(16)
@@ -232,13 +252,13 @@ class HaPanelSmartCabinet extends LitElement {
 	}
 
 	async _saveMini() {
-		const name = this.shadowRoot.querySelector("#mini-name").value.trim();
-		const collection = this.shadowRoot
-			.querySelector("#mini-collection")
-			.value.trim();
-		const artist = this.shadowRoot
-			.querySelector("#mini-artist")
-			.value.trim();
+		const name = (this.shadowRoot.querySelector("#mini-name") as HTMLInputElement).value.trim();
+		const collectionValue = (
+			this.shadowRoot.querySelector("#mini-collection") as HTMLInputElement
+		).value.trim();
+		const artistValue = (
+			this.shadowRoot.querySelector("#mini-artist") as HTMLInputElement
+		).value.trim();
 		if (!name) return;
 		const current = this._miniatures.find(
 			(item) => item.id === this._editingMiniId,
@@ -249,8 +269,8 @@ class HaPanelSmartCabinet extends LitElement {
 						action: "updateMiniature",
 						id: current.id,
 						name,
-						collection,
-						artist,
+				collection: collectionValue,
+				artist: artistValue,
 						date: current.date || "",
 						shelf: current.shelf || 0,
 						location: current.location || 0,
@@ -259,8 +279,8 @@ class HaPanelSmartCabinet extends LitElement {
 				: {
 						action: "createMiniature",
 						name,
-						collection,
-						artist,
+				collection: collectionValue,
+				artist: artistValue,
 						date: "",
 						shelf: 0,
 						location: 0,

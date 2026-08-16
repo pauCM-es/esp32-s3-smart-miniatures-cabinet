@@ -9,7 +9,7 @@ export default defineConfig({
     outDir: resolve(import.meta.dirname, "../src/ha/www"),
     lib: {
       entry: {
-        "smart-cabinet-panel": source("custom-panel/smart-cabinet-panel.js"),
+        "smart-cabinet-panel": source("custom-panel/smart-cabinet-panel.ts"),
         "smart-cabinet-card": source("cards/smart-cabinet-card.js"),
         "smart-cabinet-miniatures-card": source("cards/smart-cabinet-miniatures-card.js"),
       },

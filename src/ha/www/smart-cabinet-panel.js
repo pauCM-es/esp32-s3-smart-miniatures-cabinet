@@ -72,14 +72,14 @@ let y = class extends HTMLElement {
     }
   }
   static getPropertyDescriptor(t, i, a) {
-    const { get: r, set: s } = ht(this.prototype, t) ?? { get() {
+    const { get: r, set: n } = ht(this.prototype, t) ?? { get() {
       return this[i];
-    }, set(n) {
-      this[i] = n;
+    }, set(s) {
+      this[i] = s;
     } };
-    return { get: r, set(n) {
+    return { get: r, set(s) {
       const p = r?.call(this);
-      s?.call(this, n), this.requestUpdate(t, p, a);
+      n?.call(this, s), this.requestUpdate(t, p, a);
     }, configurable: !0, enumerable: !0 };
   }
   static getPropertyOptions(t) {
@@ -155,29 +155,29 @@ let y = class extends HTMLElement {
   _$ET(t, i) {
     const a = this.constructor.elementProperties.get(t), r = this.constructor._$Eu(t, a);
     if (r !== void 0 && a.reflect === !0) {
-      const s = (a.converter?.toAttribute !== void 0 ? a.converter : I).toAttribute(i, a.type);
-      this._$Em = t, s == null ? this.removeAttribute(r) : this.setAttribute(r, s), this._$Em = null;
+      const n = (a.converter?.toAttribute !== void 0 ? a.converter : I).toAttribute(i, a.type);
+      this._$Em = t, n == null ? this.removeAttribute(r) : this.setAttribute(r, n), this._$Em = null;
     }
   }
   _$AK(t, i) {
     const a = this.constructor, r = a._$Eh.get(t);
     if (r !== void 0 && this._$Em !== r) {
-      const s = a.getPropertyOptions(r), n = typeof s.converter == "function" ? { fromAttribute: s.converter } : s.converter?.fromAttribute !== void 0 ? s.converter : I;
+      const n = a.getPropertyOptions(r), s = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : I;
       this._$Em = r;
-      const p = n.fromAttribute(i, s.type);
+      const p = s.fromAttribute(i, n.type);
       this[r] = p ?? this._$Ej?.get(r) ?? p, this._$Em = null;
     }
   }
-  requestUpdate(t, i, a, r = !1, s) {
+  requestUpdate(t, i, a, r = !1, n) {
     if (t !== void 0) {
-      const n = this.constructor;
-      if (r === !1 && (s = this[t]), a ??= n.getPropertyOptions(t), !((a.hasChanged ?? at)(s, i) || a.useDefault && a.reflect && s === this._$Ej?.get(t) && !this.hasAttribute(n._$Eu(t, a)))) return;
+      const s = this.constructor;
+      if (r === !1 && (n = this[t]), a ??= s.getPropertyOptions(t), !((a.hasChanged ?? at)(n, i) || a.useDefault && a.reflect && n === this._$Ej?.get(t) && !this.hasAttribute(s._$Eu(t, a)))) return;
       this.C(t, i, a);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
   }
-  C(t, i, { useDefault: a, reflect: r, wrapped: s }, n) {
-    a && !(this._$Ej ??= /* @__PURE__ */ new Map()).has(t) && (this._$Ej.set(t, n ?? i ?? this[t]), s !== !0 || n !== void 0) || (this._$AL.has(t) || (this.hasUpdated || a || (i = void 0), this._$AL.set(t, i)), r === !0 && this._$Em !== t && (this._$Eq ??= /* @__PURE__ */ new Set()).add(t));
+  C(t, i, { useDefault: a, reflect: r, wrapped: n }, s) {
+    a && !(this._$Ej ??= /* @__PURE__ */ new Map()).has(t) && (this._$Ej.set(t, s ?? i ?? this[t]), n !== !0 || s !== void 0) || (this._$AL.has(t) || (this.hasUpdated || a || (i = void 0), this._$AL.set(t, i)), r === !0 && this._$Em !== t && (this._$Eq ??= /* @__PURE__ */ new Set()).add(t));
   }
   async _$EP() {
     this.isUpdatePending = !0;
@@ -196,13 +196,13 @@ let y = class extends HTMLElement {
     if (!this.isUpdatePending) return;
     if (!this.hasUpdated) {
       if (this.renderRoot ??= this.createRenderRoot(), this._$Ep) {
-        for (const [r, s] of this._$Ep) this[r] = s;
+        for (const [r, n] of this._$Ep) this[r] = n;
         this._$Ep = void 0;
       }
       const a = this.constructor.elementProperties;
-      if (a.size > 0) for (const [r, s] of a) {
-        const { wrapped: n } = s, p = this[r];
-        n !== !0 || this._$AL.has(r) || p === void 0 || this.C(r, void 0, s, p);
+      if (a.size > 0) for (const [r, n] of a) {
+        const { wrapped: s } = n, p = this[r];
+        s !== !0 || this._$AL.has(r) || p === void 0 || this.C(r, void 0, n, p);
       }
     }
     let t = !1;
@@ -240,30 +240,30 @@ let y = class extends HTMLElement {
   }
 };
 y.elementStyles = [], y.shadowRootOptions = { mode: "open" }, y[k("elementProperties")] = /* @__PURE__ */ new Map(), y[k("finalized")] = /* @__PURE__ */ new Map(), vt?.({ ReactiveElement: y }), (N.reactiveElementVersions ??= []).push("2.1.2");
-const R = globalThis, W = (e) => e, z = R.trustedTypes, Q = z ? z.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, rt = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, st = "?" + f, bt = `<${st}>`, _ = document, A = () => _.createComment(""), E = (e) => e === null || typeof e != "object" && typeof e != "function", O = Array.isArray, xt = (e) => O(e) || typeof e?.[Symbol.iterator] == "function", P = `[ 	
+const R = globalThis, W = (e) => e, z = R.trustedTypes, Q = z ? z.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, rt = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, nt = "?" + f, bt = `<${nt}>`, _ = document, A = () => _.createComment(""), E = (e) => e === null || typeof e != "object" && typeof e != "function", O = Array.isArray, xt = (e) => O(e) || typeof e?.[Symbol.iterator] == "function", P = `[ 	
 \f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, Z = /-->/g, G = />/g, v = RegExp(`>|${P}(?:([^\\s"'>=/]+)(${P}*=${P}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), J = /'/g, X = /"/g, nt = /^(?:script|style|textarea|title)$/i, _t = (e) => (t, ...i) => ({ _$litType$: e, strings: t, values: i }), d = _t(1), $ = /* @__PURE__ */ Symbol.for("lit-noChange"), h = /* @__PURE__ */ Symbol.for("lit-nothing"), K = /* @__PURE__ */ new WeakMap(), b = _.createTreeWalker(_, 129);
+\f\r"'\`<>=]|("|')|))|$)`, "g"), J = /'/g, X = /"/g, st = /^(?:script|style|textarea|title)$/i, _t = (e) => (t, ...i) => ({ _$litType$: e, strings: t, values: i }), d = _t(1), $ = /* @__PURE__ */ Symbol.for("lit-noChange"), h = /* @__PURE__ */ Symbol.for("lit-nothing"), K = /* @__PURE__ */ new WeakMap(), b = _.createTreeWalker(_, 129);
 function ot(e, t) {
   if (!O(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return Q !== void 0 ? Q.createHTML(t) : t;
 }
 const yt = (e, t) => {
   const i = e.length - 1, a = [];
-  let r, s = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", n = S;
+  let r, n = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", s = S;
   for (let p = 0; p < i; p++) {
     const o = e[p];
     let l, u, c = -1, g = 0;
-    for (; g < o.length && (n.lastIndex = g, u = n.exec(o), u !== null); ) g = n.lastIndex, n === S ? u[1] === "!--" ? n = Z : u[1] !== void 0 ? n = G : u[2] !== void 0 ? (nt.test(u[2]) && (r = RegExp("</" + u[2], "g")), n = v) : u[3] !== void 0 && (n = v) : n === v ? u[0] === ">" ? (n = r ?? S, c = -1) : u[1] === void 0 ? c = -2 : (c = n.lastIndex - u[2].length, l = u[1], n = u[3] === void 0 ? v : u[3] === '"' ? X : J) : n === X || n === J ? n = v : n === Z || n === G ? n = S : (n = v, r = void 0);
-    const m = n === v && e[p + 1].startsWith("/>") ? " " : "";
-    s += n === S ? o + bt : c >= 0 ? (a.push(l), o.slice(0, c) + rt + o.slice(c) + f + m) : o + f + (c === -2 ? p : m);
+    for (; g < o.length && (s.lastIndex = g, u = s.exec(o), u !== null); ) g = s.lastIndex, s === S ? u[1] === "!--" ? s = Z : u[1] !== void 0 ? s = G : u[2] !== void 0 ? (st.test(u[2]) && (r = RegExp("</" + u[2], "g")), s = v) : u[3] !== void 0 && (s = v) : s === v ? u[0] === ">" ? (s = r ?? S, c = -1) : u[1] === void 0 ? c = -2 : (c = s.lastIndex - u[2].length, l = u[1], s = u[3] === void 0 ? v : u[3] === '"' ? X : J) : s === X || s === J ? s = v : s === Z || s === G ? s = S : (s = v, r = void 0);
+    const m = s === v && e[p + 1].startsWith("/>") ? " " : "";
+    n += s === S ? o + bt : c >= 0 ? (a.push(l), o.slice(0, c) + rt + o.slice(c) + f + m) : o + f + (c === -2 ? p : m);
   }
-  return [ot(e, s + (e[i] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), a];
+  return [ot(e, n + (e[i] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), a];
 };
 class M {
   constructor({ strings: t, _$litType$: i }, a) {
     let r;
     this.parts = [];
-    let s = 0, n = 0;
+    let n = 0, s = 0;
     const p = t.length - 1, o = this.parts, [l, u] = yt(t, i);
     if (this.el = M.createElement(l, a), b.currentNode = this.el.content, i === 2 || i === 3) {
       const c = this.el.content.firstChild;
@@ -272,23 +272,23 @@ class M {
     for (; (r = b.nextNode()) !== null && o.length < p; ) {
       if (r.nodeType === 1) {
         if (r.hasAttributes()) for (const c of r.getAttributeNames()) if (c.endsWith(rt)) {
-          const g = u[n++], m = r.getAttribute(c).split(f), T = /([.?@])?(.*)/.exec(g);
-          o.push({ type: 1, index: s, name: T[2], strings: m, ctor: T[1] === "." ? wt : T[1] === "?" ? St : T[1] === "@" ? kt : H }), r.removeAttribute(c);
-        } else c.startsWith(f) && (o.push({ type: 6, index: s }), r.removeAttribute(c));
-        if (nt.test(r.tagName)) {
+          const g = u[s++], m = r.getAttribute(c).split(f), T = /([.?@])?(.*)/.exec(g);
+          o.push({ type: 1, index: n, name: T[2], strings: m, ctor: T[1] === "." ? wt : T[1] === "?" ? St : T[1] === "@" ? kt : H }), r.removeAttribute(c);
+        } else c.startsWith(f) && (o.push({ type: 6, index: n }), r.removeAttribute(c));
+        if (st.test(r.tagName)) {
           const c = r.textContent.split(f), g = c.length - 1;
           if (g > 0) {
             r.textContent = z ? z.emptyScript : "";
-            for (let m = 0; m < g; m++) r.append(c[m], A()), b.nextNode(), o.push({ type: 2, index: ++s });
+            for (let m = 0; m < g; m++) r.append(c[m], A()), b.nextNode(), o.push({ type: 2, index: ++n });
             r.append(c[g], A());
           }
         }
-      } else if (r.nodeType === 8) if (r.data === st) o.push({ type: 2, index: s });
+      } else if (r.nodeType === 8) if (r.data === nt) o.push({ type: 2, index: n });
       else {
         let c = -1;
-        for (; (c = r.data.indexOf(f, c + 1)) !== -1; ) o.push({ type: 7, index: s }), c += f.length - 1;
+        for (; (c = r.data.indexOf(f, c + 1)) !== -1; ) o.push({ type: 7, index: n }), c += f.length - 1;
       }
-      s++;
+      n++;
     }
   }
   static createElement(t, i) {
@@ -299,8 +299,8 @@ class M {
 function w(e, t, i = e, a) {
   if (t === $) return t;
   let r = a !== void 0 ? i._$Co?.[a] : i._$Cl;
-  const s = E(t) ? void 0 : t._$litDirective$;
-  return r?.constructor !== s && (r?._$AO?.(!1), s === void 0 ? r = void 0 : (r = new s(e), r._$AT(e, i, a)), a !== void 0 ? (i._$Co ??= [])[a] = r : i._$Cl = r), r !== void 0 && (t = w(e, r._$AS(e, t.values), r, a)), t;
+  const n = E(t) ? void 0 : t._$litDirective$;
+  return r?.constructor !== n && (r?._$AO?.(!1), n === void 0 ? r = void 0 : (r = new n(e), r._$AT(e, i, a)), a !== void 0 ? (i._$Co ??= [])[a] = r : i._$Cl = r), r !== void 0 && (t = w(e, r._$AS(e, t.values), r, a)), t;
 }
 class $t {
   constructor(t, i) {
@@ -315,13 +315,13 @@ class $t {
   u(t) {
     const { el: { content: i }, parts: a } = this._$AD, r = (t?.creationScope ?? _).importNode(i, !0);
     b.currentNode = r;
-    let s = b.nextNode(), n = 0, p = 0, o = a[0];
+    let n = b.nextNode(), s = 0, p = 0, o = a[0];
     for (; o !== void 0; ) {
-      if (n === o.index) {
+      if (s === o.index) {
         let l;
-        o.type === 2 ? l = new C(s, s.nextSibling, this, t) : o.type === 1 ? l = new o.ctor(s, o.name, o.strings, this, t) : o.type === 6 && (l = new At(s, this, t)), this._$AV.push(l), o = a[++p];
+        o.type === 2 ? l = new C(n, n.nextSibling, this, t) : o.type === 1 ? l = new o.ctor(n, o.name, o.strings, this, t) : o.type === 6 && (l = new At(n, this, t)), this._$AV.push(l), o = a[++p];
       }
-      n !== o?.index && (s = b.nextNode(), n++);
+      s !== o?.index && (n = b.nextNode(), s++);
     }
     return b.currentNode = _, r;
   }
@@ -364,8 +364,8 @@ class C {
     const { values: i, _$litType$: a } = t, r = typeof a == "number" ? this._$AC(t) : (a.el === void 0 && (a.el = M.createElement(ot(a.h, a.h[0]), this.options)), a);
     if (this._$AH?._$AD === r) this._$AH.p(i);
     else {
-      const s = new $t(r, this), n = s.u(this.options);
-      s.p(i), this.T(n), this._$AH = s;
+      const n = new $t(r, this), s = n.u(this.options);
+      n.p(i), this.T(s), this._$AH = n;
     }
   }
   _$AC(t) {
@@ -376,7 +376,7 @@ class C {
     O(this._$AH) || (this._$AH = [], this._$AR());
     const i = this._$AH;
     let a, r = 0;
-    for (const s of t) r === i.length ? i.push(a = new C(this.O(A()), this.O(A()), this, this.options)) : a = i[r], a._$AI(s), r++;
+    for (const n of t) r === i.length ? i.push(a = new C(this.O(A()), this.O(A()), this, this.options)) : a = i[r], a._$AI(n), r++;
     r < i.length && (this._$AR(a && a._$AB.nextSibling, r), i.length = r);
   }
   _$AR(t = this._$AA.nextSibling, i) {
@@ -396,19 +396,19 @@ class H {
   get _$AU() {
     return this._$AM._$AU;
   }
-  constructor(t, i, a, r, s) {
-    this.type = 1, this._$AH = h, this._$AN = void 0, this.element = t, this.name = i, this._$AM = r, this.options = s, a.length > 2 || a[0] !== "" || a[1] !== "" ? (this._$AH = Array(a.length - 1).fill(new String()), this.strings = a) : this._$AH = h;
+  constructor(t, i, a, r, n) {
+    this.type = 1, this._$AH = h, this._$AN = void 0, this.element = t, this.name = i, this._$AM = r, this.options = n, a.length > 2 || a[0] !== "" || a[1] !== "" ? (this._$AH = Array(a.length - 1).fill(new String()), this.strings = a) : this._$AH = h;
   }
   _$AI(t, i = this, a, r) {
-    const s = this.strings;
-    let n = !1;
-    if (s === void 0) t = w(this, t, i, 0), n = !E(t) || t !== this._$AH && t !== $, n && (this._$AH = t);
+    const n = this.strings;
+    let s = !1;
+    if (n === void 0) t = w(this, t, i, 0), s = !E(t) || t !== this._$AH && t !== $, s && (this._$AH = t);
     else {
       const p = t;
       let o, l;
-      for (t = s[0], o = 0; o < s.length - 1; o++) l = w(this, p[a + o], i, o), l === $ && (l = this._$AH[o]), n ||= !E(l) || l !== this._$AH[o], l === h ? t = h : t !== h && (t += (l ?? "") + s[o + 1]), this._$AH[o] = l;
+      for (t = n[0], o = 0; o < n.length - 1; o++) l = w(this, p[a + o], i, o), l === $ && (l = this._$AH[o]), s ||= !E(l) || l !== this._$AH[o], l === h ? t = h : t !== h && (t += (l ?? "") + n[o + 1]), this._$AH[o] = l;
     }
-    n && !r && this.j(t);
+    s && !r && this.j(t);
   }
   j(t) {
     t === h ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t ?? "");
@@ -431,13 +431,13 @@ class St extends H {
   }
 }
 class kt extends H {
-  constructor(t, i, a, r, s) {
-    super(t, i, a, r, s), this.type = 5;
+  constructor(t, i, a, r, n) {
+    super(t, i, a, r, n), this.type = 5;
   }
   _$AI(t, i = this) {
     if ((t = w(this, t, i, 0) ?? h) === $) return;
-    const a = this._$AH, r = t === h && a !== h || t.capture !== a.capture || t.once !== a.once || t.passive !== a.passive, s = t !== h && (a === h || r);
-    r && this.element.removeEventListener(this.name, this, a), s && this.element.addEventListener(this.name, this, t), this._$AH = t;
+    const a = this._$AH, r = t === h && a !== h || t.capture !== a.capture || t.once !== a.once || t.passive !== a.passive, n = t !== h && (a === h || r);
+    r && this.element.removeEventListener(this.name, this, a), n && this.element.addEventListener(this.name, this, t), this._$AH = t;
   }
   handleEvent(t) {
     typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, t) : this._$AH.handleEvent(t);
@@ -460,8 +460,8 @@ const Mt = (e, t, i) => {
   const a = i?.renderBefore ?? t;
   let r = a._$litPart$;
   if (r === void 0) {
-    const s = i?.renderBefore ?? null;
-    a._$litPart$ = r = new C(t.insertBefore(A(), s), s, void 0, i ?? {});
+    const n = i?.renderBefore ?? null;
+    a._$litPart$ = r = new C(t.insertBefore(A(), n), n, void 0, i ?? {});
   }
   return r._$AI(e), r;
 };
@@ -568,12 +568,18 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
     e._selectedShelf = t, e._selectedLocation = 1, e._render();
   },
   selectLocation: async (t) => {
-    e._selectedLocation = t, await e._command({ action: "highlightLocation", shelf: e._selectedShelf, location: t }), e._render();
+    e._selectedLocation = t, await e._command({
+      action: "highlightLocation",
+      shelf: e._selectedShelf,
+      location: t
+    }), e._render();
   },
   insertShelf: (t) => e._command({ action: "insertShelf", position: t }),
   duplicateShelf: (t) => e._command({ action: "duplicateShelf", shelf: t }),
   deleteShelf: async (t) => {
-    confirm(`Delete Shelf ${t}? Miniatures on it will become Unassigned.`) && await e._command({ action: "deleteShelf", shelf: t });
+    confirm(
+      `Delete Shelf ${t}? Miniatures on it will become Unassigned.`
+    ) && await e._command({ action: "deleteShelf", shelf: t });
   },
   moveShelf: async (t, i) => {
     await e._command({ action: "moveShelf", from: t, to: i }), e._selectedShelf = i;
@@ -586,11 +592,18 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
   }),
   autoMap: () => e._command({ action: "autoMapShelf", shelf: e._selectedShelf }),
   clearMap: async () => {
-    confirm("Clear every location mapping on this shelf?") && await e._command({ action: "clearShelfMapping", shelf: e._selectedShelf });
+    confirm("Clear every location mapping on this shelf?") && await e._command({
+      action: "clearShelfMapping",
+      shelf: e._selectedShelf
+    });
   },
   toggleDirection: () => {
     const t = e._layout.shelves?.[e._selectedShelf - 1];
-    return e._command({ action: "setShelfDirection", shelf: e._selectedShelf, mirrored: !t?.mirrored });
+    return e._command({
+      action: "setShelfDirection",
+      shelf: e._selectedShelf,
+      mirrored: !t?.mirrored
+    });
   },
   zoom: (t) => {
     e._ledZoom = Math.min(2, Math.max(0.5, e._ledZoom + t)), e._render();
@@ -607,16 +620,32 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
     else {
       e._mappingEnd = t;
       const i = Math.min(e._mappingStart, e._mappingEnd);
-      await e._command({ action: "previewLocation", shelf: e._selectedShelf, location: e._selectedLocation, start_led: i, leds: Math.abs(e._mappingEnd - e._mappingStart) + 1 });
+      await e._command({
+        action: "previewLocation",
+        shelf: e._selectedShelf,
+        location: e._selectedLocation,
+        start_led: i,
+        leds: Math.abs(e._mappingEnd - e._mappingStart) + 1
+      });
     }
     e._render();
   },
   resetLedRange: async () => {
-    e._mappingStart = null, e._mappingEnd = null, await e._command({ action: "highlightLocation", shelf: e._selectedShelf, location: e._selectedLocation }), e._render();
+    e._mappingStart = null, e._mappingEnd = null, await e._command({
+      action: "highlightLocation",
+      shelf: e._selectedShelf,
+      location: e._selectedLocation
+    }), e._render();
   },
   saveLedRange: async () => {
     const t = Math.min(e._mappingStart, e._mappingEnd);
-    await e._command({ action: "setLocationConfig", shelf: e._selectedShelf, location: e._selectedLocation, start_led: t, leds: Math.abs(e._mappingEnd - e._mappingStart) + 1 }), e._mappingStart = null, e._mappingEnd = null;
+    await e._command({
+      action: "setLocationConfig",
+      shelf: e._selectedShelf,
+      location: e._selectedLocation,
+      start_led: t,
+      leds: Math.abs(e._mappingEnd - e._mappingStart) + 1
+    }), e._mappingStart = null, e._mappingEnd = null;
   },
   editMini: (t) => {
     e._editingMiniId = t, e._render();
@@ -631,7 +660,11 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
   },
   highlightOne: (t) => {
     const i = e._miniatures.find((a) => a.id === t);
-    return i?.shelf ? e._command({ action: "highlightLocation", shelf: i.shelf, location: i.location }) : void 0;
+    return i?.shelf ? e._command({
+      action: "highlightLocation",
+      shelf: i.shelf,
+      location: i.location
+    }) : void 0;
   },
   setViewIndex: (t) => e._setViewIndex(t),
   clearViewHighlight: async () => {
@@ -680,9 +713,9 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 				<label class="color-control"
 					><span>Highlight color</span
 					><input
-							id="highlight-color"
-							type="color"
-							@change=${(s) => e.actions.setHighlightColor(s.target.value)}
+						id="highlight-color"
+						type="color"
+						@change=${(n) => e.actions.setHighlightColor(n.target.value)}
 						.value=${e._rgbToHex(
     t.highlight_color || { r: 156, g: 39, b: 176 }
   )}
@@ -704,21 +737,21 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 				</div>
 				<div class="shelf-items">
 					${i.map(
-    (s, n) => d`<div
-									class="shelf-row ${s.shelf === e._selectedShelf ? "selected" : ""}">
+    (n, s) => d`<div
+									class="shelf-row ${n.shelf === e._selectedShelf ? "selected" : ""}">
 									<button
 										class="shelf-select"
-										@click=${() => e.actions.selectShelf(s.shelf)}>
+										@click=${() => e.actions.selectShelf(n.shelf)}>
 										<span class="shelf-number"
-											>${String(s.shelf).padStart(
+											>${String(n.shelf).padStart(
       2,
       "0"
     )}</span
 										><span
-											><b>Shelf ${s.shelf}</b
+											><b>Shelf ${n.shelf}</b
 											><small
-												>${s.total_locations}
-												locations · ${s.total_leds}
+												>${n.total_locations}
+												locations · ${n.total_leds}
 												LEDs</small
 											></span
 										>
@@ -726,20 +759,32 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 									<div class="row-actions">
 										<button
 											class="icon-button"
-											@click=${() => e.actions.moveShelf(s.shelf, Math.max(1, s.shelf - 1))}
-											?disabled=${n === 0}>
+											@click=${() => e.actions.moveShelf(
+      n.shelf,
+      Math.max(
+        1,
+        n.shelf - 1
+      )
+    )}
+											?disabled=${s === 0}>
 											↑</button
 										><button
 											class="icon-button"
-											@click=${() => e.actions.moveShelf(s.shelf, Math.min(i.length, s.shelf + 1))}
-											?disabled=${n === i.length - 1}>
+											@click=${() => e.actions.moveShelf(
+      n.shelf,
+      Math.min(
+        i.length,
+        n.shelf + 1
+      )
+    )}
+											?disabled=${s === i.length - 1}>
 											↓
 										</button>
 									</div>
 								</div>
 								<button
 									class="insert-shelf"
-									@click=${() => e.actions.insertShelf(s.shelf + 1)}>
+									@click=${() => e.actions.insertShelf(n.shelf + 1)}>
 									＋ Insert shelf here
 								</button>`
   )}
@@ -791,7 +836,7 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 			</main>
 		</div>`;
 }, Pt = (e, t, i) => {
-  const a = e._mappingStart ?? (i?.mapped ? i.start_led : null), r = e._mappingEnd ?? (i?.mapped ? i.start_led + i.leds - 1 : null), s = Array.from({ length: t.total_leds }, (o, l) => {
+  const a = e._mappingStart ?? (i?.mapped ? i.start_led : null), r = e._mappingEnd ?? (i?.mapped ? i.start_led + i.leds - 1 : null), n = Array.from({ length: t.total_leds }, (o, l) => {
     const u = a !== null && r !== null && l >= Math.min(a, r) && l <= Math.max(a, r), c = e._showAllMappings && t.locations.some(
       (g) => g.mapped && l >= g.start_led && l < g.start_led + g.leds
     );
@@ -801,7 +846,7 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 			title="LED ${l + 1}">
 			${l % 5 === 0 ? d`<small>${l + 1}</small>` : h}
 		</button>`;
-  }), n = Math.ceil(t.total_leds / 2), p = t.mirrored ? [s.slice(0, n).reverse(), s.slice(n)] : [s.slice(0, n), s.slice(n).reverse()];
+  }), s = Math.ceil(t.total_leds / 2), p = t.mirrored ? [n.slice(0, s).reverse(), n.slice(s)] : [n.slice(0, s), n.slice(s).reverse()];
   return d`<section class="mapping-visual">
 		<div class="section-heading">
 			<div>
@@ -813,9 +858,9 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 					id="show-all-mappings"
 					type="checkbox"
 					.checked=${e._showAllMappings}
-					@change=${(o) => e.actions.setShowAllMappings(o.target.checked)} /><span
-					>Show all assigned</span
-				></label
+					@change=${(o) => e.actions.setShowAllMappings(
+    o.target.checked
+  )} /><span>Show all assigned</span></label
 			>
 		</div>
 		<cabinet-dial-picker
@@ -823,7 +868,10 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 			.value=${e._selectedLocation - 1}
 			.total=${t.total_locations}
 			.ticks=${3}
-			@dial-change=${(o) => e.actions.selectMappingLocation(o.detail.value, t.total_locations)}>
+			@dial-change=${(o) => e.actions.selectMappingLocation(
+    o.detail.value,
+    t.total_locations
+  )}>
 		</cabinet-dial-picker>
 		<div class="mapping-tools">
 			<button @click=${e.actions.toggleDirection}>
@@ -846,7 +894,16 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 			class="led-runs ${t.mirrored ? "mirrored" : ""}"
 			style=${`--led-size:${e._ledZoom * 9}px`}>
 			<div class="led-runs-content">
-				<div class="led-run"><div class="power-mark" aria-label="Strip power">⚡</div>${p[0]}<span class="strip-connector" aria-hidden="true"></span></div>
+				<div class="led-run">
+					<div
+						class="power-mark"
+						aria-label="Strip power">
+						⚡
+					</div>
+					${p[0]}<span
+						class="strip-connector"
+						aria-hidden="true"></span>
+				</div>
 				<div class="led-run return">${p[1]}</div>
 			</div>
 		</div>
@@ -890,7 +947,9 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 				/></label>
 			</div>
 			<div class="button-row end">
-				${i ? d`<button @click=${e.actions.cancelMini}>Cancel</button>` : h}<button
+				${i ? d`<button @click=${e.actions.cancelMini}>
+							Cancel
+						</button>` : h}<button
 					class="primary"
 					@click=${e.actions.saveMini}>
 					${i ? "Save changes" : "Add miniature"}
@@ -938,7 +997,13 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 		</section>
 	</div>`;
 }, Ut = (e) => {
-  const t = e._searchQuery.trim().toLocaleLowerCase(), i = e._searchField === "all" ? ["name", "collection", "artist"] : [e._searchField], a = t ? e._miniatures.filter((s) => i.some((n) => String(s[n] || "").toLocaleLowerCase().includes(t))) : [], r = a.filter((s) => s.shelf > 0 && s.location > 0);
+  const t = e._searchQuery.trim().toLocaleLowerCase(), i = e._searchField === "all" ? ["name", "collection", "artist"] : [e._searchField], a = t ? e._miniatures.filter(
+    (n) => i.some(
+      (s) => String(n[s] || "").toLocaleLowerCase().includes(t)
+    )
+  ) : [], r = a.filter(
+    (n) => n.shelf > 0 && n.location > 0
+  );
   return d`<section class="panel-card search-card">
 		<div class="eyebrow">FIND & HIGHLIGHT</div>
 		<h2>Find a miniature in the cabinet</h2>
@@ -946,12 +1011,12 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 			<input
 				id="search-query"
 				type="search"
-				@input=${(s) => e.actions.setSearchQuery(s.target.value)}
+				@input=${(n) => e.actions.setSearchQuery(n.target.value)}
 				placeholder="Search miniatures…"
 				autocomplete="off"
 				.value=${e._searchQuery} /><select
 				id="search-field"
-				@change=${(s) => e.actions.setSearchField(s.target.value)}
+				@change=${(n) => e.actions.setSearchField(n.target.value)}
 				.value=${e._searchField}>
 				<option value="all">All fields</option>
 				<option value="name">Name</option>
@@ -966,7 +1031,31 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 		</div>
 		<div
 			id="search-results"
-			class="search-results">${t ? a.length ? a.map((s) => d`<button class="search-result" @click=${() => e.actions.highlightOne(s.id)} ?disabled=${!s.shelf}>${j(s.name)}<div class="search-result-main"><b>${s.name}</b><span>${s.collection || "No collection"} · ${s.artist || "Unknown artist"}</span></div><span class="position-badge ${s.shelf ? "" : "unassigned"}">${s.shelf ? `Shelf ${s.shelf} · Location ${s.location}` : "Unassigned"}</span></button>`) : d`<div class="empty-state"><b>No matches</b><span>Try another term or field.</span></div>` : h}</div>
+			class="search-results">
+			${t ? a.length ? a.map(
+    (n) => d`<button
+									class="search-result"
+									@click=${() => e.actions.highlightOne(n.id)}
+									?disabled=${!n.shelf}>
+									${j(n.name)}
+									<div class="search-result-main">
+										<b>${n.name}</b
+										><span
+											>${n.collection || "No collection"}
+											·
+											${n.artist || "Unknown artist"}</span
+										>
+									</div>
+									<span
+										class="position-badge ${n.shelf ? "" : "unassigned"}"
+										>${n.shelf ? `Shelf ${n.shelf} · Location ${n.location}` : "Unassigned"}</span
+									>
+								</button>`
+  ) : d`<div class="empty-state">
+							<b>No matches</b
+							><span>Try another term or field.</span>
+						</div>` : h}
+		</div>
 	</section>`;
 }, Rt = (e) => {
   const t = e._viewItem(e._viewIndex);
@@ -991,7 +1080,9 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 			</cabinet-dial-picker>
 		</div>
 		<div class="view-actions">
-			<button @click=${e.actions.clearViewHighlight}>Stop locating</button>
+			<button @click=${e.actions.clearViewHighlight}>
+				Stop locating
+			</button>
 		</div>
 	</section>` : d`<cabinet-panel-card class="view-card empty-state">
 			<b>No assigned miniatures</b>
@@ -1011,6 +1102,25 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, zt = (e) => ({
 };
 class jt extends x {
   static styles = it(tt);
+  _hass = null;
+  _panel = null;
+  _narrow = !1;
+  _active = "configuration";
+  _selectedShelf = 1;
+  _selectedLocation = 1;
+  _editingMiniId = null;
+  _searchTimer = null;
+  _dataSignature = null;
+  _searchQuery = "";
+  _searchField = "all";
+  _viewIndex = 0;
+  _viewTimer = null;
+  _mappingStart = null;
+  _mappingEnd = null;
+  _mappingTimer = null;
+  _showAllMappings = !1;
+  _ledZoom = 1;
+  actions;
   constructor() {
     super(), this._hass = null, this._panel = null, this._narrow = !1, this._active = "configuration", this._selectedShelf = 1, this._selectedLocation = 1, this._editingMiniId = null, this._searchTimer = null, this._dataSignature = null, this._searchQuery = "", this._searchField = "all", this._viewIndex = 0, this._viewTimer = null, this._mappingStart = null, this._mappingEnd = null, this._mappingTimer = null, this._showAllMappings = !1, this._ledZoom = 1, this.actions = zt(this);
   }
@@ -1023,20 +1133,25 @@ class jt extends x {
   }
   set hass(t) {
     this._hass = t;
-    const i = t?.states?.[this._config.layout_entity], a = t?.states?.[this._config.miniatures_entity], r = t?.states?.[this._config.scene_entity], s = `${i?.last_updated || ""}|${a?.last_updated || ""}|${r?.last_updated || ""}`;
-    s !== this._dataSignature && (this._dataSignature = s, this._render());
+    const i = t?.states?.[this._config.layout_entity], a = t?.states?.[this._config.miniatures_entity], r = t?.states?.[this._config.scene_entity], n = `${i?.last_updated || ""}|${a?.last_updated || ""}|${r?.last_updated || ""}`;
+    n !== this._dataSignature && (this._dataSignature = n, this._render());
   }
   get _config() {
     return { ...Dt, ...this._panel?.config || {} };
   }
   get _layout() {
-    return this._hass?.states?.[this._config.layout_entity]?.attributes || { shelves: [], shelf_count: 0 };
+    return this._hass?.states?.[this._config.layout_entity]?.attributes || {
+      shelves: [],
+      shelf_count: 0
+    };
   }
   get _miniatures() {
     return this._hass?.states?.[this._config.miniatures_entity]?.attributes?.items || [];
   }
   get _assignedMiniatures() {
-    return this._miniatures.filter((t) => Number(t.shelf) > 0 && Number(t.location) > 0);
+    return this._miniatures.filter(
+      (t) => Number(t.shelf) > 0 && Number(t.location) > 0
+    );
   }
   _viewItem(t) {
     const i = this._assignedMiniatures;
@@ -1047,7 +1162,11 @@ class jt extends x {
   }
   _hexToRgb(t) {
     const i = t.replace("#", "");
-    return { r: parseInt(i.slice(0, 2), 16), g: parseInt(i.slice(2, 4), 16), b: parseInt(i.slice(4, 6), 16) };
+    return {
+      r: parseInt(i.slice(0, 2), 16),
+      g: parseInt(i.slice(2, 4), 16),
+      b: parseInt(i.slice(4, 6), 16)
+    };
   }
   _rgbToHex(t = {}) {
     const i = (a) => Number(a || 0).toString(16).padStart(2, "0");
@@ -1055,12 +1174,69 @@ class jt extends x {
   }
   render() {
     const t = [
-      ["view", "View", d`<svg viewBox="0 0 24 24"><path d="M4 19V5m5 14V9m5 10V4m5 15v-8"/></svg>`],
-      ["configuration", "Configuration", d`<svg viewBox="0 0 24 24"><path d="M4 4h16v5H4zm0 11h16v5H4zm4-6v6m8-6v6"/></svg>`],
-      ["miniatures", "Miniatures", d`<svg viewBox="0 0 24 24"><path d="M7 20v-2a5 5 0 0 1 10 0v2M12 4a4 4 0 1 1 0 8 4 4 0 0"/></svg>`],
-      ["search", "Search", d`<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5"/></svg>`]
+      [
+        "view",
+        "View",
+        d`<svg viewBox="0 0 24 24">
+					<path d="M4 19V5m5 14V9m5 10V4m5 15v-8" />
+				</svg>`
+      ],
+      [
+        "configuration",
+        "Configuration",
+        d`<svg viewBox="0 0 24 24">
+					<path d="M4 4h16v5H4zm0 11h16v5H4zm4-6v6m8-6v6" />
+				</svg>`
+      ],
+      [
+        "miniatures",
+        "Miniatures",
+        d`<svg viewBox="0 0 24 24">
+					<path
+						d="M7 20v-2a5 5 0 0 1 10 0v2M12 4a4 4 0 1 1 0 8 4 4 0 0" />
+				</svg>`
+      ],
+      [
+        "search",
+        "Search",
+        d`<svg viewBox="0 0 24 24">
+					<circle
+						cx="10.5"
+						cy="10.5"
+						r="5.5" />
+					<path d="m15 15 5 5" />
+				</svg>`
+      ]
     ];
-    return d`<style>${tt}</style><div class="app-shell"><header class="topbar"><div class="topbar-main"><ha-menu-button class="ha-native-menu"></ha-menu-button><div class="brand"><div class="brand-icon">SC</div><div><b>Smart Cabinet</b><span>Control & catalogue</span></div></div></div><nav>${t.map(([i, a, r]) => d`<button class="nav-tab ${this._active === i ? "active" : ""}" @click=${() => this._selectTab(i)} aria-label=${a} title=${a}>${r}</button>`)}</nav></header><div class="page">${Nt(this)}</div></div>`;
+    return d`<style>
+				${tt}
+			</style>
+			<div class="app-shell">
+				<header class="topbar">
+					<div class="topbar-main">
+						<ha-menu-button class="ha-native-menu"></ha-menu-button>
+						<div class="brand">
+							<div class="brand-icon">SC</div>
+							<div>
+								<b>Smart Cabinet</b
+								><span>Control & catalogue</span>
+							</div>
+						</div>
+					</div>
+					<nav>
+						${t.map(
+      ([i, a, r]) => d`<button
+									class="nav-tab ${this._active === i ? "active" : ""}"
+									@click=${() => this._selectTab(i)}
+									aria-label=${a}
+									title=${a}>
+									${r}
+								</button>`
+    )}
+					</nav>
+				</header>
+				<div class="page">${Nt(this)}</div>
+			</div>`;
   }
   _render() {
     this.requestUpdate();
@@ -1073,17 +1249,54 @@ class jt extends x {
     i.length && (this._viewIndex = (t % i.length + i.length) % i.length, this._render(), this._scheduleViewHighlight());
   }
   _scheduleMappingHighlight() {
-    clearTimeout(this._mappingTimer), this._mappingTimer = setTimeout(() => this._command({ action: "highlightLocation", shelf: this._selectedShelf, location: this._selectedLocation }), 220);
+    clearTimeout(this._mappingTimer), this._mappingTimer = setTimeout(
+      () => this._command({
+        action: "highlightLocation",
+        shelf: this._selectedShelf,
+        location: this._selectedLocation
+      }),
+      220
+    );
   }
   _scheduleViewHighlight() {
     const t = this._viewItem(this._viewIndex);
-    t && (clearTimeout(this._viewTimer), this._viewTimer = setTimeout(() => this._command({ action: "highlightLocation", shelf: Number(t.shelf), location: Number(t.location) }), 220));
+    t && (clearTimeout(this._viewTimer), this._viewTimer = setTimeout(
+      () => this._command({
+        action: "highlightLocation",
+        shelf: Number(t.shelf),
+        location: Number(t.location)
+      }),
+      220
+    ));
   }
   async _saveMini() {
     const t = this.shadowRoot.querySelector("#mini-name").value.trim(), i = this.shadowRoot.querySelector("#mini-collection").value.trim(), a = this.shadowRoot.querySelector("#mini-artist").value.trim();
     if (!t) return;
-    const r = this._miniatures.find((s) => s.id === this._editingMiniId);
-    await this._command(r ? { action: "updateMiniature", id: r.id, name: t, collection: i, artist: a, date: r.date || "", shelf: r.shelf || 0, location: r.location || 0, notes: r.notes || "" } : { action: "createMiniature", name: t, collection: i, artist: a, date: "", shelf: 0, location: 0, notes: "" }), this._editingMiniId = null, this._render();
+    const r = this._miniatures.find(
+      (n) => n.id === this._editingMiniId
+    );
+    await this._command(
+      r ? {
+        action: "updateMiniature",
+        id: r.id,
+        name: t,
+        collection: i,
+        artist: a,
+        date: r.date || "",
+        shelf: r.shelf || 0,
+        location: r.location || 0,
+        notes: r.notes || ""
+      } : {
+        action: "createMiniature",
+        name: t,
+        collection: i,
+        artist: a,
+        date: "",
+        shelf: 0,
+        location: 0,
+        notes: ""
+      }
+    ), this._editingMiniId = null, this._render();
   }
   _scheduleSearch() {
     clearTimeout(this._searchTimer), this._searchTimer = setTimeout(() => this._highlightSearch(), 220);
@@ -1091,8 +1304,20 @@ class jt extends x {
   async _highlightSearch() {
     const t = this._searchQuery.trim().toLocaleLowerCase();
     if (!t) return this._command({ action: "clearHighlight" });
-    const i = this._searchField === "all" ? ["name", "collection", "artist"] : [this._searchField], a = this._miniatures.filter((r) => Number(r.shelf) > 0 && Number(r.location) > 0 && i.some((s) => String(r[s] || "").toLocaleLowerCase().includes(t)));
-    return this._command(a.length ? { action: "highlightLocations", locations: a.map((r) => ({ shelf: r.shelf, location: r.location })) } : { action: "clearHighlight" });
+    const i = this._searchField === "all" ? ["name", "collection", "artist"] : [this._searchField], a = this._miniatures.filter(
+      (r) => Number(r.shelf) > 0 && Number(r.location) > 0 && i.some(
+        (n) => String(r[n] || "").toLocaleLowerCase().includes(t)
+      )
+    );
+    return this._command(
+      a.length ? {
+        action: "highlightLocations",
+        locations: a.map((r) => ({
+          shelf: r.shelf,
+          location: r.location
+        }))
+      } : { action: "clearHighlight" }
+    );
   }
 }
 customElements.define("ha-panel-smart-cabinet", jt);

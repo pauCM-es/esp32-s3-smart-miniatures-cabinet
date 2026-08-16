@@ -1,15 +1,15 @@
 import { html, nothing } from "lit";
-const avatar = (name) =>
+const avatar = (name?: string) =>
 	html`<div class="mini-avatar">${name?.[0] || "?"}</div>`;
 
-export const panelContent = (panel) => {
+export const panelContent = (panel: any) => {
 	if (panel._active === "configuration") return configurationTemplate(panel);
 	if (panel._active === "miniatures") return miniaturesTemplate(panel);
 	if (panel._active === "view") return viewTemplate(panel);
 	return searchTemplate(panel);
 };
 
-const configurationTemplate = (p) => {
+const configurationTemplate = (p: any) => {
 	const layout = p._layout;
 	const shelves = layout.shelves || [];
 	if (!shelves.length)
@@ -180,7 +180,7 @@ const configurationTemplate = (p) => {
 		</div>`;
 };
 
-const mappingTemplate = (p, shelf, location) => {
+const mappingTemplate = (p: any, shelf: any, location: any) => {
 	const start =
 		p._mappingStart ?? (location?.mapped ? location.start_led : null);
 	const end =
@@ -289,7 +289,7 @@ const mappingTemplate = (p, shelf, location) => {
 	</section>`;
 };
 
-const miniaturesTemplate = (p) => {
+const miniaturesTemplate = (p: any) => {
 	const items = p._miniatures;
 	const editing = items.find((item) => item.id === p._editingMiniId);
 	return html`<div class="miniatures-grid">
@@ -379,7 +379,7 @@ const miniaturesTemplate = (p) => {
 	</div>`;
 };
 
-const searchTemplate = (p) => {
+const searchTemplate = (p: any) => {
 	const query = p._searchQuery.trim().toLocaleLowerCase();
 	const fields =
 		p._searchField === "all"
@@ -468,7 +468,7 @@ const searchTemplate = (p) => {
 	</section>`;
 };
 
-const viewTemplate = (p) => {
+const viewTemplate = (p: any) => {
 	const item = p._viewItem(p._viewIndex);
 	if (!item)
 		return html`<cabinet-panel-card class="view-card empty-state">

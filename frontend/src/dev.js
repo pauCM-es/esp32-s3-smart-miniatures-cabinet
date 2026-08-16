@@ -1,4 +1,4 @@
-import "./custom-panel/smart-cabinet-panel.js";
+import "./custom-panel/smart-cabinet-panel.ts";
 import "./dev.css";
 import { createMockHass } from "./dev/mock-hass.js";
 
