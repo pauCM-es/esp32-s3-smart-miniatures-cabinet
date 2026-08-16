@@ -701,6 +701,9 @@ button.full {
 	gap: 18px;
 	align-items: start;
 }
+.miniatures-grid.catalogue-only {
+	grid-template-columns: minmax(0, 1fr);
+}
 .mini-editor {
 	position: sticky;
 	top: 90px;

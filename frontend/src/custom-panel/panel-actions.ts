@@ -116,10 +116,17 @@ export const createPanelActions = (p: Panel) => ({
 	},
 	editMini: (id) => {
 		p._editingMiniId = id;
+		p._addingMini = false;
+		p._render();
+	},
+	addMini: () => {
+		p._editingMiniId = null;
+		p._addingMini = true;
 		p._render();
 	},
 	cancelMini: () => {
 		p._editingMiniId = null;
+		p._addingMini = false;
 		p._render();
 	},
 	saveMini: () => p._saveMini(),

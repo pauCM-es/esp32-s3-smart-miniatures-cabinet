@@ -23,6 +23,7 @@ class HaPanelSmartCabinet extends LitElement {
 	_selectedShelf = 1;
 	_selectedLocation = 1;
 	_editingMiniId: string | null = null;
+	_addingMini = false;
 	_searchTimer: ReturnType<typeof setTimeout> | null = null;
 	_dataSignature: string | null = null;
 	_searchQuery = "";
@@ -50,6 +51,7 @@ class HaPanelSmartCabinet extends LitElement {
 		this._selectedShelf = 1;
 		this._selectedLocation = 1;
 		this._editingMiniId = null;
+		this._addingMini = false;
 		this._searchTimer = null;
 		this._dataSignature = null;
 		this._searchQuery = "";
@@ -363,6 +365,7 @@ class HaPanelSmartCabinet extends LitElement {
 					},
 		);
 		this._editingMiniId = null;
+		this._addingMini = false;
 		this._render();
 	}
 

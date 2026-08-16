@@ -341,9 +341,11 @@ const mappingTemplate = (p: any, shelf: any, location: any) => {
 const miniaturesTemplate = (p: any) => {
 	const items = p._miniatures;
 	const editing = items.find((item) => item.id === p._editingMiniId);
+	const showEditor = Boolean(editing || p._addingMini);
 	const sortedItems = sortMiniatures(items, p._catalogueSort);
-	return html`<div class="miniatures-grid">
-		<section class="panel-card mini-editor">
+	return html`<div class="miniatures-grid ${showEditor ? "" : "catalogue-only"}">
+		${showEditor
+			? html`<section class="panel-card mini-editor">
 			<div class="eyebrow">
 				${editing ? "EDIT MINIATURE" : "NEW MINIATURE"}
 			</div>
@@ -370,23 +372,23 @@ const miniaturesTemplate = (p: any) => {
 				/></label>
 			</div>
 			<div class="button-row end">
-				${editing
-					? html`<button @click=${p.actions.cancelMini}>
-							Cancel
-						</button>`
-					: nothing}<button
+				<button @click=${p.actions.cancelMini}>Cancel</button><button
 					class="primary"
 					@click=${p.actions.saveMini}>
 					${editing ? "Save changes" : "Add miniature"}
 				</button>
 			</div>
-		</section>
+		</section>`
+			: nothing}
 		<section class="panel-card mini-list-card">
 			<div class="section-heading">
 				<div>
 					<div class="eyebrow">CATALOGUE</div>
 					<h2>${items.length} miniatures</h2>
 				</div>
+				<button class="primary small" @click=${p.actions.addMini}>
+					Add new mini
+				</button>
 			</div>
 			${sortControls(p._catalogueSort, (sort) =>
 				p.actions.setSort("_catalogueSort", sort),
