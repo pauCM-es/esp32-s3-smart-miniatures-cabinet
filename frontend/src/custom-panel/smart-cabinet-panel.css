@@ -906,6 +906,11 @@ button.full {
 	margin: 18px auto;
 	padding: 22px;
 }
+.summary-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
 .summary-shelves { display: grid; gap: 12px; }
 .summary-shelf { padding: 14px; border-radius: 13px; background: var(--secondary-background-color); }
 .summary-shelf-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 12px; }
@@ -924,6 +929,12 @@ button.full {
 .summary-hex span { display: block; font-size: clamp(7px, 1.7vw, 10px); font-weight: 800; line-height: 1; }
 .summary-hex.assigned { background: #8fd4e8; color: #786000; }
 .summary-hex.assigned::before { background: #f1e6b2; }
+.summary-hex.selected { background: var(--primary-color); color: var(--text-primary-color); }
+.summary-hex.selected::before { background: color-mix(in srgb, var(--primary-color) 30%, var(--card-background-color)); }
+.summary-hex.moving { background: #f59e0b; color: #3b2600; }
+.summary-hex.moving::before { background: #fef3c7; }
+.summary-hex.target { background: #22c55e; color: #073b1a; }
+.summary-hex.target::before { background: #dcfce7; }
 .summary-hex:hover, .summary-hex:focus-visible { background: var(--primary-color); outline: none; }
 .view-mini-card {
 	display: flex;

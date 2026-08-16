@@ -31,6 +31,9 @@ class HaPanelSmartCabinet extends LitElement {
 	_searchSort = "name";
 	_catalogueSort = "name";
 	_catalogueView = "list";
+	_summarySelected: { shelf: number; location: number } | null = null;
+	_summaryMoveSource: { shelf: number; location: number } | null = null;
+	_summaryMoveTarget: { shelf: number; location: number } | null = null;
 	_viewIndex = 0;
 	_viewTimer: ReturnType<typeof setTimeout> | null = null;
 	_mappingStart: number | null = null;
@@ -60,6 +63,9 @@ class HaPanelSmartCabinet extends LitElement {
 		this._searchSort = "name";
 		this._catalogueSort = "name";
 		this._catalogueView = "list";
+		this._summarySelected = null;
+		this._summaryMoveSource = null;
+		this._summaryMoveTarget = null;
 		this._viewIndex = 0;
 		this._viewTimer = null;
 		this._mappingStart = null;
@@ -151,11 +157,74 @@ class HaPanelSmartCabinet extends LitElement {
 	}
 
 	_selectSummaryLocation(shelf, location) {
+		if (this._summaryMoveSource) {
+			this._selectSummaryMoveTarget(shelf, location);
+			return;
+		}
+		this._summarySelected = { shelf: Number(shelf), location: Number(location) };
 		const itemIndex = this._assignedMiniatures.findIndex(
 			(item) => Number(item.shelf) === Number(shelf) && Number(item.location) === Number(location),
 		);
 		if (itemIndex >= 0) this._viewIndex = itemIndex;
 		this._command({ action: "highlightLocation", shelf: Number(shelf), location: Number(location) });
+		this._render();
+	}
+
+	_startSummaryMove() {
+		const selected = this._summarySelected;
+		const miniature = selected && this._miniatures.find(
+			(item) => Number(item.shelf) === selected.shelf && Number(item.location) === selected.location,
+		);
+		if (!selected || !miniature) return;
+		this._summaryMoveSource = selected;
+		this._summaryMoveTarget = null;
+		this._render();
+	}
+
+	_cancelSummaryMove(clearSelection = false) {
+		if (!this._summaryMoveSource && (!clearSelection || !this._summarySelected)) return;
+		if (clearSelection) this._summarySelected = null;
+		this._summaryMoveSource = null;
+		this._summaryMoveTarget = null;
+		if (clearSelection) this._command({ action: "clearHighlight" });
+		this._render();
+	}
+
+	async _selectSummaryMoveTarget(shelf, location) {
+		const source = this._summaryMoveSource;
+		const target = { shelf: Number(shelf), location: Number(location) };
+		if (!source || (source.shelf === target.shelf && source.location === target.location)) return;
+		const miniature = this._miniatures.find(
+			(item) => Number(item.shelf) === source.shelf && Number(item.location) === source.location,
+		);
+		if (!miniature) return this._cancelSummaryMove();
+		const displaced = this._miniatures.find(
+			(item) => Number(item.shelf) === target.shelf && Number(item.location) === target.location,
+		);
+		this._summaryMoveTarget = target;
+		this._render();
+		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+		const message = displaced
+			? `Move ${miniature.name} to Shelf ${target.shelf}, Location ${target.location}?\n\n${displaced.name} will become Unassigned.`
+			: `Move ${miniature.name} to Shelf ${target.shelf}, Location ${target.location}?`;
+		if (!confirm(message)) return this._cancelSummaryMove();
+		const update = (item, destinationShelf, destinationLocation) =>
+			this._command({
+				action: "updateMiniature",
+				id: item.id,
+				name: item.name || "",
+				collection: item.collection || "",
+				artist: item.artist || "",
+				date: item.date || "",
+				shelf: destinationShelf,
+				location: destinationLocation,
+				notes: item.notes || "",
+			});
+		if (displaced) await update(displaced, 0, 0);
+		await update(miniature, target.shelf, target.location);
+		this._summarySelected = target;
+		this._summaryMoveSource = null;
+		this._summaryMoveTarget = null;
 		this._render();
 	}
 
@@ -252,7 +321,7 @@ class HaPanelSmartCabinet extends LitElement {
 		return html`<style>
 				${panelStyles}
 			</style>
-			<div class="app-shell">
+			<div class="app-shell" @click=${() => this._cancelSummaryMove(true)}>
 				<header class="topbar">
 					<div class="topbar-main">
 						<ha-menu-button class="ha-native-menu"></ha-menu-button>

@@ -642,19 +642,28 @@ const viewControlsTemplate = (p: any) => {
 
 const cabinetSummaryTemplate = (p: any) => {
 	const shelves = p._layout.shelves || [];
+	const selected = p._summarySelected;
+	const moving = p._summaryMoveSource;
+	const target = p._summaryMoveTarget;
+	const selectedMiniature = selected && p._miniatures.find(
+		(item) => Number(item.shelf) === selected.shelf && Number(item.location) === selected.location,
+	);
 	const miniaturesByLocation = new Map<string, any>(
 		p._assignedMiniatures.map((item) => [
 			`${item.shelf}:${item.location}`,
 			item,
 		]),
 	);
-	return html`<section class="panel-card cabinet-summary">
+	return html`<section class="panel-card cabinet-summary" @click=${(event) => event.stopPropagation()}>
 		<div class="section-heading">
 			<div>
 				<div class="eyebrow">CABINET SUMMARY</div>
 				<h2>All shelves</h2>
 			</div>
-			<span class="muted">Tap a location to locate it.</span>
+			<div class="summary-actions">
+				<span class="muted">${moving ? "Choose a target location." : "Tap a location to locate it."}</span>
+				<button class="small" ?disabled=${!selectedMiniature || Boolean(moving)} @click=${() => p._startSummaryMove()}>Move</button>
+			</div>
 		</div>
 		${shelves.length
 			? html`<div class="summary-shelves">
@@ -694,10 +703,11 @@ const cabinetSummaryTemplate = (p: any) => {
 											miniaturesByLocation.get(
 												`${shelf.shelf}:${location.location}`,
 											);
+										const isSource = moving && moving.shelf === Number(shelf.shelf) && moving.location === Number(location.location);
+										const isTarget = target && target.shelf === Number(shelf.shelf) && target.location === Number(location.location);
+										const isSelected = selected && selected.shelf === Number(shelf.shelf) && selected.location === Number(location.location);
 										return html`<button
-											class="summary-hex ${anchor.run} ${miniature
-												? "assigned"
-												: ""}"
+											class="summary-hex ${anchor.run} ${miniature ? "assigned" : ""} ${isSelected ? "selected" : ""} ${isSource ? "moving" : ""} ${isTarget ? "target" : ""}"
 											style=${`--anchor:${anchor.percent}`}
 											@click=${() =>
 												p._selectSummaryLocation(
