@@ -31,6 +31,9 @@ export interface PanelConfig {
 	miniatures_entity: string;
 	scene_entity: string;
 	mini_lights_command_topic: string;
+	power_entity: string;
+	brightness_entity: string;
+	mini_lights_entity: string;
 }
 
 export interface PanelActions {
@@ -60,10 +63,22 @@ export interface PanelActions {
 	setViewIndex(index: number): void;
 	clearViewHighlight(): Promise<void>;
 	applyScene(scene: string): Promise<void>;
+	setCabinetPower(on: boolean): Promise<void>;
+	setCabinetBrightness(brightness: number | string): Promise<void>;
 	setMiniatureLights(update: {
+		power?: boolean;
 		brightness?: number | string;
 		color?: string;
 	}): Promise<void>;
+	openPaletteEditor(): void;
+	closePaletteEditor(): void;
+	selectPaletteColor(index: number): void;
+	setPaletteColor(color: string): Promise<void>;
+	addPaletteColor(): void;
+	removePaletteColor(index: number): void;
+	startPaletteDrag(index: number, event: DragEvent): void;
+	dropPaletteColor(targetIndex: number, event: DragEvent): void;
+	finishPaletteDrag(): void;
 	setSearchQuery(query: string): void;
 	setSearchField(field: MiniatureSearchField): void;
 	setSort(target: SortTarget, sort: MiniatureSort): void;
@@ -94,6 +109,12 @@ export interface PanelTemplateContext {
 	_ledZoom: number;
 	_miniatureBrightness: number;
 	_miniatureColor: string;
+	_miniaturePower: boolean;
+	_miniaturePalette: string[];
+	_paletteEditorOpen: boolean;
+	_paletteSelectedIndex: number;
+	_cabinetBrightness: number;
+	_cabinetPower: boolean;
 	readonly _config: PanelConfig;
 	readonly _layout: Layout;
 	readonly _miniatures: Miniature[];
@@ -119,9 +140,21 @@ export interface PanelActionHost extends PanelTemplateContext {
 	_selectSummaryLocation(shelf: number, location: number): void;
 	_startSummaryMove(): void;
 	_setMiniatureLights(update: {
+		power?: boolean;
 		brightness?: number | string;
 		color?: string;
 	}): Promise<void>;
+	_openPaletteEditor(): void;
+	_closePaletteEditor(): void;
+	_selectPaletteColor(index: number): void;
+	_setPaletteColor(color: string): Promise<void>;
+	_addPaletteColor(): void;
+	_removePaletteColor(index: number): void;
+	_startPaletteDrag(index: number, event: DragEvent): void;
+	_dropPaletteColor(targetIndex: number, event: DragEvent): void;
+	_finishPaletteDrag(): void;
+	_setCabinetPower(on: boolean): Promise<void>;
+	_setCabinetBrightness(brightness: number | string): Promise<void>;
 	_saveMini(): Promise<void>;
 	_setViewIndex(index: number): void;
 	_scheduleMappingHighlight(): void;

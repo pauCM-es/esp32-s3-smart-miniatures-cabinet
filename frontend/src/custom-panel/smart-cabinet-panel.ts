@@ -2,10 +2,8 @@ import { LitElement, html, unsafeCSS, type TemplateResult } from "lit";
 import "../components/cabinet-panel-card.js";
 import { createPanelActions } from "./panel-actions.js";
 import { normalizeLayout, normalizeMiniatures } from "./panel-data.js";
-import {
-	isAssignedMiniature,
-	searchMiniatures,
-} from "./panel-selectors.js";
+import { DEFAULT_MINIATURE_PALETTE } from "./miniature-palette.js";
+import { isAssignedMiniature, searchMiniatures } from "./panel-selectors.js";
 import panelStyles from "./smart-cabinet-panel.css?inline";
 import { panelContent } from "./smart-cabinet-panel-templates.js";
 import { publishMqtt } from "./panel-service.js";
@@ -34,6 +32,9 @@ const DEFAULT_CONFIG: PanelConfig = {
 	miniatures_entity: "sensor.smart_cabinet_miniatures",
 	scene_entity: "sensor.smart_cabinet_scene",
 	mini_lights_command_topic: "smartcabinet/cabinet01/ha/mini_lights/set",
+	power_entity: "switch.smart_cabinet_power",
+	brightness_entity: "number.smart_cabinet_brightness",
+	mini_lights_entity: "light.miniature_lights",
 };
 
 class HaPanelSmartCabinet extends LitElement {
@@ -41,7 +42,7 @@ class HaPanelSmartCabinet extends LitElement {
 	_hass: Hass | null = null;
 	_panel: { config?: Record<string, string> } | null = null;
 	_narrow = false;
-	_active: PanelView = "configuration";
+	_active: PanelView = "view";
 	_selectedShelf = 1;
 	_selectedLocation = 1;
 	_editingMiniId: string | null = null;
@@ -63,9 +64,22 @@ class HaPanelSmartCabinet extends LitElement {
 	_mappingTimer: ReturnType<typeof setTimeout> | null = null;
 	_showAllMappings = false;
 	_ledZoom = 1;
-	_dialDrag: { pointerId: number; x: number; value: number; steps: number } | null = null;
+	_dialDrag: {
+		pointerId: number;
+		x: number;
+		value: number;
+		steps: number;
+	} | null = null;
 	_miniatureBrightness = 45;
 	_miniatureColor = "#03a9e6";
+	_miniaturePower = true;
+	_miniaturePalette: string[] = [...DEFAULT_MINIATURE_PALETTE];
+	_paletteEditorOpen = false;
+	_paletteSelectedIndex = 0;
+	_paletteDragIndex: number | null = null;
+	_loadedPaletteStorageKey: string | null = null;
+	_cabinetBrightness = 0;
+	_cabinetPower = false;
 	_layoutData: Layout = { shelf_count: 0, shelves: [] };
 	_miniaturesData: Miniature[] = [];
 	actions: PanelActions;
@@ -75,7 +89,7 @@ class HaPanelSmartCabinet extends LitElement {
 		this._hass = null;
 		this._panel = null;
 		this._narrow = false;
-		this._active = "configuration";
+		this._active = "view";
 		this._selectedShelf = 1;
 		this._selectedLocation = 1;
 		this._editingMiniId = null;
@@ -100,6 +114,14 @@ class HaPanelSmartCabinet extends LitElement {
 		this._dialDrag = null;
 		this._miniatureBrightness = 45;
 		this._miniatureColor = "#03a9e6";
+		this._miniaturePower = true;
+		this._miniaturePalette = [...DEFAULT_MINIATURE_PALETTE];
+		this._paletteEditorOpen = false;
+		this._paletteSelectedIndex = 0;
+		this._paletteDragIndex = null;
+		this._loadedPaletteStorageKey = null;
+		this._cabinetBrightness = 0;
+		this._cabinetPower = false;
 		this.actions = createPanelActions(this);
 	}
 
@@ -112,6 +134,7 @@ class HaPanelSmartCabinet extends LitElement {
 
 	set panel(value: { config?: Record<string, string> } | null) {
 		this._panel = value;
+		this._loadPalette();
 		this._syncStateData();
 		this._render();
 	}
@@ -132,6 +155,9 @@ class HaPanelSmartCabinet extends LitElement {
 	get _config(): PanelConfig {
 		return { ...DEFAULT_CONFIG, ...(this._panel?.config || {}) };
 	}
+	get _paletteStorageKey(): string {
+		return `smart-cabinet:miniature-palette:${this._config.mini_lights_entity}`;
+	}
 	get _layout(): Layout {
 		return this._layoutData;
 	}
@@ -147,13 +173,47 @@ class HaPanelSmartCabinet extends LitElement {
 		const miniatures = this._hass?.states?.[this._config.miniatures_entity];
 		this._layoutData = normalizeLayout(layout?.attributes);
 		this._miniaturesData = normalizeMiniatures(miniatures?.attributes);
+		const powerState =
+			this._hass?.states?.[this._config.power_entity]?.state;
+		if (powerState !== undefined) {
+			this._cabinetPower = powerState.toLocaleLowerCase() === "on";
+		}
+		const brightnessState =
+			this._hass?.states?.[this._config.brightness_entity]?.state;
+		if (
+			brightnessState !== undefined &&
+			Number.isFinite(Number(brightnessState))
+		) {
+			this._cabinetBrightness = Math.max(
+				0,
+				Math.min(100, Number(brightnessState)),
+			);
+		}
+		const miniatureState =
+			this._hass?.states?.[this._config.mini_lights_entity];
+		if (miniatureState) {
+			this._miniaturePower =
+				miniatureState.state.toLocaleLowerCase() === "on";
+			const brightness = Number(miniatureState.attributes.brightness);
+			if (Number.isFinite(brightness))
+				this._miniatureBrightness = brightness;
+			const rgb = miniatureState.attributes.rgb_color;
+			if (Array.isArray(rgb) && rgb.length >= 3) {
+				this._miniatureColor = this._rgbToHex({
+					r: Number(rgb[0]),
+					g: Number(rgb[1]),
+					b: Number(rgb[2]),
+				});
+			}
+		}
 		this._normalizeSelection();
 	}
 
 	_normalizeSelection(): void {
 		const assignedCount = this._assignedMiniatures.length;
 		this._viewIndex = assignedCount
-			? ((this._viewIndex % assignedCount) + assignedCount) % assignedCount
+			? ((this._viewIndex % assignedCount) + assignedCount) %
+				assignedCount
 			: 0;
 		const shelves = this._layout.shelves;
 		if (!shelves.length) {
@@ -186,19 +246,29 @@ class HaPanelSmartCabinet extends LitElement {
 		const center = location.start_led + (location.leds - 1) / 2;
 		if (center < firstRun) {
 			if (shelf.mirrored) {
-				return { run: "forward", percent: ((firstRun - center - 0.5) / firstRun) * 100 };
+				return {
+					run: "forward",
+					percent: ((firstRun - center - 0.5) / firstRun) * 100,
+				};
 			}
-			return { run: "forward", percent: ((center + 0.5) / firstRun) * 100 };
+			return {
+				run: "forward",
+				percent: ((center + 0.5) / firstRun) * 100,
+			};
 		}
 		if (shelf.mirrored) {
 			return {
 				run: "return",
-				percent: secondRun ? ((center - firstRun + 0.5) / secondRun) * 100 : 50,
+				percent: secondRun
+					? ((center - firstRun + 0.5) / secondRun) * 100
+					: 50,
 			};
 		}
 		return {
 			run: "return",
-			percent: secondRun ? ((total - center - 0.5) / secondRun) * 100 : 50,
+			percent: secondRun
+				? ((total - center - 0.5) / secondRun) * 100
+				: 50,
 		};
 	}
 
@@ -218,9 +288,13 @@ class HaPanelSmartCabinet extends LitElement {
 
 	_startSummaryMove(): void {
 		const selected = this._summarySelected;
-		const miniature = selected && this._miniatures.find(
-			(item) => item.shelf === selected.shelf && item.location === selected.location,
-		);
+		const miniature =
+			selected &&
+			this._miniatures.find(
+				(item) =>
+					item.shelf === selected.shelf &&
+					item.location === selected.location,
+			);
 		if (!selected || !miniature) return;
 		this._summaryMoveSource = selected;
 		this._summaryMoveTarget = null;
@@ -228,7 +302,11 @@ class HaPanelSmartCabinet extends LitElement {
 	}
 
 	_cancelSummaryMove(clearSelection = false): void {
-		if (!this._summaryMoveSource && (!clearSelection || !this._summarySelected)) return;
+		if (
+			!this._summaryMoveSource &&
+			(!clearSelection || !this._summarySelected)
+		)
+			return;
 		if (clearSelection) this._summarySelected = null;
 		this._summaryMoveSource = null;
 		this._summaryMoveTarget = null;
@@ -236,20 +314,34 @@ class HaPanelSmartCabinet extends LitElement {
 		this._render();
 	}
 
-	async _selectSummaryMoveTarget(shelf: number, location: number): Promise<void> {
+	async _selectSummaryMoveTarget(
+		shelf: number,
+		location: number,
+	): Promise<void> {
 		const source = this._summaryMoveSource;
 		const target = { shelf, location };
-		if (!source || (source.shelf === target.shelf && source.location === target.location)) return;
+		if (
+			!source ||
+			(source.shelf === target.shelf &&
+				source.location === target.location)
+		)
+			return;
 		const miniature = this._miniatures.find(
-			(item) => item.shelf === source.shelf && item.location === source.location,
+			(item) =>
+				item.shelf === source.shelf &&
+				item.location === source.location,
 		);
 		if (!miniature) return this._cancelSummaryMove();
 		const displaced = this._miniatures.find(
-			(item) => item.shelf === target.shelf && item.location === target.location,
+			(item) =>
+				item.shelf === target.shelf &&
+				item.location === target.location,
 		);
 		this._summaryMoveTarget = target;
 		this._render();
-		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+		await new Promise<void>((resolve) =>
+			requestAnimationFrame(() => resolve()),
+		);
 		const message = displaced
 			? `Move ${miniature.name} to Shelf ${target.shelf}, Location ${target.location}?\n\n${displaced.name} will become Unassigned.`
 			: `Move ${miniature.name} to Shelf ${target.shelf}, Location ${target.location}?`;
@@ -280,23 +372,35 @@ class HaPanelSmartCabinet extends LitElement {
 
 	_startDial(event: PointerEvent, value: number) {
 		if (event.button !== 0) return;
-		this._dialDrag = { pointerId: event.pointerId, x: event.clientX, value, steps: 0 };
+		this._dialDrag = {
+			pointerId: event.pointerId,
+			x: event.clientX,
+			value,
+			steps: 0,
+		};
 		(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
 		(event.currentTarget as HTMLElement).classList.add("dragging");
 	}
 
-	_moveDial(event: PointerEvent, total: number, onChange: (value: number) => void) {
-		if (!this._dialDrag || event.pointerId !== this._dialDrag.pointerId) return;
+	_moveDial(
+		event: PointerEvent,
+		total: number,
+		onChange: (value: number) => void,
+	) {
+		if (!this._dialDrag || event.pointerId !== this._dialDrag.pointerId)
+			return;
 		const steps = Math.trunc((this._dialDrag.x - event.clientX) / 36);
 		if (steps === this._dialDrag.steps) return;
 		this._dialDrag.steps = steps;
-		onChange(((this._dialDrag.value + steps) % total + total) % total);
+		onChange((((this._dialDrag.value + steps) % total) + total) % total);
 	}
 
 	_finishDial(event?: PointerEvent) {
 		if (event && event.pointerId !== this._dialDrag?.pointerId) return;
 		this._dialDrag = null;
-		(event?.currentTarget as HTMLElement | undefined)?.classList.remove("dragging");
+		(event?.currentTarget as HTMLElement | undefined)?.classList.remove(
+			"dragging",
+		);
 	}
 
 	_command(payload: CabinetCommand): Promise<void> {
@@ -304,21 +408,168 @@ class HaPanelSmartCabinet extends LitElement {
 	}
 
 	_setMiniatureLights({
+		power,
 		brightness,
 		color,
 	}: {
+		power?: boolean;
 		brightness?: number | string;
 		color?: string;
 	}): Promise<void> {
+		if (power !== undefined) this._miniaturePower = power;
+		if (power === undefined && (brightness !== undefined || color)) {
+			this._miniaturePower = true;
+		}
 		if (brightness !== undefined)
-			this._miniatureBrightness = Math.max(0, Math.min(100, Number(brightness) || 0));
+			this._miniatureBrightness = Math.max(
+				0,
+				Math.min(100, Number(brightness) || 0),
+			);
 		if (color) this._miniatureColor = color;
 		this._render();
 		return publishMqtt(this._hass, this._config.mini_lights_command_topic, {
-			state: "ON",
+			state: this._miniaturePower ? "ON" : "OFF",
 			brightness: this._miniatureBrightness,
 			color: this._hexToRgb(this._miniatureColor),
 		});
+	}
+
+	_loadPalette(): void {
+		const storageKey = this._paletteStorageKey;
+		if (storageKey === this._loadedPaletteStorageKey) return;
+		this._loadedPaletteStorageKey = storageKey;
+		this._miniaturePalette = [...DEFAULT_MINIATURE_PALETTE];
+		this._paletteSelectedIndex = 0;
+		try {
+			const raw = localStorage.getItem(storageKey);
+			if (!raw) return;
+			const stored = JSON.parse(raw) as unknown;
+			if (!Array.isArray(stored)) return;
+			const colors = stored.filter(
+				(value): value is string =>
+					typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value),
+			);
+			if (colors.length) this._miniaturePalette = colors.map((color) => color.toLowerCase());
+		} catch {
+			// Storage is optional; a clean default palette is always available.
+		}
+	}
+
+	_savePalette(): void {
+		try {
+			localStorage.setItem(
+				this._paletteStorageKey,
+				JSON.stringify(this._miniaturePalette),
+			);
+		} catch {
+			// Some privacy modes disable storage; palette editing still works for this session.
+		}
+	}
+
+	_openPaletteEditor(): void {
+		const currentIndex = this._miniaturePalette.findIndex(
+			(color) => color.toLocaleLowerCase() === this._miniatureColor.toLocaleLowerCase(),
+		);
+		this._paletteSelectedIndex = currentIndex >= 0 ? currentIndex : 0;
+		this._paletteEditorOpen = true;
+		this._render();
+	}
+
+	_closePaletteEditor(): void {
+		this._paletteEditorOpen = false;
+		this._paletteDragIndex = null;
+		this._render();
+	}
+
+	_selectPaletteColor(index: number): void {
+		if (!this._miniaturePalette[index]) return;
+		this._paletteSelectedIndex = index;
+		this._render();
+	}
+
+	_setPaletteColor(color: string): Promise<void> {
+		if (!this._miniaturePalette[this._paletteSelectedIndex]) {
+			this._miniaturePalette.push(color);
+			this._paletteSelectedIndex = this._miniaturePalette.length - 1;
+		} else {
+			this._miniaturePalette[this._paletteSelectedIndex] = color;
+		}
+		this._savePalette();
+		return this._setMiniatureLights({ color });
+	}
+
+	_addPaletteColor(): void {
+		this._miniaturePalette.push(this._miniatureColor);
+		this._paletteSelectedIndex = this._miniaturePalette.length - 1;
+		this._savePalette();
+		this._render();
+	}
+
+	_removePaletteColor(index: number): void {
+		if (this._miniaturePalette.length <= 1 || !this._miniaturePalette[index]) return;
+		this._miniaturePalette.splice(index, 1);
+		this._paletteSelectedIndex = Math.min(
+			this._paletteSelectedIndex,
+			this._miniaturePalette.length - 1,
+		);
+		this._savePalette();
+		this._render();
+	}
+
+	_startPaletteDrag(index: number, event: DragEvent): void {
+		this._paletteDragIndex = index;
+		event.dataTransfer?.setData("text/plain", String(index));
+		if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+		(event.currentTarget as HTMLElement).classList.add("dragging");
+	}
+
+	_dropPaletteColor(targetIndex: number, event: DragEvent): void {
+		event.preventDefault();
+		const sourceIndex = this._paletteDragIndex ?? Number(event.dataTransfer?.getData("text/plain"));
+		if (!Number.isInteger(sourceIndex) || sourceIndex < 0 || sourceIndex === targetIndex) {
+			this._finishPaletteDrag();
+			return;
+		}
+		const [color] = this._miniaturePalette.splice(sourceIndex, 1);
+		this._miniaturePalette.splice(targetIndex, 0, color);
+		if (this._paletteSelectedIndex === sourceIndex) {
+			this._paletteSelectedIndex = targetIndex;
+		} else if (sourceIndex < this._paletteSelectedIndex && targetIndex >= this._paletteSelectedIndex) {
+			this._paletteSelectedIndex -= 1;
+		} else if (sourceIndex > this._paletteSelectedIndex && targetIndex <= this._paletteSelectedIndex) {
+			this._paletteSelectedIndex += 1;
+		}
+		this._savePalette();
+		this._finishPaletteDrag();
+	}
+
+	_finishPaletteDrag(): void {
+		this._paletteDragIndex = null;
+		this._render();
+	}
+
+	_setCabinetPower(on: boolean): Promise<void> {
+		this._cabinetPower = on;
+		this._render();
+		return (
+			this._hass?.callService("switch", on ? "turn_on" : "turn_off", {
+				entity_id: this._config.power_entity,
+			}) ?? Promise.resolve()
+		);
+	}
+
+	_setCabinetBrightness(brightness: number | string): Promise<void> {
+		this._cabinetBrightness = Math.max(
+			0,
+			Math.min(100, Number(brightness) || 0),
+		);
+		this._render();
+		return (
+			this._hass?.callService("number", "set_value", {
+				entity_id: this._config.brightness_entity,
+				value: this._cabinetBrightness,
+			}) ?? Promise.resolve()
+		);
 	}
 
 	_hexToRgb(hex: string): RgbColor {
@@ -377,7 +628,9 @@ class HaPanelSmartCabinet extends LitElement {
 		return html`<style>
 				${panelStyles}
 			</style>
-			<div class="app-shell" @click=${() => this._cancelSummaryMove(true)}>
+			<div
+				class="app-shell"
+				@click=${() => this._cancelSummaryMove(true)}>
 				<header class="topbar">
 					<div class="topbar-main">
 						<ha-menu-button class="ha-native-menu"></ha-menu-button>
@@ -459,7 +712,9 @@ class HaPanelSmartCabinet extends LitElement {
 		const nameInput =
 			this.shadowRoot?.querySelector<HTMLInputElement>("#mini-name");
 		const collectionInput =
-			this.shadowRoot?.querySelector<HTMLInputElement>("#mini-collection");
+			this.shadowRoot?.querySelector<HTMLInputElement>(
+				"#mini-collection",
+			);
 		const artistInput =
 			this.shadowRoot?.querySelector<HTMLInputElement>("#mini-artist");
 		if (!nameInput || !collectionInput || !artistInput) return;

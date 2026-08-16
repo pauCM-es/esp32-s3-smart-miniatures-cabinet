@@ -160,7 +160,18 @@ export const createPanelActions = (p: PanelActionHost): PanelActions => ({
 		if (p._viewTimer !== null) clearTimeout(p._viewTimer);
 		await p._command({ action: "applyScene", scene });
 	},
+	setCabinetPower: (on) => p._setCabinetPower(on),
+	setCabinetBrightness: (brightness) => p._setCabinetBrightness(brightness),
 	setMiniatureLights: (update) => p._setMiniatureLights(update),
+	openPaletteEditor: () => p._openPaletteEditor(),
+	closePaletteEditor: () => p._closePaletteEditor(),
+	selectPaletteColor: (index) => p._selectPaletteColor(index),
+	setPaletteColor: (color) => p._setPaletteColor(color),
+	addPaletteColor: () => p._addPaletteColor(),
+	removePaletteColor: (index) => p._removePaletteColor(index),
+	startPaletteDrag: (index, event) => p._startPaletteDrag(index, event),
+	dropPaletteColor: (targetIndex, event) => p._dropPaletteColor(targetIndex, event),
+	finishPaletteDrag: () => p._finishPaletteDrag(),
 	setSearchQuery: (query) => {
 		p._searchQuery = query;
 		p._render();
