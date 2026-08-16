@@ -2,7 +2,13 @@ import { html, nothing } from "lit";
 const avatar = (name?: string) =>
 	html`<div class="mini-avatar">${name?.[0] || "?"}</div>`;
 
-const dialTemplate = (p: any, value: number, total: number, compact: boolean, onChange: (value: number) => void) => {
+const dialTemplate = (
+	p: any,
+	value: number,
+	total: number,
+	compact: boolean,
+	onChange: (value: number) => void,
+) => {
 	const count = Math.max(1, Number(total) || 1);
 	const selected = Number(value) || 0;
 	const offsets = [-3, -2, -1, 0, 1, 2, 3];
@@ -14,10 +20,16 @@ const dialTemplate = (p: any, value: number, total: number, compact: boolean, on
 		@pointercancel=${(event) => p._finishDial(event)}
 		@lostpointercapture=${(event) => p._finishDial(event)}>
 		${offsets.map(
-			(offset) => html`<span class="dial-tick ${offset === 0 ? "active" : ""}">
-				${compact && offset === 0 ? html`<em>LOCATION</em>` : nothing}<i></i>
-				<b>${(((selected + offset) % count + count) % count) + 1}</b>
-			</span>`,
+			(offset) =>
+				html`<span class="dial-tick ${offset === 0 ? "active" : ""}">
+					${compact && offset === 0
+						? html`<em>LOCATION</em>`
+						: nothing}<i></i>
+					<b
+						>${((((selected + offset) % count) + count) % count) +
+						1}</b
+					>
+				</span>`,
 		)}
 	</div>`;
 };
@@ -249,23 +261,28 @@ const mappingTemplate = (p: any, shelf: any, location: any) => {
 					@change=${(event) =>
 						p.actions.setShowAllMappings(
 							event.target.checked,
-						)} /><span class="mapping-toggle-icon" aria-hidden="true"
-						><svg viewBox="0 0 24 24"
-							><path d="M9 18h6M10 22h4M8.5 15.5C7.6 14.5 7 13.1 7 11.5a5 5 0 0 1 10 0c0 1.6-.6 3-1.5 4" />
-						</svg></span
-					><span>Show all assigned</span></label
+						)} /><span
+					class="mapping-toggle-icon"
+					aria-hidden="true"
+					><svg viewBox="0 0 24 24">
+						<path
+							d="M9 18h6M10 22h4M8.5 15.5C7.6 14.5 7 13.1 7 11.5a5 5 0 0 1 10 0c0 1.6-.6 3-1.5 4" /></svg></span
+				><span>Show all assigned</span></label
 			>
 		</div>
-	<div class="mapping-dial-selected" aria-label="Selected location">
-		${p._selectedLocation}
-	</div>
-	${dialTemplate(
-		p,
-		p._selectedLocation - 1,
-		shelf.total_locations,
-		true,
-		(value) => p.actions.selectMappingLocation(value, shelf.total_locations),
-	)}
+		<div
+			class="mapping-dial-selected"
+			aria-label="Selected location">
+			${p._selectedLocation}
+		</div>
+		${dialTemplate(
+			p,
+			p._selectedLocation - 1,
+			shelf.total_locations,
+			true,
+			(value) =>
+				p.actions.selectMappingLocation(value, shelf.total_locations),
+		)}
 		<div class="mapping-tools">
 			<button @click=${p.actions.toggleDirection}>
 				${shelf.mirrored ? "Start at right" : "Start at left"}</button
@@ -280,7 +297,8 @@ const mappingTemplate = (p: any, shelf: any, location: any) => {
 			</button>
 			${start !== null && end !== null
 				? html`<div class="mapping-range">
-						LED ${Math.min(start, end) + 1} → ${Math.max(start, end) + 1}
+						LED ${Math.min(start, end) + 1} →
+						${Math.max(start, end) + 1}
 						<span>${Math.abs(end - start) + 1} LEDs</span>
 					</div>`
 				: nothing}
@@ -500,58 +518,106 @@ const searchTemplate = (p: any) => {
 const viewTemplate = (p: any) => {
 	const item = p._viewItem(p._viewIndex);
 	const unassigned = p._miniatures.filter(
-		(miniature) => Number(miniature.shelf) <= 0 || Number(miniature.location) <= 0,
+		(miniature) =>
+			Number(miniature.shelf) <= 0 || Number(miniature.location) <= 0,
 	).length;
 	return html`${item
 		? html`<section class="panel-card view-card">
-		<div class="section-heading view-heading">
-			<div>
-				<div class="eyebrow">CABINET VIEW</div>
-				<h2>Browse miniatures</h2>
-			</div>
-			<span class="position-badge unassigned">${unassigned} unassigned</span>
-		</div>
-		<div id="view-selection" class="view-mini-card">
-			${avatar(item.name)}
-			<div class="view-mini-content">
-				<div class="view-index">
-					${p._viewIndex + 1} / ${p._assignedMiniatures.length}
+				<div class="section-heading view-heading">
+					<div>
+						<div class="eyebrow">CABINET VIEW</div>
+						<h2>Browse miniatures</h2>
+					</div>
+					<span class="position-badge unassigned"
+						>${unassigned} unassigned</span
+					>
 				</div>
-			<h3>${item.name}</h3>
-			<p>
-				${item.collection || "No collection"} ·
-				${item.artist || "Unknown artist"}
-			</p>
-			</div>
-		</div>
-		<div class="view-position">
-				SHELF ${item.shelf} · LOCATION ${item.location}
-			</div>
-		<div class="picker-shell">
-			<div class="picker-caption">Swipe or drag to locate</div>
-			${dialTemplate(
-				p,
-				p._viewIndex,
-				p._assignedMiniatures.length,
-				false,
-				(value) => p.actions.setViewIndex(value),
-			)}
-		</div>
-		<div class="view-actions">
-			<button @click=${p.actions.clearViewHighlight}>
-				Stop locating
-			</button>
-		</div>
+				<div
+					id="view-selection"
+					class="view-mini-card">
+					${avatar(item.name)}
+					<div class="view-mini-content">
+						<div class="view-index">
+							${p._viewIndex + 1} /
+							${p._assignedMiniatures.length}
+						</div>
+						<h3>${item.name}</h3>
+						<p>
+							${item.collection || "No collection"} ·
+							${item.artist || "Unknown artist"}
+						</p>
+					</div>
+				</div>
+				<div class="view-position">
+					SHELF ${item.shelf} · LOCATION ${item.location}
+				</div>
+				<div class="picker-shell">
+					<div class="picker-caption">Swipe or drag to locate</div>
+					${dialTemplate(
+						p,
+						p._viewIndex,
+						p._assignedMiniatures.length,
+						false,
+						(value) => p.actions.setViewIndex(value),
+					)}
+				</div>
+				<div class="view-actions">
+					<button @click=${p.actions.clearViewHighlight}>
+						Stop locating
+					</button>
+				</div>
 	</section>`
 		: html`<cabinet-panel-card class="view-card empty-state">
 				<b>No assigned miniatures</b>
-			</cabinet-panel-card>`}${cabinetSummaryTemplate(p)}`;
+			</cabinet-panel-card>`}${viewControlsTemplate(p)}${cabinetSummaryTemplate(p)}`;
+};
+
+const viewControlsTemplate = (p: any) => {
+	const scene = p._hass?.states?.[p._config.scene_entity]?.state || "Off";
+	const currentScene = String(scene).toLocaleLowerCase();
+	return html`<div class="view-controls-grid">
+		<section class="panel-card view-control-card">
+			<div class="eyebrow">SCENES</div>
+			<h3>Current: ${scene}</h3>
+			<p>Choosing a scene stops locating and restores the full strip output.</p>
+			<div class="scene-list">
+				${["off", "display", "showcase"].map(
+					(sceneId) => html`<button
+						class="scene-button ${currentScene === sceneId ? "active" : ""}"
+						@click=${() => p.actions.applyScene(sceneId)}>
+						${sceneId[0].toUpperCase() + sceneId.slice(1)}
+					</button>`,
+				)}
+			</div>
+		</section>
+		<section class="panel-card view-control-card">
+			<div class="eyebrow">MINIATURE STRIP</div>
+			<h3>All miniatures</h3>
+			<p>Colour or brightness stops locating and applies to the complete strip.</p>
+			<div class="strip-controls">
+				<label><span>Colour</span><input
+					type="color"
+					.value=${p._miniatureColor}
+					@change=${(event) => p._setMiniatureLights({ color: event.target.value })} /></label>
+				<label><span>Brightness</span><input
+					type="range"
+					min="0"
+					max="100"
+					.value=${p._miniatureBrightness}
+					@input=${(event) => p._setMiniatureLights({ brightness: event.target.value })} /></label>
+				<output>${p._miniatureBrightness}%</output>
+			</div>
+		</section>
+	</div>`;
 };
 
 const cabinetSummaryTemplate = (p: any) => {
 	const shelves = p._layout.shelves || [];
 	const miniaturesByLocation = new Map(
-		p._assignedMiniatures.map((item) => [`${item.shelf}:${item.location}`, item]),
+		p._assignedMiniatures.map((item) => [
+			`${item.shelf}:${item.location}`,
+			item,
+		]),
 	);
 	return html`<section class="panel-card cabinet-summary">
 		<div class="section-heading">
@@ -564,29 +630,55 @@ const cabinetSummaryTemplate = (p: any) => {
 		${shelves.length
 			? html`<div class="summary-shelves">
 					${shelves.map((shelf) => {
-						const mapped = (shelf.locations || []).filter((location) => location.mapped);
+						const mapped = (shelf.locations || []).filter(
+							(location) => location.mapped,
+						);
 						const assigned = mapped.filter((location) =>
-							miniaturesByLocation.has(`${shelf.shelf}:${location.location}`),
+							miniaturesByLocation.has(
+								`${shelf.shelf}:${location.location}`,
+							),
 						).length;
 						return html`<section class="summary-shelf">
 							<header class="summary-shelf-heading">
 								<b>Shelf ${shelf.shelf}</b>
-								<span>${mapped.length} mapped · ${assigned} assigned</span>
+								<span
+									>${mapped.length} mapped · ${assigned}
+									assigned</span
+								>
 							</header>
 							<div class="summary-scroll">
-								<div class="summary-map ${shelf.mirrored ? "mirrored" : ""}">
+								<div
+									class="summary-map ${shelf.mirrored
+										? "mirrored"
+										: ""}">
 									<div class="summary-run forward"></div>
 									<div class="summary-run return"></div>
-									<div class="summary-connector" aria-hidden="true"></div>
+									<div
+										class="summary-connector"
+										aria-hidden="true"></div>
 									${mapped.map((location) => {
-										const anchor = p._summaryLocationAnchor(shelf, location);
-										const miniature = miniaturesByLocation.get(`${shelf.shelf}:${location.location}`);
+										const anchor = p._summaryLocationAnchor(
+											shelf,
+											location,
+										);
+										const miniature =
+											miniaturesByLocation.get(
+												`${shelf.shelf}:${location.location}`,
+											);
 										return html`<button
-											class="summary-hex ${anchor.run} ${miniature ? "assigned" : ""}"
+											class="summary-hex ${anchor.run} ${miniature
+												? "assigned"
+												: ""}"
 											style=${`--anchor:${anchor.percent}`}
-											@click=${() => p._selectSummaryLocation(shelf.shelf, location.location)}
-											title=${miniature ? `Location ${location.location}: ${miniature.name}` : `Location ${location.location}: no miniature assigned`}>
-											<span>${miniature ? miniature.name?.[0] || location.location : location.location}</span>
+											@click=${() =>
+												p._selectSummaryLocation(
+													shelf.shelf,
+													location.location,
+												)}
+											title=${miniature
+												? `Location ${location.location}: ${miniature.name}`
+												: `Location ${location.location}: no miniature assigned`}>
+											<span>${location.location}</span>
 										</button>`;
 									})}
 								</div>
@@ -594,6 +686,8 @@ const cabinetSummaryTemplate = (p: any) => {
 						</section>`;
 					})}
 				</div>`
-			: html`<div class="empty-state"><b>Waiting for cabinet layout</b></div>`}
+			: html`<div class="empty-state">
+					<b>Waiting for cabinet layout</b>
+				</div>`}
 	</section>`;
 };

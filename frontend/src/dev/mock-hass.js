@@ -24,7 +24,13 @@ const fixture = () => ({
 	layout: {
 		shelf_count: 2,
 		highlight_color: { r: 156, g: 39, b: 176 },
-		shelves: [shelf(1, 160, 26), shelf(2, 36, 4, true)],
+		shelves: [
+			shelf(1, 160, 26),
+			shelf(2, 160, 26),
+			shelf(3, 160, 26),
+			shelf(4, 160, 26),
+			shelf(5, 160, 10, true),
+		],
 	},
 	miniatures: [
 		{

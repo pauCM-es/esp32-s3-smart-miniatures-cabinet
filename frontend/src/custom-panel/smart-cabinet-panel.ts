@@ -11,6 +11,7 @@ const DEFAULT_CONFIG = {
 	layout_entity: "sensor.smart_cabinet_layout",
 	miniatures_entity: "sensor.smart_cabinet_miniatures",
 	scene_entity: "sensor.smart_cabinet_scene",
+	mini_lights_command_topic: "smartcabinet/cabinet01/ha/mini_lights/set",
 };
 
 class HaPanelSmartCabinet extends LitElement {
@@ -34,6 +35,8 @@ class HaPanelSmartCabinet extends LitElement {
 	_showAllMappings = false;
 	_ledZoom = 1;
 	_dialDrag: { pointerId: number; x: number; value: number; steps: number } | null = null;
+	_miniatureBrightness = 45;
+	_miniatureColor = "#03a9e6";
 	actions: any;
 
 	constructor() {
@@ -57,6 +60,8 @@ class HaPanelSmartCabinet extends LitElement {
 		this._showAllMappings = false;
 		this._ledZoom = 1;
 		this._dialDrag = null;
+		this._miniatureBrightness = 45;
+		this._miniatureColor = "#03a9e6";
 		this.actions = createPanelActions(this);
 	}
 
@@ -169,6 +174,18 @@ class HaPanelSmartCabinet extends LitElement {
 
 	_command(payload) {
 		return publishMqtt(this._hass, this._config.command_topic, payload);
+	}
+
+	_setMiniatureLights({ brightness, color }: { brightness?: number; color?: string }) {
+		if (brightness !== undefined)
+			this._miniatureBrightness = Math.max(0, Math.min(100, Number(brightness) || 0));
+		if (color) this._miniatureColor = color;
+		this._render();
+		return publishMqtt(this._hass, this._config.mini_lights_command_topic, {
+			state: "ON",
+			brightness: this._miniatureBrightness,
+			color: this._hexToRgb(this._miniatureColor),
+		});
 	}
 
 	_hexToRgb(hex) {
