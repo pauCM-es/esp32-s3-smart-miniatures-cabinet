@@ -708,6 +708,9 @@ button.full {
 .mini-list {
 	display: grid;
 	gap: 7px;
+	max-height: min(65vh, 620px);
+	overflow-y: auto;
+	padding-right: 4px;
 }
 .mini-row {
 	display: grid;
@@ -771,7 +774,7 @@ button.full {
 .search-summary {
 	margin: 12px 2px;
 }
-.search-toolbar {
+.sort-controls {
 	display: flex;
 	align-items: center;
 	gap: 7px;
@@ -779,12 +782,12 @@ button.full {
 	color: var(--secondary-text-color);
 	font-size: 11px;
 }
-.search-sort-button {
+.sort-button {
 	min-height: 30px !important;
 	padding: 0 9px !important;
 	font-size: 11px;
 }
-.search-sort-button.active {
+.sort-button.active {
 	border-color: var(--primary-color) !important;
 	color: var(--primary-color) !important;
 }

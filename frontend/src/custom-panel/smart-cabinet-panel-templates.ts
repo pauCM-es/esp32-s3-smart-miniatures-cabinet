@@ -1,4 +1,6 @@
 import { html, nothing } from "lit";
+import { sortControls } from "../components/cabinet-sort-controls.js";
+import { sortMiniatures } from "./miniature-sort.js";
 const avatar = (name?: string) =>
 	html`<div class="mini-avatar">${name?.[0] || "?"}</div>`;
 
@@ -339,6 +341,7 @@ const mappingTemplate = (p: any, shelf: any, location: any) => {
 const miniaturesTemplate = (p: any) => {
 	const items = p._miniatures;
 	const editing = items.find((item) => item.id === p._editingMiniId);
+	const sortedItems = sortMiniatures(items, p._catalogueSort);
 	return html`<div class="miniatures-grid">
 		<section class="panel-card mini-editor">
 			<div class="eyebrow">
@@ -385,8 +388,11 @@ const miniaturesTemplate = (p: any) => {
 					<h2>${items.length} miniatures</h2>
 				</div>
 			</div>
+			${sortControls(p._catalogueSort, (sort) =>
+				p.actions.setSort("_catalogueSort", sort),
+			)}
 			<div class="mini-list">
-				${items.map(
+				${sortedItems.map(
 					(item) =>
 						html`<div class="mini-row">
 							${avatar(item.name)}
@@ -441,21 +447,7 @@ const searchTemplate = (p: any) => {
 			),
 		)
 		: [];
-	const sortedResults = [...results].sort((left, right) => {
-		if (p._searchSort === "location") {
-			const leftAssigned = Number(left.shelf) > 0 && Number(left.location) > 0;
-			const rightAssigned = Number(right.shelf) > 0 && Number(right.location) > 0;
-			if (leftAssigned !== rightAssigned) return leftAssigned ? -1 : 1;
-			return Number(left.shelf) - Number(right.shelf) ||
-				Number(left.location) - Number(right.location) ||
-				String(left.name).localeCompare(String(right.name));
-		}
-		if (p._searchSort === "newest") {
-			return Number(new Date(right.date || 0)) - Number(new Date(left.date || 0)) ||
-				String(left.name).localeCompare(String(right.name));
-		}
-		return String(left.name).localeCompare(String(right.name));
-	});
+	const sortedResults = sortMiniatures(results, p._searchSort);
 	const assigned = results.filter(
 		(item) => item.shelf > 0 && item.location > 0,
 	);
@@ -489,20 +481,9 @@ const searchTemplate = (p: any) => {
 				: "Start typing to search."}
 		</div>
 		${query
-			? html`<div class="search-toolbar">
-				<span>Sort by</span>
-				${[
-					["name", "Name"],
-					["location", "Location"],
-					["newest", "Newest"],
-				].map(
-					([sort, label]) => html`<button
-						class="search-sort-button ${p._searchSort === sort ? "active" : ""}"
-						@click=${() => p.actions.setSearchSort(sort)}>
-						${label}
-					</button>`,
-				)}
-			</div>`
+			? sortControls(p._searchSort, (sort) =>
+					p.actions.setSort("_searchSort", sort),
+				)
 			: nothing}
 		<div
 			id="search-results"
@@ -644,7 +625,7 @@ const viewControlsTemplate = (p: any) => {
 
 const cabinetSummaryTemplate = (p: any) => {
 	const shelves = p._layout.shelves || [];
-	const miniaturesByLocation = new Map(
+	const miniaturesByLocation = new Map<string, any>(
 		p._assignedMiniatures.map((item) => [
 			`${item.shelf}:${item.location}`,
 			item,

@@ -157,8 +157,8 @@ export const createPanelActions = (p: Panel) => ({
 		p._render();
 		p._scheduleSearch();
 	},
-	setSearchSort: (sort) => {
-		p._searchSort = sort;
+	setSort: (target, sort) => {
+		p[target] = sort;
 		p._render();
 	},
 });
