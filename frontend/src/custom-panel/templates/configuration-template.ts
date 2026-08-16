@@ -1,8 +1,68 @@
 import { html, type TemplateResult } from "lit";
+import { hsvToHex } from "../miniature-palette.js";
 import type { PanelTemplateContext } from "../panel-template-types.js";
 import type { Shelf } from "../panel-types.js";
 import { mappingTemplate } from "./mapping-template.js";
-import { eventValue } from "./template-primitives.js";
+
+const setHighlightColorFromPointer = (
+	panel: PanelTemplateContext,
+	event: PointerEvent,
+): void => {
+	const target = event.currentTarget as HTMLElement;
+	const bounds = target.getBoundingClientRect();
+	const x = event.clientX - bounds.left - bounds.width / 2;
+	const y = event.clientY - bounds.top - bounds.height / 2;
+	const saturation = Math.min(
+		1,
+		Math.hypot(x, y) / (Math.min(bounds.width, bounds.height) / 2),
+	);
+	const hue = (Math.atan2(y, x) * 180) / Math.PI + 180;
+	panel.actions.setHighlightColor(hsvToHex(hue, saturation));
+};
+
+const highlightColorPickerTemplate = (
+	panel: PanelTemplateContext,
+): TemplateResult => {
+	if (!panel._highlightColorPickerOpen) return html``;
+	return html`<div
+		class="highlight-picker-backdrop"
+		@click=${panel.actions.closeHighlightColorPicker}>
+		<section
+			class="highlight-picker-sheet"
+			role="dialog"
+			aria-modal="true"
+			aria-label="Choose highlight color"
+			@click=${(event: Event) => event.stopPropagation()}>
+			<div class="palette-sheet-handle" aria-hidden="true"></div>
+			<header class="palette-sheet-header">
+				<div><div class="eyebrow">CABINET CONFIGURATION</div><h2>Highlight color</h2></div>
+				<button
+					type="button"
+					class="icon-button palette-sheet-close"
+					aria-label="Close highlight color picker"
+					@click=${panel.actions.closeHighlightColorPicker}>
+					×
+				</button>
+			</header>
+			<div class="highlight-picker-value">${panel._highlightColor.toLocaleUpperCase()}</div>
+			<div
+				class="highlight-colour-wheel"
+				role="button"
+				tabindex="0"
+				aria-label="Choose highlight color"
+				@pointerdown=${(event: PointerEvent) =>
+					setHighlightColorFromPointer(panel, event)}></div>
+			<footer class="palette-sheet-footer">
+				<button
+					type="button"
+					class="primary"
+					@click=${panel.actions.closeHighlightColorPicker}>
+					Done
+				</button>
+			</footer>
+		</section>
+	</div>`;
+};
 
 const shelfListTemplate = (
 	panel: PanelTemplateContext,
@@ -135,21 +195,19 @@ export const configurationTemplate = (
 		</div>
 		<div class="general-values">
 			<div class="metric"><span>Shelves</span><b>${layout.shelf_count || shelves.length}</b></div>
-			<label class="color-control">
+			<div class="color-control">
 				<span>Highlight color</span>
-				<input
-					id="highlight-color"
-					type="color"
-					@change=${(event: Event) =>
-						panel.actions.setHighlightColor(eventValue(event))}
-					.value=${panel._rgbToHex(
-						layout.highlight_color || { r: 156, g: 39, b: 176 },
-					)} />
-			</label>
+				<button
+					type="button"
+					class="highlight-color-swatch"
+					style=${`--highlight-color:${panel._highlightColor}`}
+					aria-label="Choose highlight color"
+					@click=${panel.actions.openHighlightColorPicker}></button>
+			</div>
 		</div>
 	</section>
 	<div class="configuration-grid">
 		${shelfListTemplate(panel, shelves)}
 		${shelfDetailTemplate(panel, selected, shelves.length)}
-	</div>`;
+	</div>${highlightColorPickerTemplate(panel)}`;
 };

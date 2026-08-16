@@ -38,6 +38,8 @@ export interface PanelConfig {
 
 export interface PanelActions {
 	setHighlightColor(hex: string): Promise<void>;
+	openHighlightColorPicker(): void;
+	closeHighlightColorPicker(): void;
 	selectShelf(shelf: number): void;
 	selectLocation(location: number): Promise<void>;
 	insertShelf(position: number): Promise<void>;
@@ -113,6 +115,8 @@ export interface PanelTemplateContext {
 	_miniaturePalette: string[];
 	_paletteEditorOpen: boolean;
 	_paletteSelectedIndex: number;
+	_highlightColor: string;
+	_highlightColorPickerOpen: boolean;
 	_cabinetBrightness: number;
 	_cabinetPower: boolean;
 	readonly _config: PanelConfig;
@@ -137,6 +141,9 @@ export interface PanelActionHost extends PanelTemplateContext {
 	_render(): void;
 	_command(payload: CabinetCommand): Promise<void>;
 	_hexToRgb(hex: string): RgbColor;
+	_setHighlightColor(hex: string): Promise<void>;
+	_openHighlightColorPicker(): void;
+	_closeHighlightColorPicker(): void;
 	_selectSummaryLocation(shelf: number, location: number): void;
 	_startSummaryMove(): void;
 	_setMiniatureLights(update: {

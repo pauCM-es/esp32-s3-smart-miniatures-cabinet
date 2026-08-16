@@ -7,8 +7,9 @@ const inputValue = (panel: PanelActionHost, selector: string): string | undefine
 	(panel.shadowRoot?.querySelector(selector) as HTMLInputElement | null)?.value;
 
 export const createPanelActions = (p: PanelActionHost): PanelActions => ({
-	setHighlightColor: (hex) =>
-		p._command({ action: "setHighlightColor", ...p._hexToRgb(hex) }),
+	setHighlightColor: (hex) => p._setHighlightColor(hex),
+	openHighlightColorPicker: () => p._openHighlightColorPicker(),
+	closeHighlightColorPicker: () => p._closeHighlightColorPicker(),
 	selectShelf: (shelf) => {
 		p._selectedShelf = shelf;
 		p._selectedLocation = 1;

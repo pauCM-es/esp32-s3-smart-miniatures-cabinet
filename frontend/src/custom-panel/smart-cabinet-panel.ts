@@ -77,6 +77,8 @@ class HaPanelSmartCabinet extends LitElement {
 	_paletteEditorOpen = false;
 	_paletteSelectedIndex = 0;
 	_paletteDragIndex: number | null = null;
+	_highlightColor = "#9c27b0";
+	_highlightColorPickerOpen = false;
 	_loadedPaletteStorageKey: string | null = null;
 	_cabinetBrightness = 0;
 	_cabinetPower = false;
@@ -119,6 +121,8 @@ class HaPanelSmartCabinet extends LitElement {
 		this._paletteEditorOpen = false;
 		this._paletteSelectedIndex = 0;
 		this._paletteDragIndex = null;
+		this._highlightColor = "#9c27b0";
+		this._highlightColorPickerOpen = false;
 		this._loadedPaletteStorageKey = null;
 		this._cabinetBrightness = 0;
 		this._cabinetPower = false;
@@ -173,6 +177,9 @@ class HaPanelSmartCabinet extends LitElement {
 		const miniatures = this._hass?.states?.[this._config.miniatures_entity];
 		this._layoutData = normalizeLayout(layout?.attributes);
 		this._miniaturesData = normalizeMiniatures(miniatures?.attributes);
+		if (this._layoutData.highlight_color) {
+			this._highlightColor = this._rgbToHex(this._layoutData.highlight_color);
+		}
 		const powerState =
 			this._hass?.states?.[this._config.power_entity]?.state;
 		if (powerState !== undefined) {
@@ -432,6 +439,22 @@ class HaPanelSmartCabinet extends LitElement {
 			brightness: this._miniatureBrightness,
 			color: this._hexToRgb(this._miniatureColor),
 		});
+	}
+
+	_setHighlightColor(hex: string): Promise<void> {
+		this._highlightColor = hex;
+		this._render();
+		return this._command({ action: "setHighlightColor", ...this._hexToRgb(hex) });
+	}
+
+	_openHighlightColorPicker(): void {
+		this._highlightColorPickerOpen = true;
+		this._render();
+	}
+
+	_closeHighlightColorPicker(): void {
+		this._highlightColorPickerOpen = false;
+		this._render();
 	}
 
 	_loadPalette(): void {
