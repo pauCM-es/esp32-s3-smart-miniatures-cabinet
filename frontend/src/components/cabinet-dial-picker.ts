@@ -1,6 +1,11 @@
 import { LitElement, html } from "lit";
 
 export class CabinetDialPicker extends LitElement {
+	value = 0;
+	total = 1;
+	ticks = 3;
+	compact = false;
+	_drag: { pointerId: number; x: number; value: number; steps: number } | null = null;
 	static properties = {
 		value: { type: Number },
 		total: { type: Number },
@@ -18,7 +23,7 @@ export class CabinetDialPicker extends LitElement {
 	createRenderRoot() {
 		return this;
 	}
-	_start(event) {
+	_start(event: PointerEvent) {
 		if (event.button !== 0) return;
 		this._drag = {
 			pointerId: event.pointerId,
@@ -26,10 +31,10 @@ export class CabinetDialPicker extends LitElement {
 			value: this.value,
 			steps: 0,
 		};
-		event.currentTarget.setPointerCapture(event.pointerId);
+		(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
 		this.classList.add("dragging");
 	}
-	_move(event) {
+	_move(event: PointerEvent) {
 		if (!this._drag || event.pointerId !== this._drag.pointerId) return;
 		const steps = Math.trunc((this._drag.x - event.clientX) / 36);
 		if (steps === this._drag.steps) return;
@@ -42,7 +47,7 @@ export class CabinetDialPicker extends LitElement {
 			}),
 		);
 	}
-	_finish(event) {
+	_finish(event?: PointerEvent) {
 		if (event && event.pointerId !== this._drag?.pointerId) return;
 		this._drag = null;
 		this.classList.remove("dragging");

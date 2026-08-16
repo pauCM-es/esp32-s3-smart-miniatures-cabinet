@@ -493,6 +493,11 @@ const Ct = D.litElementPolyfillSupport;
 Ct?.({ LitElement: x });
 (D.litElementVersions ??= []).push("4.2.2");
 class Tt extends x {
+  value = 0;
+  total = 1;
+  ticks = 3;
+  compact = !1;
+  _drag = null;
   static properties = {
     value: { type: Number },
     total: { type: Number },
