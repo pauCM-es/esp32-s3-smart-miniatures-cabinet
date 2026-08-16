@@ -22,6 +22,7 @@ struct Shelf {
     uint16_t ledStart{0};
     uint16_t ledCount{0};
     uint8_t locationCount{0};
+    bool mirrored{false};  // Physical strip starts at the right-hand end.
 };
 
 class CabinetLayout {
@@ -32,6 +33,7 @@ public:
     bool setShelfCount(uint8_t count);
     bool setShelfLedCount(uint8_t shelfIndex, uint16_t count);
     bool setShelfLocationCount(uint8_t shelfIndex, uint8_t count);
+    bool setShelfMirrored(uint8_t shelfIndex, bool mirrored);
     bool setLocationRange(uint8_t shelfIndex, uint8_t locationIndex,
                           uint16_t relativeLedStart, uint16_t ledCount);
     bool distributeShelfEvenly(uint8_t shelfIndex);
@@ -54,8 +56,6 @@ private:
 
     void recalculateShelfOffsets();
     void rebuildShelfLocations(uint8_t shelfIndex);
-    bool rangeOverlaps(uint8_t shelfIndex, uint8_t locationIndex,
-                       uint16_t relativeLedStart, uint16_t ledCount) const;
 };
 
 }  // namespace smartcabinet

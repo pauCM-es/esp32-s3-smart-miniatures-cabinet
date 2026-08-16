@@ -11,7 +11,7 @@ CabinetLayout::CabinetLayout() {
 void CabinetLayout::loadDefaults() {
     shelfCount_ = config::kDefaultShelfCount;
     for (uint8_t i = 0; i < config::kMaxShelves; ++i) {
-        shelves_[i] = Shelf{i, 0, 0, 0};
+        shelves_[i] = Shelf{i, 0, 0, 0, false};
         for (uint8_t j = 0; j < config::kMaxLocationsPerShelf; ++j) {
             locations_[i][j] = Location{makeLocationId(i, j), i, j, 0, 0, 0};
         }
@@ -47,6 +47,7 @@ bool CabinetLayout::setShelfCount(uint8_t count) {
             shelves_[i].index = i;
             shelves_[i].ledCount = config::kDefaultLedsPerShelf;
             shelves_[i].locationCount = config::kDefaultLocationsPerShelf;
+            shelves_[i].mirrored = false;
             for (uint8_t j = 0; j < config::kMaxLocationsPerShelf; ++j) {
                 Location& loc = locations_[i][j];
                 loc.id = makeLocationId(i, j);
@@ -118,6 +119,12 @@ bool CabinetLayout::setShelfLocationCount(uint8_t shelfIndex, uint8_t count) {
     return true;
 }
 
+bool CabinetLayout::setShelfMirrored(uint8_t shelfIndex, bool mirrored) {
+    if (shelfIndex >= shelfCount_) return false;
+    shelves_[shelfIndex].mirrored = mirrored;
+    return true;
+}
+
 bool CabinetLayout::setLocationRange(uint8_t shelfIndex, uint8_t locationIndex,
                                      uint16_t relativeLedStart, uint16_t ledCount) {
     if (shelfIndex >= shelfCount_) {
@@ -140,10 +147,6 @@ bool CabinetLayout::setLocationRange(uint8_t shelfIndex, uint8_t locationIndex,
     if (static_cast<uint32_t>(relativeLedStart) + ledCount > s.ledCount) {
         return false;
     }
-    if (rangeOverlaps(shelfIndex, locationIndex, relativeLedStart, ledCount)) {
-        return false;
-    }
-
     Location& loc = locations_[shelfIndex][locationIndex];
     loc.relativeLedStart = relativeLedStart;
     loc.ledStart = s.ledStart + relativeLedStart;
@@ -234,29 +237,6 @@ void CabinetLayout::rebuildShelfLocations(uint8_t shelfIndex) {
             loc.ledCount = 0;
         }
     }
-}
-
-bool CabinetLayout::rangeOverlaps(uint8_t shelfIndex, uint8_t locationIndex,
-                                  uint16_t relativeLedStart, uint16_t ledCount) const {
-    const Shelf& s = shelves_[shelfIndex];
-    const uint16_t newStart = relativeLedStart;
-    const uint16_t newEnd = static_cast<uint16_t>(relativeLedStart + ledCount);
-
-    for (uint8_t i = 0; i < s.locationCount; ++i) {
-        if (i == locationIndex) {
-            continue;
-        }
-        const Location& other = locations_[shelfIndex][i];
-        if (other.ledCount == 0) {
-            continue;
-        }
-        const uint16_t otherStart = other.relativeLedStart;
-        const uint16_t otherEnd = static_cast<uint16_t>(otherStart + other.ledCount);
-        if (newStart < otherEnd && newEnd > otherStart) {
-            return true;
-        }
-    }
-    return false;
 }
 
 }  // namespace smartcabinet

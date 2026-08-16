@@ -33,7 +33,7 @@ constexpr int kRgbwCabinetDataPin = 46;
 constexpr uint16_t kRgbwCabinetLedCount = 30;  // Replace with measured strip count.
 
 constexpr int kMiniatureLedDataPin = 45;
-constexpr uint16_t kMiniatureLedCount = 400;    // ~2.5 m at 160 LED/m.
+constexpr uint16_t kMiniatureLedCount = 800;    // 5 shelves at 160 LED/m.
 // Physical output ceiling for the miniature strip (0-255).
 // The public 0-100% brightness controls scale to this value, not to 255.
 constexpr uint8_t kMiniatureMaxBrightness = 125;
