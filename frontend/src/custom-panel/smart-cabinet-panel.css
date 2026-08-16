@@ -715,6 +715,76 @@ button.full {
 	overflow-y: auto;
 	padding-right: 4px;
 }
+.catalogue-toolbar,
+.view-toggle {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+}
+.view-toggle {
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--divider-color);
+	border-radius: 10px;
+	background: var(--secondary-background-color);
+}
+.view-toggle .icon-button {
+	background: transparent;
+	color: var(--secondary-text-color);
+}
+.view-toggle .icon-button.active {
+	background: var(--card-background-color);
+	color: var(--primary-color);
+}
+.icon-button svg {
+	width: 16px;
+	height: 16px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+.mini-list.grid {
+	grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+	gap: 12px;
+	max-height: min(65vh, 620px);
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-right: 0;
+}
+.mini-row.mini-card {
+	position: relative;
+	grid-template-columns: 38px minmax(0, 1fr);
+	align-content: start;
+	min-height: 0;
+	padding: 13px;
+	gap: 10px;
+}
+.mini-row.mini-card .mini-artist,
+.mini-row.mini-card .position-badge {
+	grid-column: 1 / -1;
+}
+.mini-row.mini-card .mini-main {
+	padding-right: 60px;
+}
+.mini-row.mini-card .mini-artist {
+	margin: 0;
+}
+.mini-row.mini-card .position-badge {
+	justify-self: start;
+}
+.mini-row.mini-card .row-actions {
+	position: absolute;
+	top: 11px;
+	right: 11px;
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--divider-color);
+	border-radius: 9px;
+	background: var(--secondary-background-color);
+}
+.mini-row.mini-card .row-actions .icon-button { background: transparent; }
 .mini-row {
 	display: grid;
 	grid-template-columns: 38px minmax(160px, 1fr) minmax(

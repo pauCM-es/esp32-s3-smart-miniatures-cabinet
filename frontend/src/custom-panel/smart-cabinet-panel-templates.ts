@@ -342,7 +342,16 @@ const miniaturesTemplate = (p: any) => {
 	const items = p._miniatures;
 	const editing = items.find((item) => item.id === p._editingMiniId);
 	const showEditor = Boolean(editing || p._addingMini);
-	const sortedItems = sortMiniatures(items, p._catalogueSort);
+	const catalogueItems = items.filter(
+		(item) =>
+			item.name ||
+			item.collection ||
+			item.artist ||
+			Number(item.shelf) > 0 ||
+			Number(item.location) > 0,
+	);
+	const sortedItems = sortMiniatures(catalogueItems, p._catalogueSort);
+	const isGrid = p._catalogueView === "grid";
 	return html`<div class="miniatures-grid ${showEditor ? "" : "catalogue-only"}">
 		${showEditor
 			? html`<section class="panel-card mini-editor">
@@ -384,19 +393,23 @@ const miniaturesTemplate = (p: any) => {
 			<div class="section-heading">
 				<div>
 					<div class="eyebrow">CATALOGUE</div>
-					<h2>${items.length} miniatures</h2>
+					<h2>${catalogueItems.length} miniatures</h2>
 				</div>
-				<button class="primary small" @click=${p.actions.addMini}>
-					Add new mini
-				</button>
+				<div class="catalogue-toolbar">
+					<div class="view-toggle" role="group" aria-label="Catalogue view">
+						<button class="icon-button ${isGrid ? "" : "active"}" aria-label="List view" title="List view" aria-pressed=${String(!isGrid)} @click=${() => p.actions.setCatalogueView("list")}><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg></button>
+						<button class="icon-button ${isGrid ? "active" : ""}" aria-label="Grid view" title="Grid view" aria-pressed=${String(isGrid)} @click=${() => p.actions.setCatalogueView("grid")}><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></svg></button>
+					</div>
+					<button class="primary small" @click=${p.actions.addMini}>Add new mini</button>
+				</div>
 			</div>
 			${sortControls(p._catalogueSort, (sort) =>
 				p.actions.setSort("_catalogueSort", sort),
 			)}
-			<div class="mini-list">
+			<div class="mini-list ${isGrid ? "grid" : ""}">
 				${sortedItems.map(
 					(item) =>
-						html`<div class="mini-row">
+						html`<div class="mini-row ${isGrid ? "mini-card" : ""}">
 							${avatar(item.name)}
 							<div class="mini-main">
 								<b>${item.name}</b
@@ -416,7 +429,9 @@ const miniaturesTemplate = (p: any) => {
 									: "Unassigned"}
 							</div>
 							<div class="row-actions">
-								<button
+								${isGrid
+									? html`<button class="icon-button" aria-label="Edit ${item.name}" title="Edit ${item.name}" @click=${() => p.actions.editMini(item.id)}><svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" /></svg></button><button class="icon-button danger" aria-label="Delete ${item.name}" title="Delete ${item.name}" @click=${() => p.actions.deleteMini(item.id)}><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v4M14 11v4" /></svg></button>`
+									: html`<button
 									class="ghost"
 									@click=${() => p.actions.editMini(item.id)}>
 									Edit</button
@@ -425,7 +440,7 @@ const miniaturesTemplate = (p: any) => {
 									@click=${() =>
 										p.actions.deleteMini(item.id)}>
 									Delete
-								</button>
+								</button>`}
 							</div>
 						</div>`,
 				)}

@@ -168,4 +168,8 @@ export const createPanelActions = (p: Panel) => ({
 		p[target] = sort;
 		p._render();
 	},
+	setCatalogueView: (view) => {
+		p._catalogueView = view;
+		p._render();
+	},
 });

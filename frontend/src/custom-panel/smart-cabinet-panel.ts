@@ -30,6 +30,7 @@ class HaPanelSmartCabinet extends LitElement {
 	_searchField = "all";
 	_searchSort = "name";
 	_catalogueSort = "name";
+	_catalogueView = "list";
 	_viewIndex = 0;
 	_viewTimer: ReturnType<typeof setTimeout> | null = null;
 	_mappingStart: number | null = null;
@@ -58,6 +59,7 @@ class HaPanelSmartCabinet extends LitElement {
 		this._searchField = "all";
 		this._searchSort = "name";
 		this._catalogueSort = "name";
+		this._catalogueView = "list";
 		this._viewIndex = 0;
 		this._viewTimer = null;
 		this._mappingStart = null;

@@ -1,4 +1,4 @@
-const T = globalThis, D = T.ShadowRoot && (T.ShadyCSS === void 0 || T.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, it = /* @__PURE__ */ Symbol(), j = /* @__PURE__ */ new WeakMap();
+const N = globalThis, P = N.ShadowRoot && (N.ShadyCSS === void 0 || N.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, it = /* @__PURE__ */ Symbol(), V = /* @__PURE__ */ new WeakMap();
 let ht = class {
   constructor(t, i, a) {
     if (this._$cssResult$ = !0, a !== it) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
@@ -7,9 +7,9 @@ let ht = class {
   get styleSheet() {
     let t = this.o;
     const i = this.t;
-    if (D && t === void 0) {
+    if (P && t === void 0) {
       const a = i !== void 0 && i.length === 1;
-      a && (t = j.get(i)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), a && j.set(i, t));
+      a && (t = V.get(i)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), a && V.set(i, t));
     }
     return t;
   }
@@ -18,17 +18,17 @@ let ht = class {
   }
 };
 const at = (e) => new ht(typeof e == "string" ? e : e + "", void 0, it), ut = (e, t) => {
-  if (D) e.adoptedStyleSheets = t.map((i) => i instanceof CSSStyleSheet ? i : i.styleSheet);
+  if (P) e.adoptedStyleSheets = t.map((i) => i instanceof CSSStyleSheet ? i : i.styleSheet);
   else for (const i of t) {
-    const a = document.createElement("style"), r = T.litNonce;
+    const a = document.createElement("style"), r = N.litNonce;
     r !== void 0 && a.setAttribute("nonce", r), a.textContent = i.cssText, e.appendChild(a);
   }
-}, V = D ? (e) => e : (e) => e instanceof CSSStyleSheet ? ((t) => {
+}, j = P ? (e) => e : (e) => e instanceof CSSStyleSheet ? ((t) => {
   let i = "";
   for (const a of t.cssRules) i += a.cssText;
   return at(i);
 })(e) : e;
-const { is: mt, defineProperty: gt, getOwnPropertyDescriptor: vt, getOwnPropertyNames: ft, getOwnPropertySymbols: xt, getPrototypeOf: bt } = Object, z = globalThis, q = z.trustedTypes, _t = q ? q.emptyScript : "", yt = z.reactiveElementPolyfillSupport, k = (e, t) => e, P = { toAttribute(e, t) {
+const { is: mt, defineProperty: gt, getOwnPropertyDescriptor: vt, getOwnPropertyNames: xt, getOwnPropertySymbols: bt, getPrototypeOf: ft } = Object, z = globalThis, q = z.trustedTypes, _t = q ? q.emptyScript : "", yt = z.reactiveElementPolyfillSupport, k = (e, t) => e, D = { toAttribute(e, t) {
   switch (t) {
     case Boolean:
       e = e ? _t : null;
@@ -56,7 +56,7 @@ const { is: mt, defineProperty: gt, getOwnPropertyDescriptor: vt, getOwnProperty
       }
   }
   return i;
-} }, rt = (e, t) => !mt(e, t), F = { attribute: !0, type: String, converter: P, reflect: !1, useDefault: !1, hasChanged: rt };
+} }, rt = (e, t) => !mt(e, t), F = { attribute: !0, type: String, converter: D, reflect: !1, useDefault: !1, hasChanged: rt };
 Symbol.metadata ??= /* @__PURE__ */ Symbol("metadata"), z.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
 let _ = class extends HTMLElement {
   static addInitializer(t) {
@@ -72,14 +72,14 @@ let _ = class extends HTMLElement {
     }
   }
   static getPropertyDescriptor(t, i, a) {
-    const { get: r, set: n } = vt(this.prototype, t) ?? { get() {
+    const { get: r, set: o } = vt(this.prototype, t) ?? { get() {
       return this[i];
-    }, set(s) {
-      this[i] = s;
+    }, set(n) {
+      this[i] = n;
     } };
-    return { get: r, set(s) {
-      const d = r?.call(this);
-      n?.call(this, s), this.requestUpdate(t, d, a);
+    return { get: r, set(n) {
+      const l = r?.call(this);
+      o?.call(this, n), this.requestUpdate(t, l, a);
     }, configurable: !0, enumerable: !0 };
   }
   static getPropertyOptions(t) {
@@ -87,13 +87,13 @@ let _ = class extends HTMLElement {
   }
   static _$Ei() {
     if (this.hasOwnProperty(k("elementProperties"))) return;
-    const t = bt(this);
+    const t = ft(this);
     t.finalize(), t.l !== void 0 && (this.l = [...t.l]), this.elementProperties = new Map(t.elementProperties);
   }
   static finalize() {
     if (this.hasOwnProperty(k("finalized"))) return;
     if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(k("properties"))) {
-      const i = this.properties, a = [...ft(i), ...xt(i)];
+      const i = this.properties, a = [...xt(i), ...bt(i)];
       for (const r of a) this.createProperty(r, i[r]);
     }
     const t = this[Symbol.metadata];
@@ -112,8 +112,8 @@ let _ = class extends HTMLElement {
     const i = [];
     if (Array.isArray(t)) {
       const a = new Set(t.flat(1 / 0).reverse());
-      for (const r of a) i.unshift(V(r));
-    } else t !== void 0 && i.push(V(t));
+      for (const r of a) i.unshift(j(r));
+    } else t !== void 0 && i.push(j(t));
     return i;
   }
   static _$Eu(t, i) {
@@ -155,29 +155,29 @@ let _ = class extends HTMLElement {
   _$ET(t, i) {
     const a = this.constructor.elementProperties.get(t), r = this.constructor._$Eu(t, a);
     if (r !== void 0 && a.reflect === !0) {
-      const n = (a.converter?.toAttribute !== void 0 ? a.converter : P).toAttribute(i, a.type);
-      this._$Em = t, n == null ? this.removeAttribute(r) : this.setAttribute(r, n), this._$Em = null;
+      const o = (a.converter?.toAttribute !== void 0 ? a.converter : D).toAttribute(i, a.type);
+      this._$Em = t, o == null ? this.removeAttribute(r) : this.setAttribute(r, o), this._$Em = null;
     }
   }
   _$AK(t, i) {
     const a = this.constructor, r = a._$Eh.get(t);
     if (r !== void 0 && this._$Em !== r) {
-      const n = a.getPropertyOptions(r), s = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : P;
+      const o = a.getPropertyOptions(r), n = typeof o.converter == "function" ? { fromAttribute: o.converter } : o.converter?.fromAttribute !== void 0 ? o.converter : D;
       this._$Em = r;
-      const d = s.fromAttribute(i, n.type);
-      this[r] = d ?? this._$Ej?.get(r) ?? d, this._$Em = null;
+      const l = n.fromAttribute(i, o.type);
+      this[r] = l ?? this._$Ej?.get(r) ?? l, this._$Em = null;
     }
   }
-  requestUpdate(t, i, a, r = !1, n) {
+  requestUpdate(t, i, a, r = !1, o) {
     if (t !== void 0) {
-      const s = this.constructor;
-      if (r === !1 && (n = this[t]), a ??= s.getPropertyOptions(t), !((a.hasChanged ?? rt)(n, i) || a.useDefault && a.reflect && n === this._$Ej?.get(t) && !this.hasAttribute(s._$Eu(t, a)))) return;
+      const n = this.constructor;
+      if (r === !1 && (o = this[t]), a ??= n.getPropertyOptions(t), !((a.hasChanged ?? rt)(o, i) || a.useDefault && a.reflect && o === this._$Ej?.get(t) && !this.hasAttribute(n._$Eu(t, a)))) return;
       this.C(t, i, a);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
   }
-  C(t, i, { useDefault: a, reflect: r, wrapped: n }, s) {
-    a && !(this._$Ej ??= /* @__PURE__ */ new Map()).has(t) && (this._$Ej.set(t, s ?? i ?? this[t]), n !== !0 || s !== void 0) || (this._$AL.has(t) || (this.hasUpdated || a || (i = void 0), this._$AL.set(t, i)), r === !0 && this._$Em !== t && (this._$Eq ??= /* @__PURE__ */ new Set()).add(t));
+  C(t, i, { useDefault: a, reflect: r, wrapped: o }, n) {
+    a && !(this._$Ej ??= /* @__PURE__ */ new Map()).has(t) && (this._$Ej.set(t, n ?? i ?? this[t]), o !== !0 || n !== void 0) || (this._$AL.has(t) || (this.hasUpdated || a || (i = void 0), this._$AL.set(t, i)), r === !0 && this._$Em !== t && (this._$Eq ??= /* @__PURE__ */ new Set()).add(t));
   }
   async _$EP() {
     this.isUpdatePending = !0;
@@ -196,13 +196,13 @@ let _ = class extends HTMLElement {
     if (!this.isUpdatePending) return;
     if (!this.hasUpdated) {
       if (this.renderRoot ??= this.createRenderRoot(), this._$Ep) {
-        for (const [r, n] of this._$Ep) this[r] = n;
+        for (const [r, o] of this._$Ep) this[r] = o;
         this._$Ep = void 0;
       }
       const a = this.constructor.elementProperties;
-      if (a.size > 0) for (const [r, n] of a) {
-        const { wrapped: s } = n, d = this[r];
-        s !== !0 || this._$AL.has(r) || d === void 0 || this.C(r, void 0, n, d);
+      if (a.size > 0) for (const [r, o] of a) {
+        const { wrapped: n } = o, l = this[r];
+        n !== !0 || this._$AL.has(r) || l === void 0 || this.C(r, void 0, o, l);
       }
     }
     let t = !1;
@@ -240,67 +240,67 @@ let _ = class extends HTMLElement {
   }
 };
 _.elementStyles = [], _.shadowRootOptions = { mode: "open" }, _[k("elementProperties")] = /* @__PURE__ */ new Map(), _[k("finalized")] = /* @__PURE__ */ new Map(), yt?.({ ReactiveElement: _ }), (z.reactiveElementVersions ??= []).push("2.1.2");
-const U = globalThis, W = (e) => e, N = U.trustedTypes, Q = N ? N.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, nt = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, st = "?" + v, $t = `<${st}>`, b = document, A = () => b.createComment(""), E = (e) => e === null || typeof e != "object" && typeof e != "function", R = Array.isArray, wt = (e) => R(e) || typeof e?.[Symbol.iterator] == "function", H = `[ 	
-\f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, Z = /-->/g, G = />/g, f = RegExp(`>|${H}(?:([^\\s"'>=/]+)(${H}*=${H}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), J = /'/g, X = /"/g, ot = /^(?:script|style|textarea|title)$/i, St = (e) => (t, ...i) => ({ _$litType$: e, strings: t, values: i }), l = St(1), $ = /* @__PURE__ */ Symbol.for("lit-noChange"), h = /* @__PURE__ */ Symbol.for("lit-nothing"), K = /* @__PURE__ */ new WeakMap(), x = b.createTreeWalker(b, 129);
+const U = globalThis, W = (e) => e, T = U.trustedTypes, G = T ? T.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, nt = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, ot = "?" + v, $t = `<${ot}>`, f = document, A = () => f.createComment(""), M = (e) => e === null || typeof e != "object" && typeof e != "function", R = Array.isArray, wt = (e) => R(e) || typeof e?.[Symbol.iterator] == "function", H = `[ 	
+\f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, Z = /-->/g, Q = />/g, x = RegExp(`>|${H}(?:([^\\s"'>=/]+)(${H}*=${H}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), J = /'/g, X = /"/g, st = /^(?:script|style|textarea|title)$/i, St = (e) => (t, ...i) => ({ _$litType$: e, strings: t, values: i }), c = St(1), $ = /* @__PURE__ */ Symbol.for("lit-noChange"), h = /* @__PURE__ */ Symbol.for("lit-nothing"), K = /* @__PURE__ */ new WeakMap(), b = f.createTreeWalker(f, 129);
 function lt(e, t) {
   if (!R(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-  return Q !== void 0 ? Q.createHTML(t) : t;
+  return G !== void 0 ? G.createHTML(t) : t;
 }
 const kt = (e, t) => {
   const i = e.length - 1, a = [];
-  let r, n = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", s = S;
-  for (let d = 0; d < i; d++) {
-    const o = e[d];
-    let c, u, p = -1, m = 0;
-    for (; m < o.length && (s.lastIndex = m, u = s.exec(o), u !== null); ) m = s.lastIndex, s === S ? u[1] === "!--" ? s = Z : u[1] !== void 0 ? s = G : u[2] !== void 0 ? (ot.test(u[2]) && (r = RegExp("</" + u[2], "g")), s = f) : u[3] !== void 0 && (s = f) : s === f ? u[0] === ">" ? (s = r ?? S, p = -1) : u[1] === void 0 ? p = -2 : (p = s.lastIndex - u[2].length, c = u[1], s = u[3] === void 0 ? f : u[3] === '"' ? X : J) : s === X || s === J ? s = f : s === Z || s === G ? s = S : (s = f, r = void 0);
-    const g = s === f && e[d + 1].startsWith("/>") ? " " : "";
-    n += s === S ? o + $t : p >= 0 ? (a.push(c), o.slice(0, p) + nt + o.slice(p) + v + g) : o + v + (p === -2 ? d : g);
+  let r, o = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", n = S;
+  for (let l = 0; l < i; l++) {
+    const s = e[l];
+    let d, u, p = -1, m = 0;
+    for (; m < s.length && (n.lastIndex = m, u = n.exec(s), u !== null); ) m = n.lastIndex, n === S ? u[1] === "!--" ? n = Z : u[1] !== void 0 ? n = Q : u[2] !== void 0 ? (st.test(u[2]) && (r = RegExp("</" + u[2], "g")), n = x) : u[3] !== void 0 && (n = x) : n === x ? u[0] === ">" ? (n = r ?? S, p = -1) : u[1] === void 0 ? p = -2 : (p = n.lastIndex - u[2].length, d = u[1], n = u[3] === void 0 ? x : u[3] === '"' ? X : J) : n === X || n === J ? n = x : n === Z || n === Q ? n = S : (n = x, r = void 0);
+    const g = n === x && e[l + 1].startsWith("/>") ? " " : "";
+    o += n === S ? s + $t : p >= 0 ? (a.push(d), s.slice(0, p) + nt + s.slice(p) + v + g) : s + v + (p === -2 ? l : g);
   }
-  return [lt(e, n + (e[i] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), a];
+  return [lt(e, o + (e[i] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), a];
 };
-class M {
+class E {
   constructor({ strings: t, _$litType$: i }, a) {
     let r;
     this.parts = [];
-    let n = 0, s = 0;
-    const d = t.length - 1, o = this.parts, [c, u] = kt(t, i);
-    if (this.el = M.createElement(c, a), x.currentNode = this.el.content, i === 2 || i === 3) {
+    let o = 0, n = 0;
+    const l = t.length - 1, s = this.parts, [d, u] = kt(t, i);
+    if (this.el = E.createElement(d, a), b.currentNode = this.el.content, i === 2 || i === 3) {
       const p = this.el.content.firstChild;
       p.replaceWith(...p.childNodes);
     }
-    for (; (r = x.nextNode()) !== null && o.length < d; ) {
+    for (; (r = b.nextNode()) !== null && s.length < l; ) {
       if (r.nodeType === 1) {
         if (r.hasAttributes()) for (const p of r.getAttributeNames()) if (p.endsWith(nt)) {
-          const m = u[s++], g = r.getAttribute(p).split(v), L = /([.?@])?(.*)/.exec(m);
-          o.push({ type: 1, index: n, name: L[2], strings: g, ctor: L[1] === "." ? Et : L[1] === "?" ? Mt : L[1] === "@" ? Ct : I }), r.removeAttribute(p);
-        } else p.startsWith(v) && (o.push({ type: 6, index: n }), r.removeAttribute(p));
-        if (ot.test(r.tagName)) {
+          const m = u[n++], g = r.getAttribute(p).split(v), L = /([.?@])?(.*)/.exec(m);
+          s.push({ type: 1, index: o, name: L[2], strings: g, ctor: L[1] === "." ? Mt : L[1] === "?" ? Et : L[1] === "@" ? Ct : I }), r.removeAttribute(p);
+        } else p.startsWith(v) && (s.push({ type: 6, index: o }), r.removeAttribute(p));
+        if (st.test(r.tagName)) {
           const p = r.textContent.split(v), m = p.length - 1;
           if (m > 0) {
-            r.textContent = N ? N.emptyScript : "";
-            for (let g = 0; g < m; g++) r.append(p[g], A()), x.nextNode(), o.push({ type: 2, index: ++n });
+            r.textContent = T ? T.emptyScript : "";
+            for (let g = 0; g < m; g++) r.append(p[g], A()), b.nextNode(), s.push({ type: 2, index: ++o });
             r.append(p[m], A());
           }
         }
-      } else if (r.nodeType === 8) if (r.data === st) o.push({ type: 2, index: n });
+      } else if (r.nodeType === 8) if (r.data === ot) s.push({ type: 2, index: o });
       else {
         let p = -1;
-        for (; (p = r.data.indexOf(v, p + 1)) !== -1; ) o.push({ type: 7, index: n }), p += v.length - 1;
+        for (; (p = r.data.indexOf(v, p + 1)) !== -1; ) s.push({ type: 7, index: o }), p += v.length - 1;
       }
-      n++;
+      o++;
     }
   }
   static createElement(t, i) {
-    const a = b.createElement("template");
+    const a = f.createElement("template");
     return a.innerHTML = t, a;
   }
 }
 function w(e, t, i = e, a) {
   if (t === $) return t;
   let r = a !== void 0 ? i._$Co?.[a] : i._$Cl;
-  const n = E(t) ? void 0 : t._$litDirective$;
-  return r?.constructor !== n && (r?._$AO?.(!1), n === void 0 ? r = void 0 : (r = new n(e), r._$AT(e, i, a)), a !== void 0 ? (i._$Co ??= [])[a] = r : i._$Cl = r), r !== void 0 && (t = w(e, r._$AS(e, t.values), r, a)), t;
+  const o = M(t) ? void 0 : t._$litDirective$;
+  return r?.constructor !== o && (r?._$AO?.(!1), o === void 0 ? r = void 0 : (r = new o(e), r._$AT(e, i, a)), a !== void 0 ? (i._$Co ??= [])[a] = r : i._$Cl = r), r !== void 0 && (t = w(e, r._$AS(e, t.values), r, a)), t;
 }
 class At {
   constructor(t, i) {
@@ -313,17 +313,17 @@ class At {
     return this._$AM._$AU;
   }
   u(t) {
-    const { el: { content: i }, parts: a } = this._$AD, r = (t?.creationScope ?? b).importNode(i, !0);
-    x.currentNode = r;
-    let n = x.nextNode(), s = 0, d = 0, o = a[0];
-    for (; o !== void 0; ) {
-      if (s === o.index) {
-        let c;
-        o.type === 2 ? c = new C(n, n.nextSibling, this, t) : o.type === 1 ? c = new o.ctor(n, o.name, o.strings, this, t) : o.type === 6 && (c = new Lt(n, this, t)), this._$AV.push(c), o = a[++d];
+    const { el: { content: i }, parts: a } = this._$AD, r = (t?.creationScope ?? f).importNode(i, !0);
+    b.currentNode = r;
+    let o = b.nextNode(), n = 0, l = 0, s = a[0];
+    for (; s !== void 0; ) {
+      if (n === s.index) {
+        let d;
+        s.type === 2 ? d = new C(o, o.nextSibling, this, t) : s.type === 1 ? d = new s.ctor(o, s.name, s.strings, this, t) : s.type === 6 && (d = new Lt(o, this, t)), this._$AV.push(d), s = a[++l];
       }
-      s !== o?.index && (n = x.nextNode(), s++);
+      n !== s?.index && (o = b.nextNode(), n++);
     }
-    return x.currentNode = b, r;
+    return b.currentNode = f, r;
   }
   p(t) {
     let i = 0;
@@ -349,7 +349,7 @@ class C {
     return this._$AB;
   }
   _$AI(t, i = this) {
-    t = w(this, t, i), E(t) ? t === h || t == null || t === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : t !== this._$AH && t !== $ && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : wt(t) ? this.k(t) : this._(t);
+    t = w(this, t, i), M(t) ? t === h || t == null || t === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : t !== this._$AH && t !== $ && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : wt(t) ? this.k(t) : this._(t);
   }
   O(t) {
     return this._$AA.parentNode.insertBefore(t, this._$AB);
@@ -358,25 +358,25 @@ class C {
     this._$AH !== t && (this._$AR(), this._$AH = this.O(t));
   }
   _(t) {
-    this._$AH !== h && E(this._$AH) ? this._$AA.nextSibling.data = t : this.T(b.createTextNode(t)), this._$AH = t;
+    this._$AH !== h && M(this._$AH) ? this._$AA.nextSibling.data = t : this.T(f.createTextNode(t)), this._$AH = t;
   }
   $(t) {
-    const { values: i, _$litType$: a } = t, r = typeof a == "number" ? this._$AC(t) : (a.el === void 0 && (a.el = M.createElement(lt(a.h, a.h[0]), this.options)), a);
+    const { values: i, _$litType$: a } = t, r = typeof a == "number" ? this._$AC(t) : (a.el === void 0 && (a.el = E.createElement(lt(a.h, a.h[0]), this.options)), a);
     if (this._$AH?._$AD === r) this._$AH.p(i);
     else {
-      const n = new At(r, this), s = n.u(this.options);
-      n.p(i), this.T(s), this._$AH = n;
+      const o = new At(r, this), n = o.u(this.options);
+      o.p(i), this.T(n), this._$AH = o;
     }
   }
   _$AC(t) {
     let i = K.get(t.strings);
-    return i === void 0 && K.set(t.strings, i = new M(t)), i;
+    return i === void 0 && K.set(t.strings, i = new E(t)), i;
   }
   k(t) {
     R(this._$AH) || (this._$AH = [], this._$AR());
     const i = this._$AH;
     let a, r = 0;
-    for (const n of t) r === i.length ? i.push(a = new C(this.O(A()), this.O(A()), this, this.options)) : a = i[r], a._$AI(n), r++;
+    for (const o of t) r === i.length ? i.push(a = new C(this.O(A()), this.O(A()), this, this.options)) : a = i[r], a._$AI(o), r++;
     r < i.length && (this._$AR(a && a._$AB.nextSibling, r), i.length = r);
   }
   _$AR(t = this._$AA.nextSibling, i) {
@@ -396,25 +396,25 @@ class I {
   get _$AU() {
     return this._$AM._$AU;
   }
-  constructor(t, i, a, r, n) {
-    this.type = 1, this._$AH = h, this._$AN = void 0, this.element = t, this.name = i, this._$AM = r, this.options = n, a.length > 2 || a[0] !== "" || a[1] !== "" ? (this._$AH = Array(a.length - 1).fill(new String()), this.strings = a) : this._$AH = h;
+  constructor(t, i, a, r, o) {
+    this.type = 1, this._$AH = h, this._$AN = void 0, this.element = t, this.name = i, this._$AM = r, this.options = o, a.length > 2 || a[0] !== "" || a[1] !== "" ? (this._$AH = Array(a.length - 1).fill(new String()), this.strings = a) : this._$AH = h;
   }
   _$AI(t, i = this, a, r) {
-    const n = this.strings;
-    let s = !1;
-    if (n === void 0) t = w(this, t, i, 0), s = !E(t) || t !== this._$AH && t !== $, s && (this._$AH = t);
+    const o = this.strings;
+    let n = !1;
+    if (o === void 0) t = w(this, t, i, 0), n = !M(t) || t !== this._$AH && t !== $, n && (this._$AH = t);
     else {
-      const d = t;
-      let o, c;
-      for (t = n[0], o = 0; o < n.length - 1; o++) c = w(this, d[a + o], i, o), c === $ && (c = this._$AH[o]), s ||= !E(c) || c !== this._$AH[o], c === h ? t = h : t !== h && (t += (c ?? "") + n[o + 1]), this._$AH[o] = c;
+      const l = t;
+      let s, d;
+      for (t = o[0], s = 0; s < o.length - 1; s++) d = w(this, l[a + s], i, s), d === $ && (d = this._$AH[s]), n ||= !M(d) || d !== this._$AH[s], d === h ? t = h : t !== h && (t += (d ?? "") + o[s + 1]), this._$AH[s] = d;
     }
-    s && !r && this.j(t);
+    n && !r && this.j(t);
   }
   j(t) {
     t === h ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t ?? "");
   }
 }
-class Et extends I {
+class Mt extends I {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -422,7 +422,7 @@ class Et extends I {
     this.element[this.name] = t === h ? void 0 : t;
   }
 }
-class Mt extends I {
+class Et extends I {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -431,13 +431,13 @@ class Mt extends I {
   }
 }
 class Ct extends I {
-  constructor(t, i, a, r, n) {
-    super(t, i, a, r, n), this.type = 5;
+  constructor(t, i, a, r, o) {
+    super(t, i, a, r, o), this.type = 5;
   }
   _$AI(t, i = this) {
     if ((t = w(this, t, i, 0) ?? h) === $) return;
-    const a = this._$AH, r = t === h && a !== h || t.capture !== a.capture || t.once !== a.once || t.passive !== a.passive, n = t !== h && (a === h || r);
-    r && this.element.removeEventListener(this.name, this, a), n && this.element.addEventListener(this.name, this, t), this._$AH = t;
+    const a = this._$AH, r = t === h && a !== h || t.capture !== a.capture || t.once !== a.once || t.passive !== a.passive, o = t !== h && (a === h || r);
+    r && this.element.removeEventListener(this.name, this, a), o && this.element.addEventListener(this.name, this, t), this._$AH = t;
   }
   handleEvent(t) {
     typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, t) : this._$AH.handleEvent(t);
@@ -454,14 +454,14 @@ class Lt {
     w(this, t);
   }
 }
-const Tt = U.litHtmlPolyfillSupport;
-Tt?.(M, C), (U.litHtmlVersions ??= []).push("3.3.3");
-const Nt = (e, t, i) => {
+const Nt = U.litHtmlPolyfillSupport;
+Nt?.(E, C), (U.litHtmlVersions ??= []).push("3.3.3");
+const Tt = (e, t, i) => {
   const a = i?.renderBefore ?? t;
   let r = a._$litPart$;
   if (r === void 0) {
-    const n = i?.renderBefore ?? null;
-    a._$litPart$ = r = new C(t.insertBefore(A(), n), n, void 0, i ?? {});
+    const o = i?.renderBefore ?? null;
+    a._$litPart$ = r = new C(t.insertBefore(A(), o), o, void 0, i ?? {});
   }
   return r._$AI(e), r;
 };
@@ -476,7 +476,7 @@ class y extends _ {
   }
   update(t) {
     const i = this.render();
-    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = Nt(i, this.renderRoot, this.renderOptions);
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = Tt(i, this.renderRoot, this.renderOptions);
   }
   connectedCallback() {
     super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -497,7 +497,7 @@ class It extends y {
     return this;
   }
   render() {
-    return l`<section class="panel-card ${this.className || ""}">
+    return c`<section class="panel-card ${this.className || ""}">
 			<slot></slot>
 		</section>`;
   }
@@ -625,48 +625,51 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
   },
   setSort: (t, i) => {
     e[t] = i, e._render();
+  },
+  setCatalogueView: (t) => {
+    e._catalogueView = t, e._render();
   }
-}), tt = ':host{display:block;min-height:100%;background:var(--primary-background-color);color:var(--primary-text-color);font-family:var(--paper-font-body1_-_font-family, Roboto, sans-serif)}cabinet-dial-picker,cabinet-panel-card{display:block}*{box-sizing:border-box}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.42}.app-shell{min-height:100vh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom,0px)}.topbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 28px;border-bottom:1px solid var(--divider-color);background:var( --app-header-background-color, var(--card-background-color) );box-shadow:0 1px 8px #0000000f}.topbar-main{display:flex;align-items:center;gap:10px;min-width:0}.ha-native-menu{flex:0 0 auto;margin-left:-6px}.brand{display:flex;align-items:center;gap:11px;min-width:190px}.brand-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--primary-color);color:var(--text-primary-color);font-weight:800;font-size:13px}.brand b,.brand span{display:block}.brand span{margin-top:2px;color:var(--secondary-text-color);font-size:12px}nav{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--secondary-background-color)}.nav-tab{display:grid;place-items:center;width:42px;height:38px;border:0;background:transparent;color:var(--secondary-text-color);padding:0;border-radius:9px}.nav-tab svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.nav-tab.active{background:var(--card-background-color);color:var(--primary-text-color);box-shadow:0 1px 4px #00000017}.page{max-width:1500px;margin:0 auto;overflow-x:hidden;padding:28px}.panel-card{border:1px solid var(--divider-color);background:var(--card-background-color);border-radius:18px;box-shadow:var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, .04))}.general-card{display:flex;justify-content:space-between;align-items:center;gap:30px;padding:22px 24px;margin-bottom:18px}h2,h3,p{margin:0}h2{font-size:22px}h3{font-size:16px}p{margin-top:6px;color:var(--secondary-text-color);font-size:13px;line-height:1.5}.eyebrow{margin-bottom:5px;color:var(--primary-color);font-size:10px;letter-spacing:.12em;font-weight:800}.general-values{display:flex;align-items:center;gap:12px}.metric,.color-control{min-width:110px;padding:10px 13px;background:var(--secondary-background-color);border-radius:12px}.metric span,.color-control span{display:block;color:var(--secondary-text-color);font-size:11px;margin-bottom:5px}.metric b{font-size:20px}.color-control{display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:center;min-width:170px}.color-control span{margin:0}input[type=color]{width:34px;height:28px;border:0;padding:0;background:none}.configuration-grid{display:grid;grid-template-columns:300px minmax(0,1fr);min-width:0;gap:18px;align-items:start}.shelf-detail{min-width:0;overflow:hidden}.shelf-list,.shelf-detail,.mini-editor,.mini-list-card,.search-card{padding:20px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.shelf-items{display:grid;gap:5px}.shelf-row{display:flex;align-items:center;border:1px solid transparent;border-radius:12px;background:var(--secondary-background-color)}.shelf-row.selected{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 10%,var(--card-background-color))}.shelf-select{flex:1;display:flex;align-items:center;gap:10px;text-align:left;padding:10px;border:0;color:inherit;background:transparent}.shelf-select span:last-child{min-width:0}.shelf-select b,.shelf-select small{display:block}.shelf-select small{margin-top:2px;color:var(--secondary-text-color);font-size:10px}.shelf-number,.location-index{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:9px;background:var(--card-background-color);font-weight:700;font-size:12px}.row-actions{display:flex;gap:4px;padding-right:7px}.icon-button{width:28px;height:28px;padding:0;border:0;border-radius:8px;background:var(--card-background-color);color:inherit}.insert-shelf{width:100%;border:0;background:transparent;color:var(--primary-color);padding:4px;font-size:10px;opacity:.65}.insert-shelf:hover{opacity:1}.form-grid{display:grid;gap:12px;margin-top:16px}.form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}label span{display:block;margin-bottom:6px;color:var(--secondary-text-color);font-size:11px;font-weight:600}input,select{width:100%;min-height:40px;border:1px solid var(--divider-color);border-radius:10px;padding:8px 10px;background:var(--primary-background-color);color:var(--primary-text-color);outline:none}input:focus,select:focus{border-color:var(--primary-color);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary-color) 20%,transparent)}.button-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.button-row.end{justify-content:flex-end}button:not(.nav-tab):not(.shelf-select):not(.icon-button):not(.insert-shelf):not(.location-row):not(.search-result):not(.summary-hex){min-height:38px;border:1px solid var(--divider-color);border-radius:10px;padding:0 13px;background:var(--secondary-background-color);color:var(--primary-text-color)}button.primary{border-color:var(--primary-color)!important;background:var(--primary-color)!important;color:var(--text-primary-color)!important}button.small{min-height:32px!important;font-size:11px}button.ghost{background:transparent!important}button.danger{color:var(--error-color)!important}button.full{width:100%;margin-top:14px}.divider{height:1px;background:var(--divider-color);margin:22px 0}.locations-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr);gap:18px}.legacy-mapping{display:none}.mapping-visual{min-width:0}.mapping-toggle{display:flex;align-items:center;gap:7px;color:var(--secondary-text-color);font-size:11px}.mapping-toggle input{width:auto;min-height:auto;accent-color:var(--primary-color)}.picker-dial.compact{margin:10px 0 14px;min-height:48px}.picker-dial.compact .dial-tick em{display:none}.picker-dial.compact .dial-tick.active b{font-size:22px}.mapping-dial-selected{display:grid;place-items:center;height:32px;margin:4px 0 2px;color:var(--primary-color);font-size:32px;font-weight:800;line-height:1}.picker-dial.compact .dial-tick.active b{visibility:hidden}.mapping-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.mapping-tools b{margin-left:auto;color:var(--secondary-text-color);font-size:11px}.mapping-range{margin-left:auto;padding:8px 10px;border:1px solid var(--divider-color);border-radius:9px;color:var(--primary-text-color);font-size:11px;font-weight:700}.mapping-range span{margin-left:6px;color:var(--secondary-text-color);font-weight:600}.led-runs{display:grid;gap:20px;max-width:100%;margin-top:16px;overflow-x:auto;padding:4px 0 20px}.led-run{display:grid;grid-auto-flow:column;grid-auto-columns:var(--led-size);width:max-content;min-height:calc(var(--led-size) + 18px)}.led-run.return{margin-left:0}.led-cell{position:relative;width:var(--led-size);height:var(--led-size);min-width:var(--led-size);padding:0;border:1px solid var(--divider-color);border-radius:1px;background:var(--secondary-background-color)}.led-cell.selected{background:#fff;border-color:#fff}.led-cell.assigned{background:color-mix(in srgb,var(--primary-color) 35%,var(--secondary-background-color))}.led-cell.range-start{background:#e83e8c;border-color:#e83e8c}.led-cell.range-end{background:#ff8a00;border-color:#ff8a00}.led-cell small{position:absolute;top:calc(var(--led-size) * 4 + 4px);left:50%;transform:translate(-50%);color:var(--secondary-text-color);font-size:8px;font-weight:600}.mapping-visual{min-width:0;max-width:100%;overflow:hidden}.led-runs{position:relative;contain:inline-size;min-width:0;max-width:100%;width:100%;gap:44px;overflow-x:auto;overflow-y:hidden;padding:8px 32px 24px 28px}.led-runs-content{display:grid;width:max-content;min-width:100%;gap:44px;justify-items:center}.led-run{gap:2px;position:relative}.led-cell{min-height:0!important;height:calc(var(--led-size) * 4)!important;min-width:var(--led-size)!important;width:var(--led-size)!important;padding:0!important;border-radius:1px!important}.led-cell.assigned{background:color-mix(in srgb,var(--primary-color) 35%,var(--secondary-background-color))!important}.led-cell.selected{background:#fff!important;border-color:#fff!important}.led-cell.range-start{background:#e83e8c!important;border-color:#e83e8c!important}.led-cell.range-end{background:#ff8a00!important;border-color:#ff8a00!important}.power-mark{position:absolute;top:4px;left:-20px;display:grid;place-items:center;width:1rem;height:1rem;border-radius:50%;background:var(--primary-color);color:var(--text-primary-color);font-size:10px;z-index:2}.led-runs.mirrored .power-mark{left:auto;right:-20px}.led-run:first-of-type:after{content:none}.strip-connector{position:absolute;z-index:3;top:50%;right:-20px;width:16px;height:calc(var(--led-size) * 4 + 44px);border:2px dashed var(--secondary-text-color);border-left:0;border-radius:0 10px 10px 0;opacity:.9;pointer-events:none}.led-runs.mirrored .strip-connector{right:auto;left:-20px;transform:scaleX(-1)}.led-run{width:max-content;grid-auto-columns:max-content;justify-content:start}.led-run .led-cell{width:auto!important;min-width:0!important;aspect-ratio:1 / 2}.mapping-toggle input{position:absolute;opacity:0;pointer-events:none}.mapping-toggle-icon{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--divider-color);border-radius:50%;background:var(--secondary-background-color)}.mapping-toggle-icon svg{width:15px;height:15px;fill:none;stroke:var(--secondary-text-color);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.mapping-toggle input:checked+.mapping-toggle-icon{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 18%,var(--secondary-background-color))}.mapping-toggle input:checked+.mapping-toggle-icon svg{stroke:var(--primary-color);fill:color-mix(in srgb,var(--primary-color) 20%,transparent)}.location-list{display:grid;gap:5px;max-height:470px;overflow:auto;padding-right:4px}.location-row{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;width:100%;min-height:48px;border:1px solid var(--divider-color);border-radius:11px;padding:7px 10px;background:transparent;color:inherit;text-align:left}.location-row.selected{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 9%,transparent)}.location-row.unmapped{opacity:.66}.location-range{font-size:12px}.location-count,.muted{color:var(--secondary-text-color);font-size:11px}.location-editor{align-self:start;padding:18px;border-radius:14px;background:var(--secondary-background-color)}.range-preview{display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;background:var(--card-background-color);border-radius:10px;font-size:11px}.range-preview span{color:var(--secondary-text-color)}.miniatures-grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;align-items:start}.miniatures-grid.catalogue-only{grid-template-columns:minmax(0,1fr)}.mini-editor{position:sticky;top:90px}.mini-list{display:grid;gap:7px;max-height:min(65vh,620px);overflow-y:auto;padding-right:4px}.mini-row{display:grid;grid-template-columns:38px minmax(160px,1fr) minmax(120px,.7fr) auto auto;gap:11px;align-items:center;padding:10px;border:1px solid var(--divider-color);border-radius:12px}.mini-avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:color-mix(in srgb,var(--primary-color) 14%,var(--secondary-background-color));color:var(--primary-color);font-weight:800}.mini-main b,.mini-main span{display:block}.mini-main span,.mini-artist{color:var(--secondary-text-color);font-size:11px;margin-top:2px}.position-badge{white-space:nowrap;padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--primary-color) 12%,transparent);color:var(--primary-color);font-size:10px;font-weight:700}.position-badge.unassigned{background:var(--secondary-background-color);color:var(--secondary-text-color)}.search-card{max-width:980px;margin:0 auto}.search-controls{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-top:20px}.search-summary{margin:12px 2px}.sort-controls{display:flex;align-items:center;gap:7px;margin:0 2px 12px;color:var(--secondary-text-color);font-size:11px}.sort-button{min-height:30px!important;padding:0 9px!important;font-size:11px}.sort-button.active{border-color:var(--primary-color)!important;color:var(--primary-color)!important}.search-results{display:grid;gap:7px;max-height:min(55vh,520px);overflow-y:auto;padding-right:4px}.search-result{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:12px;width:100%;padding:10px;border:1px solid var(--divider-color);border-radius:12px;background:transparent;color:inherit;text-align:left}.search-result:hover:not(:disabled){border-color:var(--primary-color)}.search-result-main b,.search-result-main span{display:block}.search-result-main span{margin-top:3px;color:var(--secondary-text-color);font-size:11px}.view-card{max-width:760px;margin:0 auto;padding:22px}.cabinet-summary{max-width:760px;margin:18px auto;padding:22px}.summary-shelves{display:grid;gap:12px}.summary-shelf{padding:14px;border-radius:13px;background:var(--secondary-background-color)}.summary-shelf-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:12px}.summary-shelf-heading span{color:var(--secondary-text-color);font-size:11px}.summary-scroll{overflow:visible;padding:0}.summary-map{--summary-node-size: clamp(16px, 4vw, 24px);position:relative;width:100%;height:94px}.summary-run{position:absolute;left:12px;right:12px;height:2px;background:var(--secondary-text-color);opacity:.7}.summary-run.forward{top:31px}.summary-run.return{top:75px}.summary-connector{position:absolute;top:31px;right:calc(8px - var(--summary-node-size) / 2);width:calc(var(--summary-node-size) / 2 + 4px);height:44px;border:2px dashed var(--secondary-text-color);border-left:0;border-radius:0 8px 8px 0;opacity:.7;pointer-events:none}.summary-map.mirrored .summary-connector{right:auto;left:calc(8px - var(--summary-node-size) / 2);border-right:0;border-left:2px dashed var(--secondary-text-color);border-radius:8px 0 0 8px;transform:none}.summary-hex{position:absolute;left:calc(12px + (100% - 24px) * var(--anchor) / 100);z-index:1;display:grid;place-items:center;width:var(--summary-node-size);height:var(--summary-node-size);min-height:0!important;padding:0!important;border:0;border-radius:50%;background:var(--divider-color);color:var(--primary-text-color);text-align:center;transform:translate(-50%)}.summary-hex:before{content:"";position:absolute;inset:2px;z-index:-1;border-radius:inherit;background:var(--card-background-color)}.summary-hex.forward{top:calc(31px - var(--summary-node-size) / 2)}.summary-hex.return{top:calc(75px - var(--summary-node-size) / 2)}.summary-hex span{display:block;font-size:clamp(7px,1.7vw,10px);font-weight:800;line-height:1}.summary-hex.assigned{background:#8fd4e8;color:#786000}.summary-hex.assigned:before{background:#f1e6b2}.summary-hex:hover,.summary-hex:focus-visible{background:var(--primary-color);outline:none}.view-mini-card{display:flex;align-items:center;justify-content:flex-start;gap:13px;min-height:94px;padding:14px 32px 14px 14px;text-align:left;border-radius:14px;background:var(--secondary-background-color)}.view-mini-card h3{font-size:18px}.view-mini-card p{max-width:390px}.view-mini-content{min-width:0}.view-index{margin-bottom:3px;color:var(--primary-color);font-size:10px;font-weight:800;letter-spacing:.1em}.view-position{margin:12px 0 2px;text-align:center;color:var(--primary-color);font-size:11px;font-weight:800;letter-spacing:.11em}.view-position span{padding:0 5px;color:var(--secondary-text-color)}.picker-shell{position:relative;margin:24px auto 4px;padding:18px 20px 12px;overflow:hidden;border:1px solid var(--divider-color);border-radius:14px;background:var(--primary-background-color)}.picker-caption{margin-bottom:9px;color:var(--secondary-text-color);text-align:center;font-size:9px;font-weight:800;letter-spacing:.22em}.picker-dial{display:grid;grid-template-columns:repeat(7,1fr);align-items:end;min-height:58px;border-top:1px solid var(--divider-color);background:repeating-linear-gradient(90deg,transparent 0 7px,color-mix(in srgb,var(--divider-color) 70%,transparent) 7px 8px);cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}.picker-dial.dragging{cursor:grabbing}.dial-tick{display:grid;justify-items:center;gap:4px;color:var(--secondary-text-color);font-size:12px;pointer-events:none}.dial-tick i{display:block;width:1px;height:12px;background:currentColor}.dial-tick b{font-size:14px}.dial-tick.active{color:var(--primary-color);transform:translateY(-4px)}.dial-tick.active i{width:2px;height:22px}.dial-tick.active b{font-size:19px}.view-actions{display:flex;justify-content:center;margin-top:13px}.view-controls-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;max-width:760px;margin:18px auto 0}.view-control-card{padding:20px}.scene-list{display:flex;gap:7px;margin-top:15px;flex-wrap:wrap}.scene-button.active{border-color:var(--primary-color)!important;color:var(--primary-color)!important}.strip-controls{display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:12px;margin-top:15px}.strip-controls label span{margin-bottom:5px}.strip-controls input[type=color]{width:38px;height:38px}.strip-controls input[type=range]{min-height:30px;padding:0;accent-color:var(--primary-color)}.strip-controls output{min-width:34px;padding-bottom:9px;color:var(--secondary-text-color);font-size:11px;font-weight:700}.empty-state{display:grid;gap:5px;place-items:center;padding:40px 18px;text-align:center;color:var(--secondary-text-color)}.empty-state b{color:var(--primary-text-color)}@media(max-width:900px){.configuration-grid,.miniatures-grid,.view-controls-grid{grid-template-columns:1fr}.mini-editor{position:static}.locations-layout{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 12px}.topbar-main{width:100%}nav{width:100%;justify-content:space-between}.nav-tab{flex:0 0 42px}.page{padding:16px 16px calc(32px + env(safe-area-inset-bottom,0px))}}@media(max-width:600px){.brand-icon{width:36px;height:36px}.general-card{align-items:flex-start;flex-direction:column}.general-values{width:100%}.metric,.color-control{flex:1}.form-grid.two,.search-controls{grid-template-columns:1fr}.mini-row{grid-template-columns:38px 1fr auto}.mini-artist{grid-column:2}.mini-row .row-actions{grid-column:2 / -1}.position-badge{grid-column:3;grid-row:1 / span 2}.view-card{padding:16px}.picker-shell{padding-left:10px;padding-right:10px}.dial-tick b{font-size:11px}.dial-tick.active b{font-size:16px}}', Pt = [
+}), tt = ':host{display:block;min-height:100%;background:var(--primary-background-color);color:var(--primary-text-color);font-family:var(--paper-font-body1_-_font-family, Roboto, sans-serif)}cabinet-dial-picker,cabinet-panel-card{display:block}*{box-sizing:border-box}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.42}.app-shell{min-height:100vh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom,0px)}.topbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 28px;border-bottom:1px solid var(--divider-color);background:var( --app-header-background-color, var(--card-background-color) );box-shadow:0 1px 8px #0000000f}.topbar-main{display:flex;align-items:center;gap:10px;min-width:0}.ha-native-menu{flex:0 0 auto;margin-left:-6px}.brand{display:flex;align-items:center;gap:11px;min-width:190px}.brand-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--primary-color);color:var(--text-primary-color);font-weight:800;font-size:13px}.brand b,.brand span{display:block}.brand span{margin-top:2px;color:var(--secondary-text-color);font-size:12px}nav{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--secondary-background-color)}.nav-tab{display:grid;place-items:center;width:42px;height:38px;border:0;background:transparent;color:var(--secondary-text-color);padding:0;border-radius:9px}.nav-tab svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.nav-tab.active{background:var(--card-background-color);color:var(--primary-text-color);box-shadow:0 1px 4px #00000017}.page{max-width:1500px;margin:0 auto;overflow-x:hidden;padding:28px}.panel-card{border:1px solid var(--divider-color);background:var(--card-background-color);border-radius:18px;box-shadow:var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, .04))}.general-card{display:flex;justify-content:space-between;align-items:center;gap:30px;padding:22px 24px;margin-bottom:18px}h2,h3,p{margin:0}h2{font-size:22px}h3{font-size:16px}p{margin-top:6px;color:var(--secondary-text-color);font-size:13px;line-height:1.5}.eyebrow{margin-bottom:5px;color:var(--primary-color);font-size:10px;letter-spacing:.12em;font-weight:800}.general-values{display:flex;align-items:center;gap:12px}.metric,.color-control{min-width:110px;padding:10px 13px;background:var(--secondary-background-color);border-radius:12px}.metric span,.color-control span{display:block;color:var(--secondary-text-color);font-size:11px;margin-bottom:5px}.metric b{font-size:20px}.color-control{display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:center;min-width:170px}.color-control span{margin:0}input[type=color]{width:34px;height:28px;border:0;padding:0;background:none}.configuration-grid{display:grid;grid-template-columns:300px minmax(0,1fr);min-width:0;gap:18px;align-items:start}.shelf-detail{min-width:0;overflow:hidden}.shelf-list,.shelf-detail,.mini-editor,.mini-list-card,.search-card{padding:20px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.shelf-items{display:grid;gap:5px}.shelf-row{display:flex;align-items:center;border:1px solid transparent;border-radius:12px;background:var(--secondary-background-color)}.shelf-row.selected{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 10%,var(--card-background-color))}.shelf-select{flex:1;display:flex;align-items:center;gap:10px;text-align:left;padding:10px;border:0;color:inherit;background:transparent}.shelf-select span:last-child{min-width:0}.shelf-select b,.shelf-select small{display:block}.shelf-select small{margin-top:2px;color:var(--secondary-text-color);font-size:10px}.shelf-number,.location-index{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:9px;background:var(--card-background-color);font-weight:700;font-size:12px}.row-actions{display:flex;gap:4px;padding-right:7px}.icon-button{width:28px;height:28px;padding:0;border:0;border-radius:8px;background:var(--card-background-color);color:inherit}.insert-shelf{width:100%;border:0;background:transparent;color:var(--primary-color);padding:4px;font-size:10px;opacity:.65}.insert-shelf:hover{opacity:1}.form-grid{display:grid;gap:12px;margin-top:16px}.form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}label span{display:block;margin-bottom:6px;color:var(--secondary-text-color);font-size:11px;font-weight:600}input,select{width:100%;min-height:40px;border:1px solid var(--divider-color);border-radius:10px;padding:8px 10px;background:var(--primary-background-color);color:var(--primary-text-color);outline:none}input:focus,select:focus{border-color:var(--primary-color);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary-color) 20%,transparent)}.button-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.button-row.end{justify-content:flex-end}button:not(.nav-tab):not(.shelf-select):not(.icon-button):not(.insert-shelf):not(.location-row):not(.search-result):not(.summary-hex){min-height:38px;border:1px solid var(--divider-color);border-radius:10px;padding:0 13px;background:var(--secondary-background-color);color:var(--primary-text-color)}button.primary{border-color:var(--primary-color)!important;background:var(--primary-color)!important;color:var(--text-primary-color)!important}button.small{min-height:32px!important;font-size:11px}button.ghost{background:transparent!important}button.danger{color:var(--error-color)!important}button.full{width:100%;margin-top:14px}.divider{height:1px;background:var(--divider-color);margin:22px 0}.locations-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr);gap:18px}.legacy-mapping{display:none}.mapping-visual{min-width:0}.mapping-toggle{display:flex;align-items:center;gap:7px;color:var(--secondary-text-color);font-size:11px}.mapping-toggle input{width:auto;min-height:auto;accent-color:var(--primary-color)}.picker-dial.compact{margin:10px 0 14px;min-height:48px}.picker-dial.compact .dial-tick em{display:none}.picker-dial.compact .dial-tick.active b{font-size:22px}.mapping-dial-selected{display:grid;place-items:center;height:32px;margin:4px 0 2px;color:var(--primary-color);font-size:32px;font-weight:800;line-height:1}.picker-dial.compact .dial-tick.active b{visibility:hidden}.mapping-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.mapping-tools b{margin-left:auto;color:var(--secondary-text-color);font-size:11px}.mapping-range{margin-left:auto;padding:8px 10px;border:1px solid var(--divider-color);border-radius:9px;color:var(--primary-text-color);font-size:11px;font-weight:700}.mapping-range span{margin-left:6px;color:var(--secondary-text-color);font-weight:600}.led-runs{display:grid;gap:20px;max-width:100%;margin-top:16px;overflow-x:auto;padding:4px 0 20px}.led-run{display:grid;grid-auto-flow:column;grid-auto-columns:var(--led-size);width:max-content;min-height:calc(var(--led-size) + 18px)}.led-run.return{margin-left:0}.led-cell{position:relative;width:var(--led-size);height:var(--led-size);min-width:var(--led-size);padding:0;border:1px solid var(--divider-color);border-radius:1px;background:var(--secondary-background-color)}.led-cell.selected{background:#fff;border-color:#fff}.led-cell.assigned{background:color-mix(in srgb,var(--primary-color) 35%,var(--secondary-background-color))}.led-cell.range-start{background:#e83e8c;border-color:#e83e8c}.led-cell.range-end{background:#ff8a00;border-color:#ff8a00}.led-cell small{position:absolute;top:calc(var(--led-size) * 4 + 4px);left:50%;transform:translate(-50%);color:var(--secondary-text-color);font-size:8px;font-weight:600}.mapping-visual{min-width:0;max-width:100%;overflow:hidden}.led-runs{position:relative;contain:inline-size;min-width:0;max-width:100%;width:100%;gap:44px;overflow-x:auto;overflow-y:hidden;padding:8px 32px 24px 28px}.led-runs-content{display:grid;width:max-content;min-width:100%;gap:44px;justify-items:center}.led-run{gap:2px;position:relative}.led-cell{min-height:0!important;height:calc(var(--led-size) * 4)!important;min-width:var(--led-size)!important;width:var(--led-size)!important;padding:0!important;border-radius:1px!important}.led-cell.assigned{background:color-mix(in srgb,var(--primary-color) 35%,var(--secondary-background-color))!important}.led-cell.selected{background:#fff!important;border-color:#fff!important}.led-cell.range-start{background:#e83e8c!important;border-color:#e83e8c!important}.led-cell.range-end{background:#ff8a00!important;border-color:#ff8a00!important}.power-mark{position:absolute;top:4px;left:-20px;display:grid;place-items:center;width:1rem;height:1rem;border-radius:50%;background:var(--primary-color);color:var(--text-primary-color);font-size:10px;z-index:2}.led-runs.mirrored .power-mark{left:auto;right:-20px}.led-run:first-of-type:after{content:none}.strip-connector{position:absolute;z-index:3;top:50%;right:-20px;width:16px;height:calc(var(--led-size) * 4 + 44px);border:2px dashed var(--secondary-text-color);border-left:0;border-radius:0 10px 10px 0;opacity:.9;pointer-events:none}.led-runs.mirrored .strip-connector{right:auto;left:-20px;transform:scaleX(-1)}.led-run{width:max-content;grid-auto-columns:max-content;justify-content:start}.led-run .led-cell{width:auto!important;min-width:0!important;aspect-ratio:1 / 2}.mapping-toggle input{position:absolute;opacity:0;pointer-events:none}.mapping-toggle-icon{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--divider-color);border-radius:50%;background:var(--secondary-background-color)}.mapping-toggle-icon svg{width:15px;height:15px;fill:none;stroke:var(--secondary-text-color);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.mapping-toggle input:checked+.mapping-toggle-icon{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 18%,var(--secondary-background-color))}.mapping-toggle input:checked+.mapping-toggle-icon svg{stroke:var(--primary-color);fill:color-mix(in srgb,var(--primary-color) 20%,transparent)}.location-list{display:grid;gap:5px;max-height:470px;overflow:auto;padding-right:4px}.location-row{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;width:100%;min-height:48px;border:1px solid var(--divider-color);border-radius:11px;padding:7px 10px;background:transparent;color:inherit;text-align:left}.location-row.selected{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 9%,transparent)}.location-row.unmapped{opacity:.66}.location-range{font-size:12px}.location-count,.muted{color:var(--secondary-text-color);font-size:11px}.location-editor{align-self:start;padding:18px;border-radius:14px;background:var(--secondary-background-color)}.range-preview{display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;background:var(--card-background-color);border-radius:10px;font-size:11px}.range-preview span{color:var(--secondary-text-color)}.miniatures-grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;align-items:start}.miniatures-grid.catalogue-only{grid-template-columns:minmax(0,1fr)}.mini-editor{position:sticky;top:90px}.mini-list{display:grid;gap:7px;max-height:min(65vh,620px);overflow-y:auto;padding-right:4px}.catalogue-toolbar,.view-toggle{display:flex;align-items:center;gap:7px}.view-toggle{gap:2px;padding:2px;border:1px solid var(--divider-color);border-radius:10px;background:var(--secondary-background-color)}.view-toggle .icon-button{background:transparent;color:var(--secondary-text-color)}.view-toggle .icon-button.active{background:var(--card-background-color);color:var(--primary-color)}.icon-button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.mini-list.grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;max-height:min(65vh,620px);overflow-y:auto;overflow-x:hidden;padding-right:0}.mini-row.mini-card{position:relative;grid-template-columns:38px minmax(0,1fr);align-content:start;min-height:0;padding:13px;gap:10px}.mini-row.mini-card .mini-artist,.mini-row.mini-card .position-badge{grid-column:1 / -1}.mini-row.mini-card .mini-main{padding-right:60px}.mini-row.mini-card .mini-artist{margin:0}.mini-row.mini-card .position-badge{justify-self:start}.mini-row.mini-card .row-actions{position:absolute;top:11px;right:11px;gap:2px;padding:2px;border:1px solid var(--divider-color);border-radius:9px;background:var(--secondary-background-color)}.mini-row.mini-card .row-actions .icon-button{background:transparent}.mini-row{display:grid;grid-template-columns:38px minmax(160px,1fr) minmax(120px,.7fr) auto auto;gap:11px;align-items:center;padding:10px;border:1px solid var(--divider-color);border-radius:12px}.mini-avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:color-mix(in srgb,var(--primary-color) 14%,var(--secondary-background-color));color:var(--primary-color);font-weight:800}.mini-main b,.mini-main span{display:block}.mini-main span,.mini-artist{color:var(--secondary-text-color);font-size:11px;margin-top:2px}.position-badge{white-space:nowrap;padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--primary-color) 12%,transparent);color:var(--primary-color);font-size:10px;font-weight:700}.position-badge.unassigned{background:var(--secondary-background-color);color:var(--secondary-text-color)}.search-card{max-width:980px;margin:0 auto}.search-controls{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-top:20px}.search-summary{margin:12px 2px}.sort-controls{display:flex;align-items:center;gap:7px;margin:0 2px 12px;color:var(--secondary-text-color);font-size:11px}.sort-button{min-height:30px!important;padding:0 9px!important;font-size:11px}.sort-button.active{border-color:var(--primary-color)!important;color:var(--primary-color)!important}.search-results{display:grid;gap:7px;max-height:min(55vh,520px);overflow-y:auto;padding-right:4px}.search-result{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:12px;width:100%;padding:10px;border:1px solid var(--divider-color);border-radius:12px;background:transparent;color:inherit;text-align:left}.search-result:hover:not(:disabled){border-color:var(--primary-color)}.search-result-main b,.search-result-main span{display:block}.search-result-main span{margin-top:3px;color:var(--secondary-text-color);font-size:11px}.view-card{max-width:760px;margin:0 auto;padding:22px}.cabinet-summary{max-width:760px;margin:18px auto;padding:22px}.summary-shelves{display:grid;gap:12px}.summary-shelf{padding:14px;border-radius:13px;background:var(--secondary-background-color)}.summary-shelf-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:12px}.summary-shelf-heading span{color:var(--secondary-text-color);font-size:11px}.summary-scroll{overflow:visible;padding:0}.summary-map{--summary-node-size: clamp(16px, 4vw, 24px);position:relative;width:100%;height:94px}.summary-run{position:absolute;left:12px;right:12px;height:2px;background:var(--secondary-text-color);opacity:.7}.summary-run.forward{top:31px}.summary-run.return{top:75px}.summary-connector{position:absolute;top:31px;right:calc(8px - var(--summary-node-size) / 2);width:calc(var(--summary-node-size) / 2 + 4px);height:44px;border:2px dashed var(--secondary-text-color);border-left:0;border-radius:0 8px 8px 0;opacity:.7;pointer-events:none}.summary-map.mirrored .summary-connector{right:auto;left:calc(8px - var(--summary-node-size) / 2);border-right:0;border-left:2px dashed var(--secondary-text-color);border-radius:8px 0 0 8px;transform:none}.summary-hex{position:absolute;left:calc(12px + (100% - 24px) * var(--anchor) / 100);z-index:1;display:grid;place-items:center;width:var(--summary-node-size);height:var(--summary-node-size);min-height:0!important;padding:0!important;border:0;border-radius:50%;background:var(--divider-color);color:var(--primary-text-color);text-align:center;transform:translate(-50%)}.summary-hex:before{content:"";position:absolute;inset:2px;z-index:-1;border-radius:inherit;background:var(--card-background-color)}.summary-hex.forward{top:calc(31px - var(--summary-node-size) / 2)}.summary-hex.return{top:calc(75px - var(--summary-node-size) / 2)}.summary-hex span{display:block;font-size:clamp(7px,1.7vw,10px);font-weight:800;line-height:1}.summary-hex.assigned{background:#8fd4e8;color:#786000}.summary-hex.assigned:before{background:#f1e6b2}.summary-hex:hover,.summary-hex:focus-visible{background:var(--primary-color);outline:none}.view-mini-card{display:flex;align-items:center;justify-content:flex-start;gap:13px;min-height:94px;padding:14px 32px 14px 14px;text-align:left;border-radius:14px;background:var(--secondary-background-color)}.view-mini-card h3{font-size:18px}.view-mini-card p{max-width:390px}.view-mini-content{min-width:0}.view-index{margin-bottom:3px;color:var(--primary-color);font-size:10px;font-weight:800;letter-spacing:.1em}.view-position{margin:12px 0 2px;text-align:center;color:var(--primary-color);font-size:11px;font-weight:800;letter-spacing:.11em}.view-position span{padding:0 5px;color:var(--secondary-text-color)}.picker-shell{position:relative;margin:24px auto 4px;padding:18px 20px 12px;overflow:hidden;border:1px solid var(--divider-color);border-radius:14px;background:var(--primary-background-color)}.picker-caption{margin-bottom:9px;color:var(--secondary-text-color);text-align:center;font-size:9px;font-weight:800;letter-spacing:.22em}.picker-dial{display:grid;grid-template-columns:repeat(7,1fr);align-items:end;min-height:58px;border-top:1px solid var(--divider-color);background:repeating-linear-gradient(90deg,transparent 0 7px,color-mix(in srgb,var(--divider-color) 70%,transparent) 7px 8px);cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none}.picker-dial.dragging{cursor:grabbing}.dial-tick{display:grid;justify-items:center;gap:4px;color:var(--secondary-text-color);font-size:12px;pointer-events:none}.dial-tick i{display:block;width:1px;height:12px;background:currentColor}.dial-tick b{font-size:14px}.dial-tick.active{color:var(--primary-color);transform:translateY(-4px)}.dial-tick.active i{width:2px;height:22px}.dial-tick.active b{font-size:19px}.view-actions{display:flex;justify-content:center;margin-top:13px}.view-controls-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;max-width:760px;margin:18px auto 0}.view-control-card{padding:20px}.scene-list{display:flex;gap:7px;margin-top:15px;flex-wrap:wrap}.scene-button.active{border-color:var(--primary-color)!important;color:var(--primary-color)!important}.strip-controls{display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:12px;margin-top:15px}.strip-controls label span{margin-bottom:5px}.strip-controls input[type=color]{width:38px;height:38px}.strip-controls input[type=range]{min-height:30px;padding:0;accent-color:var(--primary-color)}.strip-controls output{min-width:34px;padding-bottom:9px;color:var(--secondary-text-color);font-size:11px;font-weight:700}.empty-state{display:grid;gap:5px;place-items:center;padding:40px 18px;text-align:center;color:var(--secondary-text-color)}.empty-state b{color:var(--primary-text-color)}@media(max-width:900px){.configuration-grid,.miniatures-grid,.view-controls-grid{grid-template-columns:1fr}.mini-editor{position:static}.locations-layout{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 12px}.topbar-main{width:100%}nav{width:100%;justify-content:space-between}.nav-tab{flex:0 0 42px}.page{padding:16px 16px calc(32px + env(safe-area-inset-bottom,0px))}}@media(max-width:600px){.brand-icon{width:36px;height:36px}.general-card{align-items:flex-start;flex-direction:column}.general-values{width:100%}.metric,.color-control{flex:1}.form-grid.two,.search-controls{grid-template-columns:1fr}.mini-row{grid-template-columns:38px 1fr auto}.mini-artist{grid-column:2}.mini-row .row-actions{grid-column:2 / -1}.position-badge{grid-column:3;grid-row:1 / span 2}.view-card{padding:16px}.picker-shell{padding-left:10px;padding-right:10px}.dial-tick b{font-size:11px}.dial-tick.active b{font-size:16px}}', Dt = [
   ["name", "Name"],
   ["location", "Location"],
   ["newest", "Newest"]
 ], ct = (e, t = "name") => [...e].sort((i, a) => {
   if (t === "location") {
-    const r = Number(i.shelf) > 0 && Number(i.location) > 0, n = Number(a.shelf) > 0 && Number(a.location) > 0;
-    return r !== n ? r ? -1 : 1 : Number(i.shelf) - Number(a.shelf) || Number(i.location) - Number(a.location) || String(i.name).localeCompare(String(a.name));
+    const r = Number(i.shelf) > 0 && Number(i.location) > 0, o = Number(a.shelf) > 0 && Number(a.location) > 0;
+    return r !== o ? r ? -1 : 1 : Number(i.shelf) - Number(a.shelf) || Number(i.location) - Number(a.location) || String(i.name).localeCompare(String(a.name));
   }
   return t === "newest" && Number(new Date(a.date || 0)) - Number(new Date(i.date || 0)) || String(i.name).localeCompare(String(a.name));
-}), dt = (e, t) => l`<div class="sort-controls">
+}), dt = (e, t) => c`<div class="sort-controls">
 	<span>Sort by</span>
-	${Pt.map(
-  ([i, a]) => l`<button
+	${Dt.map(
+  ([i, a]) => c`<button
 			class="sort-button ${e === i ? "active" : ""}"
 			@click=${() => t(i)}>
 			${a}
 		</button>`
 )}
-</div>`, B = (e) => l`<div class="mini-avatar">${e?.[0] || "?"}</div>`, pt = (e, t, i, a, r) => {
-  const n = Math.max(1, Number(i) || 1), s = Number(t) || 0;
-  return l`<div
+</div>`, B = (e) => c`<div class="mini-avatar">${e?.[0] || "?"}</div>`, pt = (e, t, i, a, r) => {
+  const o = Math.max(1, Number(i) || 1), n = Number(t) || 0;
+  return c`<div
 		class="picker-dial ${a ? "compact" : ""}"
-		@pointerdown=${(o) => e._startDial(o, s)}
-		@pointermove=${(o) => e._moveDial(o, n, r)}
-		@pointerup=${(o) => e._finishDial(o)}
-		@pointercancel=${(o) => e._finishDial(o)}
-		@lostpointercapture=${(o) => e._finishDial(o)}>
+		@pointerdown=${(s) => e._startDial(s, n)}
+		@pointermove=${(s) => e._moveDial(s, o, r)}
+		@pointerup=${(s) => e._finishDial(s)}
+		@pointercancel=${(s) => e._finishDial(s)}
+		@lostpointercapture=${(s) => e._finishDial(s)}>
 		${[-3, -2, -1, 0, 1, 2, 3].map(
-    (o) => l`<span class="dial-tick ${o === 0 ? "active" : ""}">
-					${a && o === 0 ? l`<em>LOCATION</em>` : h}<i></i>
+    (s) => c`<span class="dial-tick ${s === 0 ? "active" : ""}">
+					${a && s === 0 ? c`<em>LOCATION</em>` : h}<i></i>
 					<b
-						>${((s + o) % n + n) % n + 1}</b
+						>${((n + s) % o + o) % o + 1}</b
 					>
 				</span>`
   )}
 	</div>`;
-}, Dt = (e) => e._active === "configuration" ? Ut(e) : e._active === "miniatures" ? Ot(e) : e._active === "view" ? jt(e) : Bt(e), Ut = (e) => {
+}, Pt = (e) => e._active === "configuration" ? Ut(e) : e._active === "miniatures" ? Ot(e) : e._active === "view" ? Vt(e) : Bt(e), Ut = (e) => {
   const t = e._layout, i = t.shelves || [];
   if (!i.length)
-    return l`<div class="empty-state">
+    return c`<div class="empty-state">
 			<b>Waiting for cabinet layout</b
 			><span
 				>The panel will populate when the ESP32 publishes its retained
@@ -680,7 +683,7 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
     a.total_locations || 1
   );
   const r = a.locations?.[e._selectedLocation - 1];
-  return l` <section class="general-card panel-card">
+  return c` <section class="general-card panel-card">
 			<div>
 				<div class="eyebrow">GENERAL</div>
 				<h2>Cabinet configuration</h2>
@@ -699,7 +702,7 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 					><input
 						id="highlight-color"
 						type="color"
-						@change=${(n) => e.actions.setHighlightColor(n.target.value)}
+						@change=${(o) => e.actions.setHighlightColor(o.target.value)}
 						.value=${e._rgbToHex(
     t.highlight_color || { r: 156, g: 39, b: 176 }
   )}
@@ -721,21 +724,21 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 				</div>
 				<div class="shelf-items">
 					${i.map(
-    (n, s) => l`<div
-									class="shelf-row ${n.shelf === e._selectedShelf ? "selected" : ""}">
+    (o, n) => c`<div
+									class="shelf-row ${o.shelf === e._selectedShelf ? "selected" : ""}">
 									<button
 										class="shelf-select"
-										@click=${() => e.actions.selectShelf(n.shelf)}>
+										@click=${() => e.actions.selectShelf(o.shelf)}>
 										<span class="shelf-number"
-											>${String(n.shelf).padStart(
+											>${String(o.shelf).padStart(
       2,
       "0"
     )}</span
 										><span
-											><b>Shelf ${n.shelf}</b
+											><b>Shelf ${o.shelf}</b
 											><small
-												>${n.total_locations}
-												locations · ${n.total_leds}
+												>${o.total_locations}
+												locations · ${o.total_leds}
 												LEDs</small
 											></span
 										>
@@ -744,31 +747,31 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 										<button
 											class="icon-button"
 											@click=${() => e.actions.moveShelf(
-      n.shelf,
+      o.shelf,
       Math.max(
         1,
-        n.shelf - 1
+        o.shelf - 1
       )
     )}
-											?disabled=${s === 0}>
+											?disabled=${n === 0}>
 											↑</button
 										><button
 											class="icon-button"
 											@click=${() => e.actions.moveShelf(
-      n.shelf,
+      o.shelf,
       Math.min(
         i.length,
-        n.shelf + 1
+        o.shelf + 1
       )
     )}
-											?disabled=${s === i.length - 1}>
+											?disabled=${n === i.length - 1}>
 											↓
 										</button>
 									</div>
 								</div>
 								<button
 									class="insert-shelf"
-									@click=${() => e.actions.insertShelf(n.shelf + 1)}>
+									@click=${() => e.actions.insertShelf(o.shelf + 1)}>
 									＋ Insert shelf here
 								</button>`
   )}
@@ -820,18 +823,18 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 			</main>
 		</div>`;
 }, Rt = (e, t, i) => {
-  const a = e._mappingStart ?? (i?.mapped ? i.start_led : null), r = e._mappingEnd ?? (i?.mapped ? i.start_led + i.leds - 1 : null), n = Array.from({ length: t.total_leds }, (o, c) => {
-    const u = a !== null && r !== null && c >= Math.min(a, r) && c <= Math.max(a, r), p = e._showAllMappings && t.locations.some(
-      (m) => m.mapped && c >= m.start_led && c < m.start_led + m.leds
+  const a = e._mappingStart ?? (i?.mapped ? i.start_led : null), r = e._mappingEnd ?? (i?.mapped ? i.start_led + i.leds - 1 : null), o = Array.from({ length: t.total_leds }, (s, d) => {
+    const u = a !== null && r !== null && d >= Math.min(a, r) && d <= Math.max(a, r), p = e._showAllMappings && t.locations.some(
+      (m) => m.mapped && d >= m.start_led && d < m.start_led + m.leds
     );
-    return l`<button
-			class="led-cell ${p ? "assigned" : ""} ${u ? "selected" : ""} ${c === a ? "range-start" : ""} ${c === r ? "range-end" : ""}"
-			@click=${() => e.actions.selectLed(c)}
-			title="LED ${c + 1}">
-			${c % 5 === 0 ? l`<small>${c + 1}</small>` : h}
+    return c`<button
+			class="led-cell ${p ? "assigned" : ""} ${u ? "selected" : ""} ${d === a ? "range-start" : ""} ${d === r ? "range-end" : ""}"
+			@click=${() => e.actions.selectLed(d)}
+			title="LED ${d + 1}">
+			${d % 5 === 0 ? c`<small>${d + 1}</small>` : h}
 		</button>`;
-  }), s = Math.ceil(t.total_leds / 2), d = t.mirrored ? [n.slice(0, s).reverse(), n.slice(s)] : [n.slice(0, s), n.slice(s).reverse()];
-  return l`<section class="mapping-visual">
+  }), n = Math.ceil(t.total_leds / 2), l = t.mirrored ? [o.slice(0, n).reverse(), o.slice(n)] : [o.slice(0, n), o.slice(n).reverse()];
+  return c`<section class="mapping-visual">
 		<div class="section-heading">
 			<div>
 				<div class="eyebrow">LOCATIONS</div>
@@ -842,8 +845,8 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 					id="show-all-mappings"
 					type="checkbox"
 					.checked=${e._showAllMappings}
-					@change=${(o) => e.actions.setShowAllMappings(
-    o.target.checked
+					@change=${(s) => e.actions.setShowAllMappings(
+    s.target.checked
   )} /><span
 					class="mapping-toggle-icon"
 					aria-hidden="true"
@@ -863,7 +866,7 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
     e._selectedLocation - 1,
     t.total_locations,
     !0,
-    (o) => e.actions.selectMappingLocation(o, t.total_locations)
+    (s) => e.actions.selectMappingLocation(s, t.total_locations)
   )}
 		<div class="mapping-tools">
 			<button @click=${e.actions.toggleDirection}>
@@ -877,7 +880,7 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 				@click=${() => e.actions.zoom(0.25)}>
 				＋
 			</button>
-			${a !== null && r !== null ? l`<div class="mapping-range">
+			${a !== null && r !== null ? c`<div class="mapping-range">
 						LED ${Math.min(a, r) + 1} →
 						${Math.max(a, r) + 1}
 						<span>${Math.abs(r - a) + 1} LEDs</span>
@@ -897,11 +900,11 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 						aria-label="Strip power">
 						⚡
 					</div>
-					${d[0]}<span
+					${l[0]}<span
 						class="strip-connector"
 						aria-hidden="true"></span>
 				</div>
-				<div class="led-run return">${d[1]}</div>
+				<div class="led-run return">${l[1]}</div>
 			</div>
 		</div>
 		<div class="button-row end">
@@ -915,9 +918,11 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 		</div>
 	</section>`;
 }, Ot = (e) => {
-  const t = e._miniatures, i = t.find((n) => n.id === e._editingMiniId), a = !!(i || e._addingMini), r = ct(t, e._catalogueSort);
-  return l`<div class="miniatures-grid ${a ? "" : "catalogue-only"}">
-		${a ? l`<section class="panel-card mini-editor">
+  const t = e._miniatures, i = t.find((l) => l.id === e._editingMiniId), a = !!(i || e._addingMini), r = t.filter(
+    (l) => l.name || l.collection || l.artist || Number(l.shelf) > 0 || Number(l.location) > 0
+  ), o = ct(r, e._catalogueSort), n = e._catalogueView === "grid";
+  return c`<div class="miniatures-grid ${a ? "" : "catalogue-only"}">
+		${a ? c`<section class="panel-card mini-editor">
 			<div class="eyebrow">
 				${i ? "EDIT MINIATURE" : "NEW MINIATURE"}
 			</div>
@@ -955,43 +960,47 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 			<div class="section-heading">
 				<div>
 					<div class="eyebrow">CATALOGUE</div>
-					<h2>${t.length} miniatures</h2>
+					<h2>${r.length} miniatures</h2>
 				</div>
-				<button class="primary small" @click=${e.actions.addMini}>
-					Add new mini
-				</button>
+				<div class="catalogue-toolbar">
+					<div class="view-toggle" role="group" aria-label="Catalogue view">
+						<button class="icon-button ${n ? "" : "active"}" aria-label="List view" title="List view" aria-pressed=${String(!n)} @click=${() => e.actions.setCatalogueView("list")}><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg></button>
+						<button class="icon-button ${n ? "active" : ""}" aria-label="Grid view" title="Grid view" aria-pressed=${String(n)} @click=${() => e.actions.setCatalogueView("grid")}><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></svg></button>
+					</div>
+					<button class="primary small" @click=${e.actions.addMini}>Add new mini</button>
+				</div>
 			</div>
 			${dt(
     e._catalogueSort,
-    (n) => e.actions.setSort("_catalogueSort", n)
+    (l) => e.actions.setSort("_catalogueSort", l)
   )}
-			<div class="mini-list">
-				${r.map(
-    (n) => l`<div class="mini-row">
-							${B(n.name)}
+			<div class="mini-list ${n ? "grid" : ""}">
+				${o.map(
+    (l) => c`<div class="mini-row ${n ? "mini-card" : ""}">
+							${B(l.name)}
 							<div class="mini-main">
-								<b>${n.name}</b
+								<b>${l.name}</b
 								><span
-									>${n.collection || "No collection"}</span
+									>${l.collection || "No collection"}</span
 								>
 							</div>
 							<div class="mini-artist">
-								${n.artist || "Unknown artist"}
+								${l.artist || "Unknown artist"}
 							</div>
 							<div
-								class="position-badge ${n.shelf ? "" : "unassigned"}">
-								${n.shelf ? `S${n.shelf} · L${n.location}` : "Unassigned"}
+								class="position-badge ${l.shelf ? "" : "unassigned"}">
+								${l.shelf ? `S${l.shelf} · L${l.location}` : "Unassigned"}
 							</div>
 							<div class="row-actions">
-								<button
+								${n ? c`<button class="icon-button" aria-label="Edit ${l.name}" title="Edit ${l.name}" @click=${() => e.actions.editMini(l.id)}><svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" /></svg></button><button class="icon-button danger" aria-label="Delete ${l.name}" title="Delete ${l.name}" @click=${() => e.actions.deleteMini(l.id)}><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v4M14 11v4" /></svg></button>` : c`<button
 									class="ghost"
-									@click=${() => e.actions.editMini(n.id)}>
+									@click=${() => e.actions.editMini(l.id)}>
 									Edit</button
 								><button
 									class="danger ghost"
-									@click=${() => e.actions.deleteMini(n.id)}>
+									@click=${() => e.actions.deleteMini(l.id)}>
 									Delete
-								</button>
+								</button>`}
 							</div>
 						</div>`
   )}
@@ -1000,25 +1009,25 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 	</div>`;
 }, Bt = (e) => {
   const t = e._searchQuery.trim().toLocaleLowerCase(), i = e._searchField === "all" ? ["name", "collection", "artist"] : [e._searchField], a = t ? e._miniatures.filter(
-    (s) => i.some(
-      (d) => String(s[d] || "").toLocaleLowerCase().includes(t)
+    (n) => i.some(
+      (l) => String(n[l] || "").toLocaleLowerCase().includes(t)
     )
-  ) : [], r = ct(a, e._searchSort), n = a.filter(
-    (s) => s.shelf > 0 && s.location > 0
+  ) : [], r = ct(a, e._searchSort), o = a.filter(
+    (n) => n.shelf > 0 && n.location > 0
   );
-  return l`<section class="panel-card search-card">
+  return c`<section class="panel-card search-card">
 		<div class="eyebrow">FIND & HIGHLIGHT</div>
 		<h2>Find a miniature in the cabinet</h2>
 		<div class="search-controls">
 			<input
 				id="search-query"
 				type="search"
-				@input=${(s) => e.actions.setSearchQuery(s.target.value)}
+				@input=${(n) => e.actions.setSearchQuery(n.target.value)}
 				placeholder="Search miniatures…"
 				autocomplete="off"
 				.value=${e._searchQuery} /><select
 				id="search-field"
-				@change=${(s) => e.actions.setSearchField(s.target.value)}
+				@change=${(n) => e.actions.setSearchField(n.target.value)}
 				.value=${e._searchField}>
 				<option value="all">All fields</option>
 				<option value="name">Name</option>
@@ -1029,45 +1038,45 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 		<div
 			id="search-summary"
 			class="search-summary muted">
-			${t ? `${a.length} result${a.length === 1 ? "" : "s"} · ${n.length} assigned` : "Start typing to search."}
+			${t ? `${a.length} result${a.length === 1 ? "" : "s"} · ${o.length} assigned` : "Start typing to search."}
 		</div>
 		${t ? dt(
     e._searchSort,
-    (s) => e.actions.setSort("_searchSort", s)
+    (n) => e.actions.setSort("_searchSort", n)
   ) : h}
 		<div
 			id="search-results"
 			class="search-results">
 			${t ? r.length ? r.map(
-    (s) => l`<button
+    (n) => c`<button
 									class="search-result"
-									@click=${() => e.actions.highlightOne(s.id)}
-									?disabled=${!s.shelf}>
-									${B(s.name)}
+									@click=${() => e.actions.highlightOne(n.id)}
+									?disabled=${!n.shelf}>
+									${B(n.name)}
 									<div class="search-result-main">
-										<b>${s.name}</b
+										<b>${n.name}</b
 										><span
-											>${s.collection || "No collection"}
+											>${n.collection || "No collection"}
 											·
-											${s.artist || "Unknown artist"}</span
+											${n.artist || "Unknown artist"}</span
 										>
 									</div>
 									<span
-										class="position-badge ${s.shelf ? "" : "unassigned"}"
-										>${s.shelf ? `Shelf ${s.shelf} · Location ${s.location}` : "Unassigned"}</span
+										class="position-badge ${n.shelf ? "" : "unassigned"}"
+										>${n.shelf ? `Shelf ${n.shelf} · Location ${n.location}` : "Unassigned"}</span
 									>
 								</button>`
-  ) : l`<div class="empty-state">
+  ) : c`<div class="empty-state">
 							<b>No matches</b
 							><span>Try another term or field.</span>
 						</div>` : h}
 		</div>
 	</section>`;
-}, jt = (e) => {
+}, Vt = (e) => {
   const t = e._viewItem(e._viewIndex), i = e._miniatures.filter(
     (a) => Number(a.shelf) <= 0 || Number(a.location) <= 0
   ).length;
-  return l`${t ? l`<section class="panel-card view-card">
+  return c`${t ? c`<section class="panel-card view-card">
 				<div class="section-heading view-heading">
 					<div>
 						<div class="eyebrow">CABINET VIEW</div>
@@ -1111,19 +1120,19 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 						Stop locating
 					</button>
 				</div>
-	</section>` : l`<cabinet-panel-card class="view-card empty-state">
+	</section>` : c`<cabinet-panel-card class="view-card empty-state">
 				<b>No assigned miniatures</b>
-			</cabinet-panel-card>`}${Vt(e)}${qt(e)}`;
-}, Vt = (e) => {
+			</cabinet-panel-card>`}${jt(e)}${qt(e)}`;
+}, jt = (e) => {
   const t = e._hass?.states?.[e._config.scene_entity]?.state || "Off", i = String(t).toLocaleLowerCase();
-  return l`<div class="view-controls-grid">
+  return c`<div class="view-controls-grid">
 		<section class="panel-card view-control-card">
 			<div class="eyebrow">SCENES</div>
 			<h3>Current: ${t}</h3>
 			<p>Choosing a scene stops locating and restores the full strip output.</p>
 			<div class="scene-list">
 				${["off", "display", "showcase"].map(
-    (a) => l`<button
+    (a) => c`<button
 						class="scene-button ${i === a ? "active" : ""}"
 						@click=${() => e.actions.applyScene(a)}>
 						${a[0].toUpperCase() + a.slice(1)}
@@ -1157,7 +1166,7 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
       a
     ])
   );
-  return l`<section class="panel-card cabinet-summary">
+  return c`<section class="panel-card cabinet-summary">
 		<div class="section-heading">
 			<div>
 				<div class="eyebrow">CABINET SUMMARY</div>
@@ -1165,20 +1174,20 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 			</div>
 			<span class="muted">Tap a location to locate it.</span>
 		</div>
-		${t.length ? l`<div class="summary-shelves">
+		${t.length ? c`<div class="summary-shelves">
 					${t.map((a) => {
     const r = (a.locations || []).filter(
-      (s) => s.mapped
-    ), n = r.filter(
-      (s) => i.has(
-        `${a.shelf}:${s.location}`
+      (n) => n.mapped
+    ), o = r.filter(
+      (n) => i.has(
+        `${a.shelf}:${n.location}`
       )
     ).length;
-    return l`<section class="summary-shelf">
+    return c`<section class="summary-shelf">
 							<header class="summary-shelf-heading">
 								<b>Shelf ${a.shelf}</b>
 								<span
-									>${r.length} mapped · ${n}
+									>${r.length} mapped · ${o}
 									assigned</span
 								>
 							</header>
@@ -1190,29 +1199,29 @@ const Y = (e, t) => e.shadowRoot.querySelector(t)?.value, Ht = (e) => ({
 									<div
 										class="summary-connector"
 										aria-hidden="true"></div>
-									${r.map((s) => {
-      const d = e._summaryLocationAnchor(
+									${r.map((n) => {
+      const l = e._summaryLocationAnchor(
         a,
-        s
-      ), o = i.get(
-        `${a.shelf}:${s.location}`
+        n
+      ), s = i.get(
+        `${a.shelf}:${n.location}`
       );
-      return l`<button
-											class="summary-hex ${d.run} ${o ? "assigned" : ""}"
-											style=${`--anchor:${d.percent}`}
+      return c`<button
+											class="summary-hex ${l.run} ${s ? "assigned" : ""}"
+											style=${`--anchor:${l.percent}`}
 											@click=${() => e._selectSummaryLocation(
         a.shelf,
-        s.location
+        n.location
       )}
-											title=${o ? `Location ${s.location}: ${o.name}` : `Location ${s.location}: no miniature assigned`}>
-											<span>${s.location}</span>
+											title=${s ? `Location ${n.location}: ${s.name}` : `Location ${n.location}: no miniature assigned`}>
+											<span>${n.location}</span>
 										</button>`;
     })}
 								</div>
 							</div>
 						</section>`;
   })}
-				</div>` : l`<div class="empty-state">
+				</div>` : c`<div class="empty-state">
 					<b>Waiting for cabinet layout</b>
 				</div>`}
 	</section>`;
@@ -1246,6 +1255,7 @@ class Wt extends y {
   _searchField = "all";
   _searchSort = "name";
   _catalogueSort = "name";
+  _catalogueView = "list";
   _viewIndex = 0;
   _viewTimer = null;
   _mappingStart = null;
@@ -1258,7 +1268,7 @@ class Wt extends y {
   _miniatureColor = "#03a9e6";
   actions;
   constructor() {
-    super(), this._hass = null, this._panel = null, this._narrow = !1, this._active = "configuration", this._selectedShelf = 1, this._selectedLocation = 1, this._editingMiniId = null, this._addingMini = !1, this._searchTimer = null, this._dataSignature = null, this._searchQuery = "", this._searchField = "all", this._searchSort = "name", this._catalogueSort = "name", this._viewIndex = 0, this._viewTimer = null, this._mappingStart = null, this._mappingEnd = null, this._mappingTimer = null, this._showAllMappings = !1, this._ledZoom = 1, this._dialDrag = null, this._miniatureBrightness = 45, this._miniatureColor = "#03a9e6", this.actions = Ht(this);
+    super(), this._hass = null, this._panel = null, this._narrow = !1, this._active = "configuration", this._selectedShelf = 1, this._selectedLocation = 1, this._editingMiniId = null, this._addingMini = !1, this._searchTimer = null, this._dataSignature = null, this._searchQuery = "", this._searchField = "all", this._searchSort = "name", this._catalogueSort = "name", this._catalogueView = "list", this._viewIndex = 0, this._viewTimer = null, this._mappingStart = null, this._mappingEnd = null, this._mappingTimer = null, this._showAllMappings = !1, this._ledZoom = 1, this._dialDrag = null, this._miniatureBrightness = 45, this._miniatureColor = "#03a9e6", this.actions = Ht(this);
   }
   set narrow(t) {
     const i = !!t;
@@ -1269,8 +1279,8 @@ class Wt extends y {
   }
   set hass(t) {
     this._hass = t;
-    const i = t?.states?.[this._config.layout_entity], a = t?.states?.[this._config.miniatures_entity], r = t?.states?.[this._config.scene_entity], n = `${i?.last_updated || ""}|${a?.last_updated || ""}|${r?.last_updated || ""}`;
-    n !== this._dataSignature && (this._dataSignature = n, this._render());
+    const i = t?.states?.[this._config.layout_entity], a = t?.states?.[this._config.miniatures_entity], r = t?.states?.[this._config.scene_entity], o = `${i?.last_updated || ""}|${a?.last_updated || ""}|${r?.last_updated || ""}`;
+    o !== this._dataSignature && (this._dataSignature = o, this._render());
   }
   get _config() {
     return { ...Ft, ...this._panel?.config || {} };
@@ -1294,13 +1304,13 @@ class Wt extends y {
     return i.length ? i[(t % i.length + i.length) % i.length] : null;
   }
   _summaryLocationAnchor(t, i) {
-    const a = Number(t.total_leds) || 0, r = Math.ceil(a / 2), n = a - r, s = Number(i.start_led) + (Number(i.leds) - 1) / 2;
-    return s < r ? t.mirrored ? { run: "forward", percent: (r - s - 0.5) / r * 100 } : { run: "forward", percent: (s + 0.5) / r * 100 } : t.mirrored ? {
+    const a = Number(t.total_leds) || 0, r = Math.ceil(a / 2), o = a - r, n = Number(i.start_led) + (Number(i.leds) - 1) / 2;
+    return n < r ? t.mirrored ? { run: "forward", percent: (r - n - 0.5) / r * 100 } : { run: "forward", percent: (n + 0.5) / r * 100 } : t.mirrored ? {
       run: "return",
-      percent: n ? (s - r + 0.5) / n * 100 : 50
+      percent: o ? (n - r + 0.5) / o * 100 : 50
     } : {
       run: "return",
-      percent: n ? (a - s - 0.5) / n * 100 : 50
+      percent: o ? (a - n - 0.5) / o * 100 : 50
     };
   }
   _selectSummaryLocation(t, i) {
@@ -1347,21 +1357,21 @@ class Wt extends y {
       [
         "view",
         "View",
-        l`<svg viewBox="0 0 24 24">
+        c`<svg viewBox="0 0 24 24">
 					<path d="M4 19V5m5 14V9m5 10V4m5 15v-8" />
 				</svg>`
       ],
       [
         "configuration",
         "Configuration",
-        l`<svg viewBox="0 0 24 24">
+        c`<svg viewBox="0 0 24 24">
 					<path d="M4 4h16v5H4zm0 11h16v5H4zm4-6v6m8-6v6" />
 				</svg>`
       ],
       [
         "miniatures",
         "Miniatures",
-        l`<svg viewBox="0 0 24 24">
+        c`<svg viewBox="0 0 24 24">
 					<path
 						d="M7 20v-2a5 5 0 0 1 10 0v2M12 4a4 4 0 1 1 0 8 4 4 0 0" />
 				</svg>`
@@ -1369,7 +1379,7 @@ class Wt extends y {
       [
         "search",
         "Search",
-        l`<svg viewBox="0 0 24 24">
+        c`<svg viewBox="0 0 24 24">
 					<circle
 						cx="10.5"
 						cy="10.5"
@@ -1378,7 +1388,7 @@ class Wt extends y {
 				</svg>`
       ]
     ];
-    return l`<style>
+    return c`<style>
 				${tt}
 			</style>
 			<div class="app-shell">
@@ -1395,7 +1405,7 @@ class Wt extends y {
 					</div>
 					<nav>
 						${t.map(
-      ([i, a, r]) => l`<button
+      ([i, a, r]) => c`<button
 									class="nav-tab ${this._active === i ? "active" : ""}"
 									@click=${() => this._selectTab(i)}
 									aria-label=${a}
@@ -1405,7 +1415,7 @@ class Wt extends y {
     )}
 					</nav>
 				</header>
-				<div class="page">${Dt(this)}</div>
+				<div class="page">${Pt(this)}</div>
 			</div>`;
   }
   _render() {
@@ -1443,7 +1453,7 @@ class Wt extends y {
     const t = this.shadowRoot.querySelector("#mini-name").value.trim(), i = this.shadowRoot.querySelector("#mini-collection").value.trim(), a = this.shadowRoot.querySelector("#mini-artist").value.trim();
     if (!t) return;
     const r = this._miniatures.find(
-      (n) => n.id === this._editingMiniId
+      (o) => o.id === this._editingMiniId
     );
     await this._command(
       r ? {
@@ -1476,7 +1486,7 @@ class Wt extends y {
     if (!t) return this._command({ action: "clearHighlight" });
     const i = this._searchField === "all" ? ["name", "collection", "artist"] : [this._searchField], a = this._miniatures.filter(
       (r) => Number(r.shelf) > 0 && Number(r.location) > 0 && i.some(
-        (n) => String(r[n] || "").toLocaleLowerCase().includes(t)
+        (o) => String(r[o] || "").toLocaleLowerCase().includes(t)
       )
     );
     return this._command(
