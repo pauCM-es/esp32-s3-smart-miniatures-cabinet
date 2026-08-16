@@ -438,9 +438,24 @@ const searchTemplate = (p: any) => {
 					String(item[key] || "")
 						.toLocaleLowerCase()
 						.includes(query),
-				),
-			)
+			),
+		)
 		: [];
+	const sortedResults = [...results].sort((left, right) => {
+		if (p._searchSort === "location") {
+			const leftAssigned = Number(left.shelf) > 0 && Number(left.location) > 0;
+			const rightAssigned = Number(right.shelf) > 0 && Number(right.location) > 0;
+			if (leftAssigned !== rightAssigned) return leftAssigned ? -1 : 1;
+			return Number(left.shelf) - Number(right.shelf) ||
+				Number(left.location) - Number(right.location) ||
+				String(left.name).localeCompare(String(right.name));
+		}
+		if (p._searchSort === "newest") {
+			return Number(new Date(right.date || 0)) - Number(new Date(left.date || 0)) ||
+				String(left.name).localeCompare(String(right.name));
+		}
+		return String(left.name).localeCompare(String(right.name));
+	});
 	const assigned = results.filter(
 		(item) => item.shelf > 0 && item.location > 0,
 	);
@@ -473,12 +488,28 @@ const searchTemplate = (p: any) => {
 				? `${results.length} result${results.length === 1 ? "" : "s"} · ${assigned.length} assigned`
 				: "Start typing to search."}
 		</div>
+		${query
+			? html`<div class="search-toolbar">
+				<span>Sort by</span>
+				${[
+					["name", "Name"],
+					["location", "Location"],
+					["newest", "Newest"],
+				].map(
+					([sort, label]) => html`<button
+						class="search-sort-button ${p._searchSort === sort ? "active" : ""}"
+						@click=${() => p.actions.setSearchSort(sort)}>
+						${label}
+					</button>`,
+				)}
+			</div>`
+			: nothing}
 		<div
 			id="search-results"
 			class="search-results">
 			${query
-				? results.length
-					? results.map(
+				? sortedResults.length
+					? sortedResults.map(
 							(item) =>
 								html`<button
 									class="search-result"

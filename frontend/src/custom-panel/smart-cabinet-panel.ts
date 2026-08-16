@@ -27,6 +27,7 @@ class HaPanelSmartCabinet extends LitElement {
 	_dataSignature: string | null = null;
 	_searchQuery = "";
 	_searchField = "all";
+	_searchSort = "name";
 	_viewIndex = 0;
 	_viewTimer: ReturnType<typeof setTimeout> | null = null;
 	_mappingStart: number | null = null;
@@ -52,6 +53,7 @@ class HaPanelSmartCabinet extends LitElement {
 		this._dataSignature = null;
 		this._searchQuery = "";
 		this._searchField = "all";
+		this._searchSort = "name";
 		this._viewIndex = 0;
 		this._viewTimer = null;
 		this._mappingStart = null;
