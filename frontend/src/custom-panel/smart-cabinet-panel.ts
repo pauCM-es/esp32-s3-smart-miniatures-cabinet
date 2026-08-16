@@ -1,12 +1,34 @@
-import { LitElement, html, unsafeCSS } from "lit";
+import { LitElement, html, unsafeCSS, type TemplateResult } from "lit";
 import "../components/cabinet-panel-card.js";
 import { createPanelActions } from "./panel-actions.js";
+import { normalizeLayout, normalizeMiniatures } from "./panel-data.js";
+import {
+	isAssignedMiniature,
+	searchMiniatures,
+} from "./panel-selectors.js";
 import panelStyles from "./smart-cabinet-panel.css?inline";
 import { panelContent } from "./smart-cabinet-panel-templates.js";
 import { publishMqtt } from "./panel-service.js";
-import type { Hass } from "./panel-types.js";
+import type {
+	CabinetPosition,
+	CatalogueView,
+	LocationAnchor,
+	MiniatureSearchField,
+	PanelActions,
+	PanelConfig,
+	PanelView,
+} from "./panel-template-types.js";
+import type {
+	CabinetCommand,
+	Hass,
+	Layout,
+	Location,
+	Miniature,
+	RgbColor,
+	Shelf,
+} from "./panel-types.js";
 
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG: PanelConfig = {
 	command_topic: "smartcabinet/cabinet01/api/command",
 	layout_entity: "sensor.smart_cabinet_layout",
 	miniatures_entity: "sensor.smart_cabinet_miniatures",
@@ -19,7 +41,7 @@ class HaPanelSmartCabinet extends LitElement {
 	_hass: Hass | null = null;
 	_panel: { config?: Record<string, string> } | null = null;
 	_narrow = false;
-	_active = "configuration";
+	_active: PanelView = "configuration";
 	_selectedShelf = 1;
 	_selectedLocation = 1;
 	_editingMiniId: string | null = null;
@@ -27,13 +49,13 @@ class HaPanelSmartCabinet extends LitElement {
 	_searchTimer: ReturnType<typeof setTimeout> | null = null;
 	_dataSignature: string | null = null;
 	_searchQuery = "";
-	_searchField = "all";
-	_searchSort = "name";
-	_catalogueSort = "name";
-	_catalogueView = "list";
-	_summarySelected: { shelf: number; location: number } | null = null;
-	_summaryMoveSource: { shelf: number; location: number } | null = null;
-	_summaryMoveTarget: { shelf: number; location: number } | null = null;
+	_searchField: MiniatureSearchField = "all";
+	_searchSort: "name" | "location" | "newest" = "name";
+	_catalogueSort: "name" | "location" | "newest" = "name";
+	_catalogueView: CatalogueView = "list";
+	_summarySelected: CabinetPosition | null = null;
+	_summaryMoveSource: CabinetPosition | null = null;
+	_summaryMoveTarget: CabinetPosition | null = null;
 	_viewIndex = 0;
 	_viewTimer: ReturnType<typeof setTimeout> | null = null;
 	_mappingStart: number | null = null;
@@ -44,7 +66,9 @@ class HaPanelSmartCabinet extends LitElement {
 	_dialDrag: { pointerId: number; x: number; value: number; steps: number } | null = null;
 	_miniatureBrightness = 45;
 	_miniatureColor = "#03a9e6";
-	actions: any;
+	_layoutData: Layout = { shelf_count: 0, shelves: [] };
+	_miniaturesData: Miniature[] = [];
+	actions: PanelActions;
 
 	constructor() {
 		super();
@@ -88,11 +112,13 @@ class HaPanelSmartCabinet extends LitElement {
 
 	set panel(value: { config?: Record<string, string> } | null) {
 		this._panel = value;
+		this._syncStateData();
 		this._render();
 	}
 
 	set hass(value: Hass | null) {
 		this._hass = value;
+		this._syncStateData();
 		const layout = value?.states?.[this._config.layout_entity];
 		const miniatures = value?.states?.[this._config.miniatures_entity];
 		const scene = value?.states?.[this._config.scene_entity];
@@ -103,41 +129,61 @@ class HaPanelSmartCabinet extends LitElement {
 		}
 	}
 
-	get _config() {
+	get _config(): PanelConfig {
 		return { ...DEFAULT_CONFIG, ...(this._panel?.config || {}) };
 	}
-	get _layout() {
-		return (
-			this._hass?.states?.[this._config.layout_entity]?.attributes || {
-				shelves: [],
-				shelf_count: 0,
-			}
-		);
+	get _layout(): Layout {
+		return this._layoutData;
 	}
-	get _miniatures() {
-		return (
-			this._hass?.states?.[this._config.miniatures_entity]?.attributes
-				?.items || []
-		);
+	get _miniatures(): Miniature[] {
+		return this._miniaturesData;
 	}
-	get _assignedMiniatures() {
-		return this._miniatures.filter(
-			(item) => Number(item.shelf) > 0 && Number(item.location) > 0,
+	get _assignedMiniatures(): Miniature[] {
+		return this._miniatures.filter(isAssignedMiniature);
+	}
+
+	_syncStateData(): void {
+		const layout = this._hass?.states?.[this._config.layout_entity];
+		const miniatures = this._hass?.states?.[this._config.miniatures_entity];
+		this._layoutData = normalizeLayout(layout?.attributes);
+		this._miniaturesData = normalizeMiniatures(miniatures?.attributes);
+		this._normalizeSelection();
+	}
+
+	_normalizeSelection(): void {
+		const assignedCount = this._assignedMiniatures.length;
+		this._viewIndex = assignedCount
+			? ((this._viewIndex % assignedCount) + assignedCount) % assignedCount
+			: 0;
+		const shelves = this._layout.shelves;
+		if (!shelves.length) {
+			this._selectedShelf = 1;
+			this._selectedLocation = 1;
+			return;
+		}
+		this._selectedShelf = Math.min(
+			Math.max(1, this._selectedShelf),
+			shelves.length,
+		);
+		const selected = shelves[this._selectedShelf - 1];
+		this._selectedLocation = Math.min(
+			Math.max(1, this._selectedLocation),
+			Math.max(1, selected.total_locations),
 		);
 	}
 
-	_viewItem(index) {
+	_viewItem(index: number): Miniature | null {
 		const items = this._assignedMiniatures;
 		return items.length
 			? items[((index % items.length) + items.length) % items.length]
 			: null;
 	}
 
-	_summaryLocationAnchor(shelf, location) {
-		const total = Number(shelf.total_leds) || 0;
+	_summaryLocationAnchor(shelf: Shelf, location: Location): LocationAnchor {
+		const total = shelf.total_leds;
 		const firstRun = Math.ceil(total / 2);
 		const secondRun = total - firstRun;
-		const center = Number(location.start_led) + (Number(location.leds) - 1) / 2;
+		const center = location.start_led + (location.leds - 1) / 2;
 		if (center < firstRun) {
 			if (shelf.mirrored) {
 				return { run: "forward", percent: ((firstRun - center - 0.5) / firstRun) * 100 };
@@ -156,24 +202,24 @@ class HaPanelSmartCabinet extends LitElement {
 		};
 	}
 
-	_selectSummaryLocation(shelf, location) {
+	_selectSummaryLocation(shelf: number, location: number): void {
 		if (this._summaryMoveSource) {
 			this._selectSummaryMoveTarget(shelf, location);
 			return;
 		}
-		this._summarySelected = { shelf: Number(shelf), location: Number(location) };
+		this._summarySelected = { shelf, location };
 		const itemIndex = this._assignedMiniatures.findIndex(
-			(item) => Number(item.shelf) === Number(shelf) && Number(item.location) === Number(location),
+			(item) => item.shelf === shelf && item.location === location,
 		);
 		if (itemIndex >= 0) this._viewIndex = itemIndex;
-		this._command({ action: "highlightLocation", shelf: Number(shelf), location: Number(location) });
+		this._command({ action: "highlightLocation", shelf, location });
 		this._render();
 	}
 
-	_startSummaryMove() {
+	_startSummaryMove(): void {
 		const selected = this._summarySelected;
 		const miniature = selected && this._miniatures.find(
-			(item) => Number(item.shelf) === selected.shelf && Number(item.location) === selected.location,
+			(item) => item.shelf === selected.shelf && item.location === selected.location,
 		);
 		if (!selected || !miniature) return;
 		this._summaryMoveSource = selected;
@@ -181,7 +227,7 @@ class HaPanelSmartCabinet extends LitElement {
 		this._render();
 	}
 
-	_cancelSummaryMove(clearSelection = false) {
+	_cancelSummaryMove(clearSelection = false): void {
 		if (!this._summaryMoveSource && (!clearSelection || !this._summarySelected)) return;
 		if (clearSelection) this._summarySelected = null;
 		this._summaryMoveSource = null;
@@ -190,16 +236,16 @@ class HaPanelSmartCabinet extends LitElement {
 		this._render();
 	}
 
-	async _selectSummaryMoveTarget(shelf, location) {
+	async _selectSummaryMoveTarget(shelf: number, location: number): Promise<void> {
 		const source = this._summaryMoveSource;
-		const target = { shelf: Number(shelf), location: Number(location) };
+		const target = { shelf, location };
 		if (!source || (source.shelf === target.shelf && source.location === target.location)) return;
 		const miniature = this._miniatures.find(
-			(item) => Number(item.shelf) === source.shelf && Number(item.location) === source.location,
+			(item) => item.shelf === source.shelf && item.location === source.location,
 		);
 		if (!miniature) return this._cancelSummaryMove();
 		const displaced = this._miniatures.find(
-			(item) => Number(item.shelf) === target.shelf && Number(item.location) === target.location,
+			(item) => item.shelf === target.shelf && item.location === target.location,
 		);
 		this._summaryMoveTarget = target;
 		this._render();
@@ -208,7 +254,11 @@ class HaPanelSmartCabinet extends LitElement {
 			? `Move ${miniature.name} to Shelf ${target.shelf}, Location ${target.location}?\n\n${displaced.name} will become Unassigned.`
 			: `Move ${miniature.name} to Shelf ${target.shelf}, Location ${target.location}?`;
 		if (!confirm(message)) return this._cancelSummaryMove();
-		const update = (item, destinationShelf, destinationLocation) =>
+		const update = (
+			item: Miniature,
+			destinationShelf: number,
+			destinationLocation: number,
+		) =>
 			this._command({
 				action: "updateMiniature",
 				id: item.id,
@@ -249,11 +299,17 @@ class HaPanelSmartCabinet extends LitElement {
 		(event?.currentTarget as HTMLElement | undefined)?.classList.remove("dragging");
 	}
 
-	_command(payload) {
+	_command(payload: CabinetCommand): Promise<void> {
 		return publishMqtt(this._hass, this._config.command_topic, payload);
 	}
 
-	_setMiniatureLights({ brightness, color }: { brightness?: number; color?: string }) {
+	_setMiniatureLights({
+		brightness,
+		color,
+	}: {
+		brightness?: number | string;
+		color?: string;
+	}): Promise<void> {
 		if (brightness !== undefined)
 			this._miniatureBrightness = Math.max(0, Math.min(100, Number(brightness) || 0));
 		if (color) this._miniatureColor = color;
@@ -265,7 +321,7 @@ class HaPanelSmartCabinet extends LitElement {
 		});
 	}
 
-	_hexToRgb(hex) {
+	_hexToRgb(hex: string): RgbColor {
 		const value = hex.replace("#", "");
 		return {
 			r: parseInt(value.slice(0, 2), 16),
@@ -274,16 +330,16 @@ class HaPanelSmartCabinet extends LitElement {
 		};
 	}
 
-	_rgbToHex(color: { r?: number; g?: number; b?: number } = {}) {
-		const part = (value) =>
+	_rgbToHex(color: Partial<RgbColor> = {}): string {
+		const part = (value: number | undefined) =>
 			Number(value || 0)
 				.toString(16)
 				.padStart(2, "0");
 		return `#${part(color.r)}${part(color.g)}${part(color.b)}`;
 	}
 
-	render() {
-		const nav = [
+	render(): TemplateResult {
+		const nav: Array<[PanelView, string, TemplateResult]> = [
 			[
 				"view",
 				"View",
@@ -352,17 +408,17 @@ class HaPanelSmartCabinet extends LitElement {
 			</div>`;
 	}
 
-	_render() {
+	_render(): void {
 		this.requestUpdate();
 	}
 
-	_selectTab(tab) {
+	_selectTab(tab: PanelView): void {
 		this._active = tab;
 		this._render();
 		if (tab === "view") this._scheduleViewHighlight();
 	}
 
-	_setViewIndex(index) {
+	_setViewIndex(index: number): void {
 		const items = this._assignedMiniatures;
 		if (!items.length) return;
 		this._viewIndex =
@@ -371,8 +427,8 @@ class HaPanelSmartCabinet extends LitElement {
 		this._scheduleViewHighlight();
 	}
 
-	_scheduleMappingHighlight() {
-		clearTimeout(this._mappingTimer);
+	_scheduleMappingHighlight(): void {
+		if (this._mappingTimer !== null) clearTimeout(this._mappingTimer);
 		this._mappingTimer = setTimeout(
 			() =>
 				this._command({
@@ -384,10 +440,10 @@ class HaPanelSmartCabinet extends LitElement {
 		);
 	}
 
-	_scheduleViewHighlight() {
+	_scheduleViewHighlight(): void {
 		const item = this._viewItem(this._viewIndex);
 		if (!item) return;
-		clearTimeout(this._viewTimer);
+		if (this._viewTimer !== null) clearTimeout(this._viewTimer);
 		this._viewTimer = setTimeout(
 			() =>
 				this._command({
@@ -399,14 +455,17 @@ class HaPanelSmartCabinet extends LitElement {
 		);
 	}
 
-	async _saveMini() {
-		const name = (this.shadowRoot.querySelector("#mini-name") as HTMLInputElement).value.trim();
-		const collectionValue = (
-			this.shadowRoot.querySelector("#mini-collection") as HTMLInputElement
-		).value.trim();
-		const artistValue = (
-			this.shadowRoot.querySelector("#mini-artist") as HTMLInputElement
-		).value.trim();
+	async _saveMini(): Promise<void> {
+		const nameInput =
+			this.shadowRoot?.querySelector<HTMLInputElement>("#mini-name");
+		const collectionInput =
+			this.shadowRoot?.querySelector<HTMLInputElement>("#mini-collection");
+		const artistInput =
+			this.shadowRoot?.querySelector<HTMLInputElement>("#mini-artist");
+		if (!nameInput || !collectionInput || !artistInput) return;
+		const name = nameInput.value.trim();
+		const collectionValue = collectionInput.value.trim();
+		const artistValue = artistInput.value.trim();
 		if (!name) return;
 		const current = this._miniatures.find(
 			(item) => item.id === this._editingMiniId,
@@ -417,8 +476,8 @@ class HaPanelSmartCabinet extends LitElement {
 						action: "updateMiniature",
 						id: current.id,
 						name,
-				collection: collectionValue,
-				artist: artistValue,
+						collection: collectionValue,
+						artist: artistValue,
 						date: current.date || "",
 						shelf: current.shelf || 0,
 						location: current.location || 0,
@@ -427,8 +486,8 @@ class HaPanelSmartCabinet extends LitElement {
 				: {
 						action: "createMiniature",
 						name,
-				collection: collectionValue,
-				artist: artistValue,
+						collection: collectionValue,
+						artist: artistValue,
 						date: "",
 						shelf: 0,
 						location: 0,
@@ -440,28 +499,19 @@ class HaPanelSmartCabinet extends LitElement {
 		this._render();
 	}
 
-	_scheduleSearch() {
-		clearTimeout(this._searchTimer);
+	_scheduleSearch(): void {
+		if (this._searchTimer !== null) clearTimeout(this._searchTimer);
 		this._searchTimer = setTimeout(() => this._highlightSearch(), 220);
 	}
 
-	async _highlightSearch() {
+	async _highlightSearch(): Promise<void> {
 		const query = this._searchQuery.trim().toLocaleLowerCase();
 		if (!query) return this._command({ action: "clearHighlight" });
-		const fields =
-			this._searchField === "all"
-				? ["name", "collection", "artist"]
-				: [this._searchField];
-		const assigned = this._miniatures.filter(
-			(item) =>
-				Number(item.shelf) > 0 &&
-				Number(item.location) > 0 &&
-				fields.some((key) =>
-					String(item[key] || "")
-						.toLocaleLowerCase()
-						.includes(query),
-				),
-		);
+		const assigned = searchMiniatures(
+			this._miniatures,
+			query,
+			this._searchField,
+		).filter(isAssignedMiniature);
 		return this._command(
 			assigned.length
 				? {
