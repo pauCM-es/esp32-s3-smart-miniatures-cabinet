@@ -226,24 +226,16 @@ const mappingTemplate = (p, shelf, location) => {
 				></label
 			>
 		</div>
-		<div
-			id="mapping-location-dial"
-			class="picker-dial compact">
-			${[-3, -2, -1, 0, 1, 2, 3].map((offset) => {
-				const index =
-					((p._selectedLocation -
-						1 +
-						offset +
-						shelf.total_locations) %
-						shelf.total_locations) +
-					1;
-				return html`<span
-					class="dial-tick ${offset === 0 ? "active" : ""}"
-					>${offset === 0 ? html`<em>LOCATION</em>` : nothing}<i></i
-					><b>${index}</b></span
-				>`;
-			})}
-		</div>
+		<cabinet-dial-picker
+			.compact=${true}
+			.value=${p._selectedLocation - 1}
+			.total=${shelf.total_locations}
+			.ticks=${3}
+			@dial-change=${(event) => {
+				p._selectedLocation = ((event.detail.value % shelf.total_locations) + shelf.total_locations) % shelf.total_locations + 1;
+				p._mappingStart = null; p._mappingEnd = null; p._render(); p._scheduleMappingHighlight();
+			}}>
+		</cabinet-dial-picker>
 		<div class="mapping-tools">
 			<button data-action="toggle-direction">
 				${shelf.mirrored ? "Start at right" : "Start at left"}</button
@@ -399,9 +391,9 @@ const searchTemplate = (p) =>
 const viewTemplate = (p) => {
 	const item = p._viewItem(p._viewIndex);
 	if (!item)
-		return html`<section class="panel-card view-card empty-state">
+		return html`<cabinet-panel-card class="view-card empty-state">
 			<b>No assigned miniatures</b>
-		</section>`;
+		</cabinet-panel-card>`;
 	return html`<section class="panel-card view-card">
 		<div id="view-selection">
 			${avatar(item.name)}
@@ -415,24 +407,12 @@ const viewTemplate = (p) => {
 			</div>
 		</div>
 		<div class="picker-shell">
-			<div
-				id="view-dial"
-				class="picker-dial">
-				${[-3, -2, -1, 0, 1, 2, 3].map(
-					(offset) =>
-						html`<span
-							class="dial-tick ${offset === 0 ? "active" : ""}"
-							><i></i
-							><b
-								>${((p._viewIndex +
-									offset +
-									p._assignedMiniatures.length) %
-									p._assignedMiniatures.length) +
-								1}</b
-							></span
-						>`,
-				)}
-			</div>
+			<cabinet-dial-picker
+				.value=${p._viewIndex}
+				.total=${p._assignedMiniatures.length}
+				.ticks=${3}
+				@dial-change=${(event) => p._setViewIndex(event.detail.value)}>
+			</cabinet-dial-picker>
 		</div>
 		<div class="view-actions">
 			<button data-action="clear-view-highlight">Stop locating</button>

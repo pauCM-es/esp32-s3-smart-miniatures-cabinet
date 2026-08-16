@@ -1,4 +1,6 @@
 import { panelContent } from "./smart-cabinet-panel-templates.js";
+import "../components/cabinet-panel-card.js";
+import "../components/cabinet-dial-picker.js";
 import panelStyles from "./smart-cabinet-panel.css?inline";
 import { LitElement, html, unsafeCSS } from "lit";
 
