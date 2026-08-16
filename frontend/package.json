@@ -1,0 +1,14 @@
+{
+  "name": "smart-cabinet-ha-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 0.0.0.0",
+    "watch": "vite build --watch"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}

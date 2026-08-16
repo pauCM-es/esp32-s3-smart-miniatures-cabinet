@@ -41,9 +41,13 @@ Search is case-insensitive and performs partial matching against:
 
 All assigned search results are highlighted simultaneously. Clicking an individual result highlights only that miniature.
 
+## Frontend development
+
+Edit the source in `frontend/`, then run `pnpm run build` from that folder. The build generates the HA files below.
+
 ## HA files
 
-Copy:
+Copy these files together, preserving their names:
 
 ```text
 ha/www/smart-cabinet-panel.js
@@ -53,6 +57,7 @@ to:
 
 ```text
 /config/www/smart-cabinet-panel.js
+/config/www/smart-cabinet-panel-views.js
 ```
 
 Then merge the contents of:

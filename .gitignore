@@ -18,3 +18,6 @@ assets-to-convert/
 docs
 squareline-ui
 panel/
+frontend/node_modules/
+frontend/.vite/
+src/ha/www/chunks/

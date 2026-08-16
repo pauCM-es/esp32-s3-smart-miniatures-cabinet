@@ -1,0 +1,36 @@
+:root {
+	color-scheme: dark;
+	font-family: system-ui, sans-serif;
+	background: #111827;
+}
+body {
+	margin: 0;
+}
+.dev-toolbar {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 20px;
+	background: #172033;
+	color: #e5e7eb;
+}
+.dev-toolbar b,
+.dev-toolbar span {
+	display: block;
+}
+.dev-toolbar span {
+	margin-top: 2px;
+	color: #94a3b8;
+	font-size: 12px;
+}
+.dev-toolbar button {
+	border: 1px solid #475569;
+	border-radius: 8px;
+	padding: 8px 12px;
+	background: #25324a;
+	color: inherit;
+	cursor: pointer;
+}

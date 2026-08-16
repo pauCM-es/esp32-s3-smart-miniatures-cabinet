@@ -1,27 +1,47 @@
-class h extends HTMLElement {
-  setConfig(t) {
+class SmartCabinetCard extends HTMLElement {
+  setConfig(config) {
     this.config = {
-      title: t.title || "Smart Cabinet",
-      power_entity: t.power_entity || "switch.smart_cabinet_power",
-      brightness_entity: t.brightness_entity || "number.smart_cabinet_brightness",
-      highlight_entity: t.highlight_entity || "sensor.smart_cabinet_last_highlight",
-      command_topic: t.command_topic || "smartcabinet/cabinet01/api/command"
-    }, this._rendered = !1;
+      title: config.title || "Smart Cabinet",
+      power_entity:
+        config.power_entity || "switch.smart_cabinet_power",
+      brightness_entity:
+        config.brightness_entity ||
+        "number.smart_cabinet_brightness",
+      highlight_entity:
+        config.highlight_entity ||
+        "sensor.smart_cabinet_last_highlight",
+      command_topic:
+        config.command_topic ||
+        "smartcabinet/cabinet01/api/command",
+    };
+
+    this._rendered = false;
   }
-  set hass(t) {
-    this._hass = t, this._rendered || (this._render(), this._rendered = !0), this._update();
+
+  set hass(hass) {
+    this._hass = hass;
+
+    if (!this._rendered) {
+      this._render();
+      this._rendered = true;
+    }
+
+    this._update();
   }
+
   getCardSize() {
     return 4;
   }
+
   getGridOptions() {
     return {
       columns: 6,
       min_columns: 3,
       rows: 4,
-      min_rows: 3
+      min_rows: 3,
     };
   }
+
   _render() {
     this.innerHTML = `
       <ha-card>
@@ -165,68 +185,140 @@ class h extends HTMLElement {
           }
         </style>
       </ha-card>
-    `, this.querySelector(".header").textContent = this.config.title, this.querySelector(".power-button").addEventListener(
+    `;
+
+    this.querySelector(".header").textContent = this.config.title;
+
+    this.querySelector(".power-button").addEventListener(
       "click",
       () => this._togglePower()
-    ), this.querySelector(".brightness-slider").addEventListener(
+    );
+
+    this.querySelector(".brightness-slider").addEventListener(
       "change",
-      (t) => this._setBrightness(t.target.value)
-    ), this.querySelector(".highlight-button").addEventListener(
+      (event) => this._setBrightness(event.target.value)
+    );
+
+    this.querySelector(".highlight-button").addEventListener(
       "click",
       () => this._highlight()
     );
   }
+
   _update() {
-    if (!this._hass)
+    if (!this._hass) {
       return;
-    const t = this._hass.states[this.config.power_entity], e = this._hass.states[this.config.brightness_entity], i = this._hass.states[this.config.highlight_entity], r = t?.state === "on", n = t == null || t.state === "unavailable", s = this.querySelector(".power-button");
-    s.textContent = r ? "ON" : "OFF", s.classList.toggle("on", r), s.disabled = n;
-    const a = Number(e?.state), o = Number.isFinite(a) ? a : 0;
-    this.querySelector(".brightness-slider").value = o, this.querySelector(".brightness-value").textContent = `${o}%`;
-    const l = i?.state && i.state !== "unknown" && i.state !== "unavailable" ? i.state : "None";
-    this.querySelector(".status").textContent = n ? "Controller unavailable" : `Last highlight: ${l}`;
+    }
+
+    const powerState =
+      this._hass.states[this.config.power_entity];
+
+    const brightnessState =
+      this._hass.states[this.config.brightness_entity];
+
+    const highlightState =
+      this._hass.states[this.config.highlight_entity];
+
+    const powerOn = powerState?.state === "on";
+    const unavailable =
+      powerState == null ||
+      powerState.state === "unavailable";
+
+    const powerButton =
+      this.querySelector(".power-button");
+
+    powerButton.textContent = powerOn ? "ON" : "OFF";
+    powerButton.classList.toggle("on", powerOn);
+    powerButton.disabled = unavailable;
+
+    const brightness = Number(brightnessState?.state);
+    const validBrightness = Number.isFinite(brightness)
+      ? brightness
+      : 0;
+
+    this.querySelector(".brightness-slider").value =
+      validBrightness;
+
+    this.querySelector(".brightness-value").textContent =
+      `${validBrightness}%`;
+
+    const highlight =
+      highlightState?.state &&
+      highlightState.state !== "unknown" &&
+      highlightState.state !== "unavailable"
+        ? highlightState.state
+        : "None";
+
+    this.querySelector(".status").textContent =
+      unavailable
+        ? "Controller unavailable"
+        : `Last highlight: ${highlight}`;
   }
+
   _togglePower() {
-    const e = this._hass.states[this.config.power_entity]?.state === "on" ? "turn_off" : "turn_on";
-    this._hass.callService("switch", e, {
-      entity_id: this.config.power_entity
+    const powerState =
+      this._hass.states[this.config.power_entity];
+
+    const service =
+      powerState?.state === "on" ? "turn_off" : "turn_on";
+
+    this._hass.callService("switch", service, {
+      entity_id: this.config.power_entity,
     });
   }
-  _setBrightness(t) {
-    const e = Math.max(
+
+  _setBrightness(value) {
+    const brightness = Math.max(
       0,
-      Math.min(100, Number(t))
+      Math.min(100, Number(value))
     );
+
     this._hass.callService("number", "set_value", {
       entity_id: this.config.brightness_entity,
-      value: e
+      value: brightness,
     });
   }
+
   _highlight() {
-    const t = Number(
+    const shelf = Number(
       this.querySelector(".shelf-input").value
-    ), e = Number(
+    );
+
+    const location = Number(
       this.querySelector(".location-input").value
     );
-    !Number.isInteger(t) || !Number.isInteger(e) || t < 1 || e < 1 || this._hass.callService("mqtt", "publish", {
+
+    if (
+      !Number.isInteger(shelf) ||
+      !Number.isInteger(location) ||
+      shelf < 1 ||
+      location < 1
+    ) {
+      return;
+    }
+
+    this._hass.callService("mqtt", "publish", {
       topic: this.config.command_topic,
       payload: JSON.stringify({
         action: "highlightLocation",
-        shelf: t,
-        location: e
+        shelf,
+        location,
       }),
       qos: 0,
-      retain: !1
+      retain: false,
     });
   }
 }
+
 customElements.define(
   "smart-cabinet-card",
-  h
+  SmartCabinetCard
 );
+
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "smart-cabinet-card",
   name: "Smart Cabinet",
-  description: "Basic controls for the DIY Smart Miniature Cabinet"
+  description:
+    "Basic controls for the DIY Smart Miniature Cabinet",
 });
