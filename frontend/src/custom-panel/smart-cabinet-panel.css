@@ -432,6 +432,20 @@ button.full {
 	color: var(--secondary-text-color);
 	font-size: 11px;
 }
+.mapping-range {
+	margin-left: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--divider-color);
+	border-radius: 9px;
+	color: var(--primary-text-color);
+	font-size: 11px;
+	font-weight: 700;
+}
+.mapping-range span {
+	margin-left: 6px;
+	color: var(--secondary-text-color);
+	font-weight: 600;
+}
 .led-runs {
 	display: grid;
 	gap: 20px;
@@ -831,6 +845,16 @@ button.full {
 }
 .view-mini-card p {
 	max-width: 390px;
+}
+.view-mini-content {
+	min-width: 0;
+}
+.view-index {
+	margin-bottom: 3px;
+	color: var(--primary-color);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.1em;
 }
 .view-position {
 	margin: 12px 0 2px;

@@ -249,7 +249,11 @@ const mappingTemplate = (p: any, shelf: any, location: any) => {
 					@change=${(event) =>
 						p.actions.setShowAllMappings(
 							event.target.checked,
-						)} /><span>Show all assigned</span></label
+						)} /><span class="mapping-toggle-icon" aria-hidden="true"
+						><svg viewBox="0 0 24 24"
+							><path d="M9 18h6M10 22h4M8.5 15.5C7.6 14.5 7 13.1 7 11.5a5 5 0 0 1 10 0c0 1.6-.6 3-1.5 4" />
+						</svg></span
+					><span>Show all assigned</span></label
 			>
 		</div>
 	<div class="mapping-dial-selected" aria-label="Selected location">
@@ -274,6 +278,12 @@ const mappingTemplate = (p: any, shelf: any, location: any) => {
 				@click=${() => p.actions.zoom(0.25)}>
 				＋
 			</button>
+			${start !== null && end !== null
+				? html`<div class="mapping-range">
+						LED ${Math.min(start, end) + 1} → ${Math.max(start, end) + 1}
+						<span>${Math.abs(end - start) + 1} LEDs</span>
+					</div>`
+				: nothing}
 		</div>
 		<p>
 			Selected location: <b>${p._selectedLocation}</b>. Tap first and last
@@ -489,19 +499,34 @@ const searchTemplate = (p: any) => {
 
 const viewTemplate = (p: any) => {
 	const item = p._viewItem(p._viewIndex);
+	const unassigned = p._miniatures.filter(
+		(miniature) => Number(miniature.shelf) <= 0 || Number(miniature.location) <= 0,
+	).length;
 	return html`${item
 		? html`<section class="panel-card view-card">
-		<div id="view-selection">
+		<div class="section-heading view-heading">
+			<div>
+				<div class="eyebrow">CABINET VIEW</div>
+				<h2>Browse miniatures</h2>
+			</div>
+			<span class="position-badge unassigned">${unassigned} unassigned</span>
+		</div>
+		<div id="view-selection" class="view-mini-card">
 			${avatar(item.name)}
+			<div class="view-mini-content">
+				<div class="view-index">
+					${p._viewIndex + 1} / ${p._assignedMiniatures.length}
+				</div>
 			<h3>${item.name}</h3>
 			<p>
 				${item.collection || "No collection"} ·
 				${item.artist || "Unknown artist"}
 			</p>
-			<div class="view-position">
-				SHELF ${item.shelf} · LOCATION ${item.location}
 			</div>
 		</div>
+		<div class="view-position">
+				SHELF ${item.shelf} · LOCATION ${item.location}
+			</div>
 		<div class="picker-shell">
 			<div class="picker-caption">Swipe or drag to locate</div>
 			${dialTemplate(
