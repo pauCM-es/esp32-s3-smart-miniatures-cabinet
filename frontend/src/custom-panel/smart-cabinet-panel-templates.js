@@ -1,8 +1,4 @@
 import { html, nothing } from "lit";
-
-const action = (name, data = {}) =>
-	html`data-action=${name}
-	${Object.entries(data).map(([key, value]) => html`data-${key}=${value}`)}`;
 const avatar = (name) =>
 	html`<div class="mini-avatar">${name?.[0] || "?"}</div>`;
 
@@ -50,6 +46,8 @@ const configurationTemplate = (p) => {
 					><input
 						id="highlight-color"
 						type="color"
+						@change=${(event) =>
+							p.actions.setHighlightColor(event.target.value)}
 						.value=${p._rgbToHex(
 							layout.highlight_color || { r: 156, g: 39, b: 176 },
 						)}
@@ -65,8 +63,8 @@ const configurationTemplate = (p) => {
 					</div>
 					<button
 						class="primary small"
-						data-action="insert-shelf"
-						data-position=${shelves.length + 1}>
+						@click=${() =>
+							p.actions.insertShelf(shelves.length + 1)}>
 						＋ Add shelf
 					</button>
 				</div>
@@ -80,8 +78,8 @@ const configurationTemplate = (p) => {
 										: ""}">
 									<button
 										class="shelf-select"
-										data-action="select-shelf"
-										data-shelf=${shelf.shelf}>
+										@click=${() =>
+											p.actions.selectShelf(shelf.shelf)}>
 										<span class="shelf-number"
 											>${String(shelf.shelf).padStart(
 												2,
@@ -99,22 +97,26 @@ const configurationTemplate = (p) => {
 									<div class="row-actions">
 										<button
 											class="icon-button"
-											data-action="move-shelf"
-											data-from=${shelf.shelf}
-											data-to=${Math.max(
-												1,
-												shelf.shelf - 1,
-											)}
+											@click=${() =>
+												p.actions.moveShelf(
+													shelf.shelf,
+													Math.max(
+														1,
+														shelf.shelf - 1,
+													),
+												)}
 											?disabled=${index === 0}>
 											↑</button
 										><button
 											class="icon-button"
-											data-action="move-shelf"
-											data-from=${shelf.shelf}
-											data-to=${Math.min(
-												shelves.length,
-												shelf.shelf + 1,
-											)}
+											@click=${() =>
+												p.actions.moveShelf(
+													shelf.shelf,
+													Math.min(
+														shelves.length,
+														shelf.shelf + 1,
+													),
+												)}
 											?disabled=${index ===
 											shelves.length - 1}>
 											↓
@@ -123,8 +125,8 @@ const configurationTemplate = (p) => {
 								</div>
 								<button
 									class="insert-shelf"
-									data-action="insert-shelf"
-									data-position=${shelf.shelf + 1}>
+									@click=${() =>
+										p.actions.insertShelf(shelf.shelf + 1)}>
 									＋ Insert shelf here
 								</button>`,
 					)}
@@ -138,8 +140,7 @@ const configurationTemplate = (p) => {
 					</div>
 					<button
 						class="danger ghost"
-						data-action="delete-shelf"
-						data-shelf=${selected.shelf}
+						@click=${() => p.actions.deleteShelf(selected.shelf)}
 						?disabled=${shelves.length <= 1}>
 						Delete shelf
 					</button>
@@ -164,14 +165,14 @@ const configurationTemplate = (p) => {
 				<div class="button-row">
 					<button
 						class="primary"
-						data-action="save-shelf">
+						@click=${p.actions.saveShelf}>
 						Save shelf</button
 					><button
-						data-action="duplicate-shelf"
-						data-shelf=${selected.shelf}>
+						@click=${() =>
+							p.actions.duplicateShelf(selected.shelf)}>
 						Duplicate shelf</button
-					><button data-action="auto-map">Auto map</button
-					><button data-action="clear-map">Clear mapping</button>
+					><button @click=${p.actions.autoMap}>Auto map</button
+					><button @click=${p.actions.clearMap}>Clear mapping</button>
 				</div>
 				<div class="divider"></div>
 				${mappingTemplate(p, selected, selectedLocation)}
@@ -205,8 +206,7 @@ const mappingTemplate = (p, shelf, location) => {
 				: ""} ${led === start ? "range-start" : ""} ${led === end
 				? "range-end"
 				: ""}"
-			data-action="select-led"
-			data-led=${led}
+			@click=${() => p.actions.selectLed(led)}
 			title="LED ${led + 1}">
 			${led % 5 === 0 ? html`<small>${led + 1}</small>` : nothing}
 		</button>`;
@@ -225,9 +225,11 @@ const mappingTemplate = (p, shelf, location) => {
 				><input
 					id="show-all-mappings"
 					type="checkbox"
-					.checked=${p._showAllMappings} /><span
-					>Show all assigned</span
-				></label
+					.checked=${p._showAllMappings}
+					@change=${(event) =>
+						p.actions.setShowAllMappings(
+							event.target.checked,
+						)} /><span>Show all assigned</span></label
 			>
 		</div>
 		<cabinet-dial-picker
@@ -235,21 +237,22 @@ const mappingTemplate = (p, shelf, location) => {
 			.value=${p._selectedLocation - 1}
 			.total=${shelf.total_locations}
 			.ticks=${3}
-			@dial-change=${(event) => {
-				p._selectedLocation = ((event.detail.value % shelf.total_locations) + shelf.total_locations) % shelf.total_locations + 1;
-				p._mappingStart = null; p._mappingEnd = null; p._render(); p._scheduleMappingHighlight();
-			}}>
+			@dial-change=${(event) =>
+				p.actions.selectMappingLocation(
+					event.detail.value,
+					shelf.total_locations,
+				)}>
 		</cabinet-dial-picker>
 		<div class="mapping-tools">
-			<button data-action="toggle-direction">
+			<button @click=${p.actions.toggleDirection}>
 				${shelf.mirrored ? "Start at right" : "Start at left"}</button
 			><button
 				class="icon-button"
-				data-action="zoom-out">
+				@click=${() => p.actions.zoom(-0.25)}>
 				−</button
 			><button
 				class="icon-button"
-				data-action="zoom-in">
+				@click=${() => p.actions.zoom(0.25)}>
 				＋
 			</button>
 		</div>
@@ -261,15 +264,24 @@ const mappingTemplate = (p, shelf, location) => {
 			class="led-runs ${shelf.mirrored ? "mirrored" : ""}"
 			style=${`--led-size:${p._ledZoom * 9}px`}>
 			<div class="led-runs-content">
-				<div class="led-run"><div class="power-mark" aria-label="Strip power">⚡</div>${runs[0]}<span class="strip-connector" aria-hidden="true"></span></div>
+				<div class="led-run">
+					<div
+						class="power-mark"
+						aria-label="Strip power">
+						⚡
+					</div>
+					${runs[0]}<span
+						class="strip-connector"
+						aria-hidden="true"></span>
+				</div>
 				<div class="led-run return">${runs[1]}</div>
 			</div>
 		</div>
 		<div class="button-row end">
-			<button data-action="reset-led-range">Go back</button
+			<button @click=${p.actions.resetLedRange}>Go back</button
 			><button
 				class="primary"
-				data-action="save-led-range"
+				@click=${p.actions.saveLedRange}
 				?disabled=${start === null || end === null}>
 				Save location
 			</button>
@@ -309,10 +321,12 @@ const miniaturesTemplate = (p) => {
 			</div>
 			<div class="button-row end">
 				${editing
-					? html`<button data-action="cancel-mini">Cancel</button>`
+					? html`<button @click=${p.actions.cancelMini}>
+							Cancel
+						</button>`
 					: nothing}<button
 					class="primary"
-					data-action="save-mini">
+					@click=${p.actions.saveMini}>
 					${editing ? "Save changes" : "Add miniature"}
 				</button>
 			</div>
@@ -349,13 +363,12 @@ const miniaturesTemplate = (p) => {
 							<div class="row-actions">
 								<button
 									class="ghost"
-									data-action="edit-mini"
-									data-id=${item.id}>
+									@click=${() => p.actions.editMini(item.id)}>
 									Edit</button
 								><button
 									class="danger ghost"
-									data-action="delete-mini"
-									data-id=${item.id}>
+									@click=${() =>
+										p.actions.deleteMini(item.id)}>
 									Delete
 								</button>
 							</div>
@@ -366,18 +379,39 @@ const miniaturesTemplate = (p) => {
 	</div>`;
 };
 
-const searchTemplate = (p) =>
-	html`<section class="panel-card search-card">
+const searchTemplate = (p) => {
+	const query = p._searchQuery.trim().toLocaleLowerCase();
+	const fields =
+		p._searchField === "all"
+			? ["name", "collection", "artist"]
+			: [p._searchField];
+	const results = query
+		? p._miniatures.filter((item) =>
+				fields.some((key) =>
+					String(item[key] || "")
+						.toLocaleLowerCase()
+						.includes(query),
+				),
+			)
+		: [];
+	const assigned = results.filter(
+		(item) => item.shelf > 0 && item.location > 0,
+	);
+	return html`<section class="panel-card search-card">
 		<div class="eyebrow">FIND & HIGHLIGHT</div>
 		<h2>Find a miniature in the cabinet</h2>
 		<div class="search-controls">
 			<input
 				id="search-query"
 				type="search"
+				@input=${(event) =>
+					p.actions.setSearchQuery(event.target.value)}
 				placeholder="Search miniatures…"
 				autocomplete="off"
 				.value=${p._searchQuery} /><select
 				id="search-field"
+				@change=${(event) =>
+					p.actions.setSearchField(event.target.value)}
 				.value=${p._searchField}>
 				<option value="all">All fields</option>
 				<option value="name">Name</option>
@@ -388,12 +422,51 @@ const searchTemplate = (p) =>
 		<div
 			id="search-summary"
 			class="search-summary muted">
-			Start typing to search.
+			${query
+				? `${results.length} result${results.length === 1 ? "" : "s"} · ${assigned.length} assigned`
+				: "Start typing to search."}
 		</div>
 		<div
 			id="search-results"
-			class="search-results"></div>
+			class="search-results">
+			${query
+				? results.length
+					? results.map(
+							(item) =>
+								html`<button
+									class="search-result"
+									@click=${() =>
+										p.actions.highlightOne(item.id)}
+									?disabled=${!item.shelf}>
+									${avatar(item.name)}
+									<div class="search-result-main">
+										<b>${item.name}</b
+										><span
+											>${item.collection ||
+											"No collection"}
+											·
+											${item.artist ||
+											"Unknown artist"}</span
+										>
+									</div>
+									<span
+										class="position-badge ${item.shelf
+											? ""
+											: "unassigned"}"
+										>${item.shelf
+											? `Shelf ${item.shelf} · Location ${item.location}`
+											: "Unassigned"}</span
+									>
+								</button>`,
+						)
+					: html`<div class="empty-state">
+							<b>No matches</b
+							><span>Try another term or field.</span>
+						</div>`
+				: nothing}
+		</div>
 	</section>`;
+};
 
 const viewTemplate = (p) => {
 	const item = p._viewItem(p._viewIndex);
@@ -418,11 +491,14 @@ const viewTemplate = (p) => {
 				.value=${p._viewIndex}
 				.total=${p._assignedMiniatures.length}
 				.ticks=${3}
-				@dial-change=${(event) => p._setViewIndex(event.detail.value)}>
+				@dial-change=${(event) =>
+					p.actions.setViewIndex(event.detail.value)}>
 			</cabinet-dial-picker>
 		</div>
 		<div class="view-actions">
-			<button data-action="clear-view-highlight">Stop locating</button>
+			<button @click=${p.actions.clearViewHighlight}>
+				Stop locating
+			</button>
 		</div>
 	</section>`;
 };
