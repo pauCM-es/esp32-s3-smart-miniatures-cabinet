@@ -1,5 +1,7 @@
 import { PanelViews } from "./smart-cabinet-panel-views.js";
 import panelStyles from "./smart-cabinet-panel.css?inline";
+import { LitElement, html, unsafeCSS } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 const DEFAULT_CONFIG = {
   command_topic: "smartcabinet/cabinet01/api/command",
@@ -9,10 +11,11 @@ const DEFAULT_CONFIG = {
   mini_lights_command_topic: "smartcabinet/cabinet01/ha/mini_lights/set",
 };
 
-class HaPanelSmartCabinet extends HTMLElement {
+class HaPanelSmartCabinet extends LitElement {
+  static styles = unsafeCSS(panelStyles);
+
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
     this._hass = null;
     this._panel = null;
     this._narrow = false;
@@ -116,39 +119,16 @@ class HaPanelSmartCabinet extends HTMLElement {
     return `#${part(color.r)}${part(color.g)}${part(color.b)}`;
   }
 
-  _render() {
-    if (!this.shadowRoot) return;
-    const previousLedRuns = this.shadowRoot.querySelector(".led-runs");
-    if (previousLedRuns) this._ledScrollLeft = previousLedRuns.scrollLeft;
-    const content = this._active === "configuration" ? this._layoutContent()
-      : this._active === "miniatures" ? this._miniaturesContent()
-      : this._active === "view" ? this._viewPickerContent()
-      : this._searchContent();
-
-    this.shadowRoot.innerHTML = `
-      <style>${this._styles()}</style>
-      <div class="app-shell">
-        <header class="topbar">
-          <div class="topbar-main">
-            <ha-menu-button class="ha-native-menu"></ha-menu-button>
-            <div class="brand"><div class="brand-icon">SC</div><div><b>Smart Cabinet</b><span>Control & catalogue</span></div></div>
-          </div>
-          <nav>
-            <button class="nav-tab ${this._active === "view" ? "active" : ""}" data-tab="view" aria-label="View" title="View"><svg viewBox="0 0 24 24"><path d="M4 19V5m5 14V9m5 10V4m5 15v-8"/></svg></button>
-            <button class="nav-tab ${this._active === "configuration" ? "active" : ""}" data-tab="configuration" aria-label="Configuration" title="Configuration"><svg viewBox="0 0 24 24"><path d="M4 4h16v5H4zm0 11h16v5H4zm4-6v6m8-6v6"/></svg></button>
-            <button class="nav-tab ${this._active === "miniatures" ? "active" : ""}" data-tab="miniatures" aria-label="Miniatures" title="Miniatures"><svg viewBox="0 0 24 24"><path d="M7 20v-2a5 5 0 0 1 10 0v2M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg></button>
-            <button class="nav-tab ${this._active === "search" ? "active" : ""}" data-tab="search" aria-label="Search" title="Search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5"/></svg></button>
-          </nav>
-        </header>
-        <div class="page">${content}</div>
-      </div>`;
-    this._bind();
-    const nextLedRuns = this.shadowRoot.querySelector(".led-runs");
-    if (nextLedRuns && Number.isFinite(this._ledScrollLeft)) {
-      nextLedRuns.scrollLeft = this._ledScrollLeft;
-    }
-    if (this._active === "search") this._updateSearch(false);
+  render() {
+    const content = this._active === "configuration" ? this._layoutContent() : this._active === "miniatures" ? this._miniaturesContent() : this._active === "view" ? this._viewPickerContent() : this._searchContent();
+    return html`<div class="app-shell"><header class="topbar"><div class="topbar-main"><ha-menu-button class="ha-native-menu"></ha-menu-button><div class="brand"><div class="brand-icon">SC</div><div><b>Smart Cabinet</b><span>Control & catalogue</span></div></div></div><nav><button class="nav-tab ${this._active === "view" ? "active" : ""}" @click=${() => this._selectTab("view")} aria-label="View" title="View">View</button><button class="nav-tab ${this._active === "configuration" ? "active" : ""}" @click=${() => this._selectTab("configuration")} aria-label="Configuration" title="Configuration">Configuration</button><button class="nav-tab ${this._active === "miniatures" ? "active" : ""}" @click=${() => this._selectTab("miniatures")} aria-label="Miniatures" title="Miniatures">Miniatures</button><button class="nav-tab ${this._active === "search" ? "active" : ""}" @click=${() => this._selectTab("search")} aria-label="Search" title="Search">Search</button></nav></header><div class="page">${unsafeHTML(content)}</div></div>`;
   }
+
+  _render() { this.requestUpdate(); }
+
+  _selectTab(tab) { this._active = tab; this.requestUpdate(); if (tab === "view") this._scheduleViewHighlight(); }
+
+  updated() { this._bind(); if (this._active === "search") this._updateSearch(false); }
 
   _bind() {
     this.shadowRoot.querySelectorAll("[data-tab]").forEach((button) => button.onclick = () => {
@@ -313,14 +293,14 @@ class HaPanelSmartCabinet extends HTMLElement {
       const endpoint = led === start ? " range-start" : led === end ? " range-end" : "";
       return `<button class="led-cell ${assigned ? "assigned" : ""} ${selected ? "selected" : ""}${endpoint}" data-action="select-led" data-led="${led}" title="LED ${led + 1}"><i></i>${led % 5 === 0 ? `<small>${led + 1}</small>` : ""}</button>`;
     }).join("");
-    const range = start === null || end === null ? "Tap the start LED" : `LED ${Math.min(start, end) + 1} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${Math.max(start, end) + 1} Ãƒâ€šÃ‚Â· ${Math.abs(end - start) + 1} LEDs`;
+    const range = start === null || end === null ? "Tap the start LED" : `LED ${Math.min(start, end) + 1} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ ${Math.max(start, end) + 1} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${Math.abs(end - start) + 1} LEDs`;
     const dial = this._mappingDialTicks(shelf.total_locations);
     return `<section class="mapping-visual">
       <div class="section-heading"><div><div class="eyebrow">LOCATIONS</div><h3>LED mapping</h3></div><label class="mapping-toggle"><input id="show-all-mappings" type="checkbox" ${this._showAllMappings ? "checked" : ""}><span class="mapping-toggle-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6m-5 3h4m-6.5-6.5a6 6 0 1 1 9 0c-.9.8-1.5 1.8-1.5 3.5h-6c0-1.7-.6-2.7-1.5-3.5Z"/></svg></span><span>Show all assigned</span></label></div>
       <div id="mapping-location-dial" class="picker-dial compact">${dial}</div>
-      <div class="mapping-tools"><button data-action="toggle-direction">${shelf.mirrored ? "Start at right" : "Start at left"}</button><button class="icon-button" data-action="zoom-out">ÃƒÂ¢Ã‹â€ Ã¢â‚¬â„¢</button><button class="icon-button" data-action="zoom-in">ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹</button><b>${range}</b></div>
+      <div class="mapping-tools"><button data-action="toggle-direction">${shelf.mirrored ? "Start at right" : "Start at left"}</button><button class="icon-button" data-action="zoom-out">ÃƒÆ’Ã‚Â¢Ãƒâ€¹Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢</button><button class="icon-button" data-action="zoom-in">ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¼ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹</button><b>${range}</b></div>
       <p>Selected location: <b id="mapping-selected-label">${this._selectedLocation}</b>. Tap first and last LED to preview; save commits the range. Overlaps are allowed.</p>
-      <div class="led-runs ${shelf.mirrored ? "mirrored" : ""}" style="--led-size:${this._ledZoom * 9}px"><div class="led-run"><div class="power-mark" aria-label="Strip power">ÃƒÂ¢Ã…Â¡Ã‚Â¡</div>${cells(ids[0])}</div><span class="strip-connector" aria-hidden="true"></span><div class="led-run return">${cells(ids[1])}</div></div>
+      <div class="led-runs ${shelf.mirrored ? "mirrored" : ""}" style="--led-size:${this._ledZoom * 9}px"><div class="led-run"><div class="power-mark" aria-label="Strip power">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¡</div>${cells(ids[0])}</div><span class="strip-connector" aria-hidden="true"></span><div class="led-run return">${cells(ids[1])}</div></div>
       <div class="button-row end"><button data-action="reset-led-range">Go back</button><button class="primary" data-action="save-led-range" ${start === null || end === null ? "disabled" : ""}>Save location</button></div>
     </section>`;
   }
@@ -429,7 +409,7 @@ class HaPanelSmartCabinet extends HTMLElement {
     const start = Number(this.shadowRoot.querySelector("#location-start")?.value);
     const leds = Number(this.shadowRoot.querySelector("#location-leds")?.value);
     const preview = this.shadowRoot.querySelector("#range-preview-text");
-    if (preview) preview.textContent = Number.isFinite(start) && leds > 0 ? `${start} ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ ${start + leds - 1}` : "Invalid range";
+    if (preview) preview.textContent = Number.isFinite(start) && leds > 0 ? `${start} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ ${start + leds - 1}` : "Invalid range";
     if (!Number.isFinite(start) || start < 0 || !Number.isFinite(leds) || leds <= 0) return;
     this._previewTimer = setTimeout(() => this._command({
       action: "previewLocation",
@@ -484,12 +464,12 @@ class HaPanelSmartCabinet extends HTMLElement {
     const results = this._miniatures.filter((item) => fields.some((key) => String(item[key] || "").toLocaleLowerCase().includes(q)));
     const assigned = results.filter((item) => item.shelf > 0 && item.location > 0);
 
-    summaryEl.textContent = `${results.length} result${results.length === 1 ? "" : "s"} Ãƒâ€šÃ‚Â· ${assigned.length} assigned`;
+    summaryEl.textContent = `${results.length} result${results.length === 1 ? "" : "s"} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${assigned.length} assigned`;
     resultsEl.innerHTML = results.map((item) => `
       <button class="search-result" data-action="highlight-one" data-id="${this._escape(item.id)}" ${item.shelf ? "" : "disabled"}>
         <div class="mini-avatar">${this._escape(item.name?.[0] || "?")}</div>
-        <div class="search-result-main"><b>${this._escape(item.name)}</b><span>${this._escape(item.collection || "No collection")} Ãƒâ€šÃ‚Â· ${this._escape(item.artist || "Unknown artist")}</span></div>
-        <span class="position-badge ${item.shelf ? "" : "unassigned"}">${item.shelf ? `Shelf ${item.shelf} Ãƒâ€šÃ‚Â· Location ${item.location}` : "Unassigned"}</span>
+        <div class="search-result-main"><b>${this._escape(item.name)}</b><span>${this._escape(item.collection || "No collection")} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${this._escape(item.artist || "Unknown artist")}</span></div>
+        <span class="position-badge ${item.shelf ? "" : "unassigned"}">${item.shelf ? `Shelf ${item.shelf} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Location ${item.location}` : "Unassigned"}</span>
       </button>`).join("") || `<div class="empty-state"><b>No matches</b><span>Try another term or field.</span></div>`;
 
     this.shadowRoot.querySelectorAll("[data-action='highlight-one']").forEach((button) => button.onclick = () => this._action(button));
