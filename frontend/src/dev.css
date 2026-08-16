@@ -2,6 +2,17 @@
 	color-scheme: dark;
 	font-family: system-ui, sans-serif;
 	background: #111827;
+	--primary-background-color: #111827;
+	--secondary-background-color: #252a35;
+	--card-background-color: #1b2029;
+	--app-header-background-color: #1b2029;
+	--primary-text-color: #f8fafc;
+	--secondary-text-color: #a7b0c0;
+	--text-primary-color: #ffffff;
+	--divider-color: #3b4352;
+	--primary-color: #03a9e6;
+	--error-color: #f87171;
+	--ha-card-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24);
 }
 body {
 	margin: 0;

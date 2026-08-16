@@ -211,6 +211,10 @@ const mappingTemplate = (p, shelf, location) => {
 			${led % 5 === 0 ? html`<small>${led + 1}</small>` : nothing}
 		</button>`;
 	});
+	const firstRun = Math.ceil(shelf.total_leds / 2);
+	const runs = shelf.mirrored
+		? [leds.slice(0, firstRun).reverse(), leds.slice(firstRun)]
+		: [leds.slice(0, firstRun), leds.slice(firstRun).reverse()];
 	return html`<section class="mapping-visual">
 		<div class="section-heading">
 			<div>
@@ -256,7 +260,10 @@ const mappingTemplate = (p, shelf, location) => {
 		<div
 			class="led-runs ${shelf.mirrored ? "mirrored" : ""}"
 			style=${`--led-size:${p._ledZoom * 9}px`}>
-			${leds}
+			<div class="led-runs-content">
+				<div class="led-run"><div class="power-mark" aria-label="Strip power">⚡</div>${runs[0]}<span class="strip-connector" aria-hidden="true"></span></div>
+				<div class="led-run return">${runs[1]}</div>
+			</div>
 		</div>
 		<div class="button-row end">
 			<button data-action="reset-led-range">Go back</button

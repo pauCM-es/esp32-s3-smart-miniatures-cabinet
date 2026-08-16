@@ -5,6 +5,10 @@
 	color: var(--primary-text-color);
 	font-family: var(--paper-font-body1_-_font-family, Roboto, sans-serif);
 }
+cabinet-dial-picker,
+cabinet-panel-card {
+	display: block;
+}
 * {
 	box-sizing: border-box;
 }
@@ -431,7 +435,7 @@ button.full {
 	min-height: calc(var(--led-size) + 18px);
 }
 .led-run.return {
-	margin-left: auto;
+	margin-left: 0;
 }
 .led-cell {
 	position: relative;
@@ -478,9 +482,6 @@ button.full {
 }
 .led-runs {
 	position: relative;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
 	contain: inline-size;
 	min-width: 0;
 	max-width: 100%;
@@ -489,6 +490,13 @@ button.full {
 	overflow-x: auto;
 	overflow-y: hidden;
 	padding: 8px 32px 24px 28px;
+}
+.led-runs-content {
+	display: grid;
+	width: max-content;
+	min-width: 100%;
+	gap: 44px;
+	justify-items: center;
 }
 .led-run {
 	gap: 2px;
@@ -545,26 +553,30 @@ button.full {
 .strip-connector {
 	position: absolute;
 	z-index: 3;
-	top: calc(var(--led-size) * 2 + 12px);
-	right: 12px;
+	top: 50%;
+	right: -20px;
 	width: 16px;
-	height: 70px;
+	height: calc(var(--led-size) * 4 + 44px);
 	border: 2px dashed var(--secondary-text-color);
 	border-left: 0;
 	border-radius: 0 10px 10px 0;
 	opacity: 0.9;
 	pointer-events: none;
 }
-.led-runs.mirrored {
-	align-items: flex-start;
-}
 .led-runs.mirrored .strip-connector {
 	right: auto;
-	left: 12px;
+	left: -20px;
 	transform: scaleX(-1);
 }
-.led-run.return {
-	margin-left: 0;
+.led-run {
+	width: max-content;
+	grid-auto-columns: max-content;
+	justify-content: start;
+}
+.led-run .led-cell {
+	width: auto !important;
+	min-width: 0 !important;
+	aspect-ratio: 1 / 2;
 }
 .mapping-toggle input {
 	position: absolute;

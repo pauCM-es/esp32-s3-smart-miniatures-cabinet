@@ -142,7 +142,7 @@ class HaPanelSmartCabinet extends LitElement {
 
 	render() {
 		const content = panelContent(this);
-		return html`<div class="app-shell">
+		return html`<style>${panelStyles}</style><div class="app-shell">
 			<header class="topbar">
 				<div class="topbar-main">
 					<ha-menu-button class="ha-native-menu"></ha-menu-button>
@@ -161,7 +161,7 @@ class HaPanelSmartCabinet extends LitElement {
 						@click=${() => this._selectTab("view")}
 						aria-label="View"
 						title="View">
-						View</button
+						<svg viewBox="0 0 24 24"><path d="M4 19V5m5 14V9m5 10V4m5 15v-8"/></svg></button
 					><button
 						class="nav-tab ${this._active === "configuration"
 							? "active"
@@ -169,7 +169,7 @@ class HaPanelSmartCabinet extends LitElement {
 						@click=${() => this._selectTab("configuration")}
 						aria-label="Configuration"
 						title="Configuration">
-						Configuration</button
+						<svg viewBox="0 0 24 24"><path d="M4 4h16v5H4zm0 11h16v5H4zm4-6v6m8-6v6"/></svg></button
 					><button
 						class="nav-tab ${this._active === "miniatures"
 							? "active"
@@ -177,7 +177,7 @@ class HaPanelSmartCabinet extends LitElement {
 						@click=${() => this._selectTab("miniatures")}
 						aria-label="Miniatures"
 						title="Miniatures">
-						Miniatures</button
+						<svg viewBox="0 0 24 24"><path d="M7 20v-2a5 5 0 0 1 10 0v2M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg></button
 					><button
 						class="nav-tab ${this._active === "search"
 							? "active"
@@ -185,7 +185,7 @@ class HaPanelSmartCabinet extends LitElement {
 						@click=${() => this._selectTab("search")}
 						aria-label="Search"
 						title="Search">
-						Search
+						<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5"/></svg>
 					</button>
 				</nav>
 			</header>
