@@ -19,12 +19,18 @@ export class CabinetDialPicker extends LitElement {
 		return this;
 	}
 	_start(event) {
-		this._drag = { x: event.clientX, value: this.value, steps: 0 };
-		this.setPointerCapture?.(event.pointerId);
+		if (event.button !== 0) return;
+		this._drag = {
+			pointerId: event.pointerId,
+			x: event.clientX,
+			value: this.value,
+			steps: 0,
+		};
+		event.currentTarget.setPointerCapture(event.pointerId);
 		this.classList.add("dragging");
 	}
 	_move(event) {
-		if (!this._drag) return;
+		if (!this._drag || event.pointerId !== this._drag.pointerId) return;
 		const steps = Math.trunc((this._drag.x - event.clientX) / 36);
 		if (steps === this._drag.steps) return;
 		this._drag.steps = steps;
@@ -36,7 +42,8 @@ export class CabinetDialPicker extends LitElement {
 			}),
 		);
 	}
-	_finish() {
+	_finish(event) {
+		if (event && event.pointerId !== this._drag?.pointerId) return;
 		this._drag = null;
 		this.classList.remove("dragging");
 	}
@@ -50,7 +57,8 @@ export class CabinetDialPicker extends LitElement {
 			@pointerdown=${this._start}
 			@pointermove=${this._move}
 			@pointerup=${this._finish}
-			@pointercancel=${this._finish}>
+			@pointercancel=${this._finish}
+			@lostpointercapture=${this._finish}>
 			${offsets.map(
 				(offset) =>
 					html`<span class="dial-tick ${offset === 0 ? "active" : ""}"
