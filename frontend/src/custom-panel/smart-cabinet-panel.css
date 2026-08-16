@@ -408,6 +408,19 @@ button.full {
 .picker-dial.compact .dial-tick.active b {
 	font-size: 22px;
 }
+.mapping-dial-selected {
+	display: grid;
+	place-items: center;
+	height: 32px;
+	margin: 4px 0 2px;
+	color: var(--primary-color);
+	font-size: 32px;
+	font-weight: 800;
+	line-height: 1;
+}
+.picker-dial.compact .dial-tick.active b {
+	visibility: hidden;
+}
 .mapping-tools {
 	display: flex;
 	align-items: center;
@@ -778,6 +791,30 @@ button.full {
 	margin: 0 auto;
 	padding: 22px;
 }
+.cabinet-summary {
+	max-width: 1100px;
+	margin: 0 auto 18px;
+	padding: 22px;
+}
+.summary-shelves { display: grid; gap: 12px; }
+.summary-shelf { padding: 14px; border-radius: 13px; background: var(--secondary-background-color); }
+.summary-shelf-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 12px; }
+.summary-shelf-heading span { color: var(--secondary-text-color); font-size: 11px; }
+.summary-scroll { overflow-x: auto; padding: 0 4px 5px; }
+.summary-map { --summary-width: max(620px, 100%); position: relative; width: var(--summary-width); height: 126px; }
+.summary-run { position: absolute; left: 18px; right: 18px; height: 2px; background: var(--secondary-text-color); opacity: .7; }
+.summary-run.forward { top: 34px; }
+.summary-run.return { top: 96px; }
+.summary-connector { position: absolute; top: 34px; right: 18px; width: 17px; height: 62px; border: 2px dashed var(--secondary-text-color); border-left: 0; border-radius: 0 9px 9px 0; opacity: .7; }
+.summary-map.mirrored .summary-connector { right: auto; left: 18px; transform: scaleX(-1); }
+.summary-hex { position: absolute; left: calc(18px + (100% - 36px) * var(--anchor) / 100); z-index: 1; display: grid; place-items: center; width: 42px; height: 48px; padding: 0; border: 0; background: #8fd4e8; color: #5e9a09; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); transform: translateX(-50%); }
+.summary-hex::before { content: ""; position: absolute; inset: 3px; z-index: -1; background: var(--card-background-color); clip-path: inherit; }
+.summary-hex.forward { top: 10px; }
+.summary-hex.return { top: 72px; }
+.summary-hex span { font-size: 11px; font-weight: 800; }
+.summary-hex.assigned { background: #8fd4e8; }
+.summary-hex.assigned::before { background: #f1e6b2; }
+.summary-hex:hover, .summary-hex:focus-visible { background: var(--primary-color); outline: none; }
 .view-mini-card {
 	display: flex;
 	align-items: center;
@@ -1008,17 +1045,5 @@ button.full {
 	}
 	.dial-tick.active b {
 		font-size: 16px;
-	}
-	.picker-dial.compact {
-		min-height: 68px;
-	}
-	.picker-dial.compact .dial-tick em {
-		display: block;
-		min-height: 10px;
-		color: var(--primary-color);
-		font-size: 8px;
-		font-style: normal;
-		font-weight: 800;
-		letter-spacing: 0.1em;
 	}
 }

@@ -1,5 +1,4 @@
 import { LitElement, html, unsafeCSS } from "lit";
-import "../components/cabinet-dial-picker.js";
 import "../components/cabinet-panel-card.js";
 import { createPanelActions } from "./panel-actions.js";
 import panelStyles from "./smart-cabinet-panel.css?inline";
@@ -34,6 +33,7 @@ class HaPanelSmartCabinet extends LitElement {
 	_mappingTimer: ReturnType<typeof setTimeout> | null = null;
 	_showAllMappings = false;
 	_ledZoom = 1;
+	_dialDrag: { pointerId: number; x: number; value: number; steps: number } | null = null;
 	actions: any;
 
 	constructor() {
@@ -56,6 +56,7 @@ class HaPanelSmartCabinet extends LitElement {
 		this._mappingTimer = null;
 		this._showAllMappings = false;
 		this._ledZoom = 1;
+		this._dialDrag = null;
 		this.actions = createPanelActions(this);
 	}
 
@@ -111,6 +112,59 @@ class HaPanelSmartCabinet extends LitElement {
 		return items.length
 			? items[((index % items.length) + items.length) % items.length]
 			: null;
+	}
+
+	_summaryLocationAnchor(shelf, location) {
+		const total = Number(shelf.total_leds) || 0;
+		const firstRun = Math.ceil(total / 2);
+		const secondRun = total - firstRun;
+		const center = Number(location.start_led) + (Number(location.leds) - 1) / 2;
+		if (center < firstRun) {
+			if (shelf.mirrored) {
+				return { run: "forward", percent: ((firstRun - center - 0.5) / firstRun) * 100 };
+			}
+			return { run: "forward", percent: ((center + 0.5) / firstRun) * 100 };
+		}
+		if (shelf.mirrored) {
+			return {
+				run: "return",
+				percent: secondRun ? ((center - firstRun + 0.5) / secondRun) * 100 : 50,
+			};
+		}
+		return {
+			run: "return",
+			percent: secondRun ? ((total - center - 0.5) / secondRun) * 100 : 50,
+		};
+	}
+
+	_selectSummaryLocation(shelf, location) {
+		const itemIndex = this._assignedMiniatures.findIndex(
+			(item) => Number(item.shelf) === Number(shelf) && Number(item.location) === Number(location),
+		);
+		if (itemIndex >= 0) this._viewIndex = itemIndex;
+		this._command({ action: "highlightLocation", shelf: Number(shelf), location: Number(location) });
+		this._render();
+	}
+
+	_startDial(event: PointerEvent, value: number) {
+		if (event.button !== 0) return;
+		this._dialDrag = { pointerId: event.pointerId, x: event.clientX, value, steps: 0 };
+		(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+		(event.currentTarget as HTMLElement).classList.add("dragging");
+	}
+
+	_moveDial(event: PointerEvent, total: number, onChange: (value: number) => void) {
+		if (!this._dialDrag || event.pointerId !== this._dialDrag.pointerId) return;
+		const steps = Math.trunc((this._dialDrag.x - event.clientX) / 36);
+		if (steps === this._dialDrag.steps) return;
+		this._dialDrag.steps = steps;
+		onChange(((this._dialDrag.value + steps) % total + total) % total);
+	}
+
+	_finishDial(event?: PointerEvent) {
+		if (event && event.pointerId !== this._dialDrag?.pointerId) return;
+		this._dialDrag = null;
+		(event?.currentTarget as HTMLElement | undefined)?.classList.remove("dragging");
 	}
 
 	_command(payload) {
