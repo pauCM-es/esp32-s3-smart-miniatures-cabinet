@@ -54,6 +54,8 @@ lv_obj_t* ui_MqttUserTextarea = NULL;
 lv_obj_t* ui_MqttPasswordTextarea = NULL;
 lv_obj_t* ui_Keyboard = NULL;
 lv_obj_t* ui_ClockLabels[5] = {NULL};
+lv_obj_t* ui_HeaderWifiIcons[5] = {NULL};
+lv_obj_t* ui_HeaderMqttLabels[5] = {NULL};
 
 static UiScreen currentScreen = UI_SCREEN_OVERVIEW;
 
@@ -99,10 +101,23 @@ lv_obj_t* ui_make_header(lv_obj_t* parent, const char* title, bool showBack) {
     lv_obj_set_style_text_font(clock, UI_FONT_M, 0);
     lv_obj_align(clock, LV_ALIGN_RIGHT_MID, 0, 0);
 
+    lv_obj_t* mqtt = lv_label_create(header);
+    lv_label_set_text(mqtt, "MQTT");
+    lv_obj_add_style(mqtt, &ui_style_muted_text, 0);
+    lv_obj_set_style_text_font(mqtt, UI_FONT_S, 0);
+    lv_obj_align_to(mqtt, clock, LV_ALIGN_OUT_LEFT_MID, -12, 0);
+
+    lv_obj_t* wifi = lv_label_create(header);
+    lv_label_set_text(wifi, LV_SYMBOL_WIFI);
+    lv_obj_add_style(wifi, &ui_style_muted_text, 0);
+    lv_obj_align_to(wifi, mqtt, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+
     /* Screen creation order matches UiScreen. */
     for (uint8_t i = 0; i < 5; ++i) {
         if (!ui_ClockLabels[i]) {
             ui_ClockLabels[i] = clock;
+            ui_HeaderWifiIcons[i] = wifi;
+            ui_HeaderMqttLabels[i] = mqtt;
             break;
         }
     }

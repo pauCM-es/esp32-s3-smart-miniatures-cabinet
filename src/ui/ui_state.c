@@ -139,6 +139,23 @@ static void render_ota(void) {
 }
 
 static void render_connectivity(void) {
+    for (uint8_t i = 0; i < 5; ++i) {
+        if (ui_HeaderWifiIcons[i]) {
+            lv_obj_set_style_text_color(
+                ui_HeaderWifiIcons[i],
+                state.wifiConnected ? ui_color_accent() : ui_color_muted(),
+                0
+            );
+        }
+        if (ui_HeaderMqttLabels[i]) {
+            lv_obj_set_style_text_color(
+                ui_HeaderMqttLabels[i],
+                state.mqttConnected ? ui_color_accent() : ui_color_muted(),
+                0
+            );
+        }
+    }
+
     if (!ui_WifiMqtt) return;
 
     lv_label_set_text(

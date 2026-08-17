@@ -55,6 +55,8 @@ extern lv_obj_t* ui_MqttUserTextarea;
 extern lv_obj_t* ui_MqttPasswordTextarea;
 extern lv_obj_t* ui_Keyboard;
 extern lv_obj_t* ui_ClockLabels[5];
+extern lv_obj_t* ui_HeaderWifiIcons[5];
+extern lv_obj_t* ui_HeaderMqttLabels[5];
 
 void ui_init(void);
 void ui_destroy(void);
