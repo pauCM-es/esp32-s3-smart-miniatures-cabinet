@@ -15,6 +15,7 @@
 #include "lighting/LightingManager.h"
 #include "lighting/MiniatureLights.h"
 #include "secrets.h"
+#include "ui/adapters/SmartCabinetUiAdapter.h"
 #include "ui/ui.h"
 
 #include "firmware/SmartCabinetApi/SmartCabinetApi.h"
@@ -70,8 +71,6 @@ void setup() {
     Serial.begin(115200);
 
     smartcabinet::display.begin();
-    ui_init();
-
     smartcabinet::app.begin();
     smartcabinet::debugConsole.begin();
 
@@ -87,6 +86,9 @@ void setup() {
     } else {
         catalogue.begin();
     }
+
+    ui_init();
+    smartcabinet::SmartCabinetUiAdapter::begin();
 
     // Connect to Wi-Fi; MQTT loop will reconnect if this times out.
     Serial.printf("[WiFi] Connecting to %s...\n", WIFI_SSID);

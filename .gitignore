@@ -21,3 +21,4 @@ panel/
 frontend/node_modules/
 frontend/.vite/
 src/ha/www/chunks/
+ui-v2/
