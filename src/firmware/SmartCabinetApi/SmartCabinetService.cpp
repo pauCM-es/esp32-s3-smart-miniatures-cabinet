@@ -21,8 +21,9 @@ bool SmartCabinetService::begin(const CabinetSettings& defaults) {
     state_.highlightB = settings.highlightB;
 
     // Restore persisted state into the existing AppController.
-    appController_.setBrightness(state_.brightness);
+    appController_.setCabinetLightBrightness(state_.brightness);
     appController_.setPower(state_.power);
+    refreshLightingState();
 
     notifyStateChanged();
 
@@ -33,46 +34,65 @@ void SmartCabinetService::loop() {
     settingsRepository_.loop();
 }
 
+void SmartCabinetService::syncFromApp() {
+    const AppLightingState lights = appController_.lightingState();
+    if (state_.power == lights.cabinetPower &&
+        state_.brightness == lights.cabinetBrightness &&
+        state_.miniLightPower == lights.miniaturePower &&
+        state_.miniLightBrightness == lights.miniatureBrightness &&
+        state_.miniLightR == lights.miniatureR &&
+        state_.miniLightG == lights.miniatureG &&
+        state_.miniLightB == lights.miniatureB &&
+        state_.activeScene == lights.activeScene) {
+        return;
+    }
+
+    refreshLightingState();
+    notifyStateChanged();
+}
+
 void SmartCabinetService::setPower(bool enabled) {
-    if (state_.power == enabled) {
+    if (state_.power == enabled && state_.miniLightPower == enabled) {
         return;
     }
 
     appController_.setPower(enabled);
 
     state_.activeScene = 0;
-    state_.power = enabled;
-    settingsRepository_.setPower(enabled);
+    refreshLightingState();
+    settingsRepository_.setPower(state_.power);
 
     notifyStateChanged();
 }
 
 void SmartCabinetService::setBrightness(uint8_t percent) {
+    setCabinetLightBrightness(percent);
+}
+
+void SmartCabinetService::setCabinetLightPower(bool enabled) {
+    if (state_.power == enabled) return;
+
+    appController_.setCabinetLightPower(enabled);
+    state_.activeScene = 0;
+    refreshLightingState();
+    settingsRepository_.setPower(state_.power);
+    notifyStateChanged();
+}
+
+void SmartCabinetService::setCabinetLightBrightness(uint8_t percent) {
     const uint8_t clamped = percent > 100 ? 100 : percent;
 
-    if (state_.brightness == clamped) {
+    if (state_.brightness == clamped && state_.power == (clamped > 0)) {
         return;
     }
 
-    appController_.setBrightness(clamped);
-
+    appController_.setCabinetLightBrightness(clamped);
+    appController_.setCabinetLightPower(clamped > 0);
     state_.activeScene = 0;
-    state_.brightness = clamped;
-    settingsRepository_.setBrightness(clamped);
-
-    // power follows brightness: reaching 0 turns off, leaving 0 turns on.
-    // setPower notifies; skip the redundant notify here when power will change.
-    const bool powerWillChange = (clamped == 0 && state_.power) ||
-                                 (clamped > 0 && !state_.power);
-    if (!powerWillChange) {
-        notifyStateChanged();
-    }
-
-    if (clamped == 0) {
-        setPower(false);
-    } else if (!state_.power) {
-        setPower(true);
-    }
+    refreshLightingState();
+    settingsRepository_.setBrightness(state_.brightness);
+    settingsRepository_.setPower(state_.power);
+    notifyStateChanged();
 }
 
 bool SmartCabinetService::applyScene(uint8_t scene) {
@@ -80,6 +100,7 @@ bool SmartCabinetService::applyScene(uint8_t scene) {
 
     appController_.applyScene(scene);
     state_.activeScene = scene;
+    refreshLightingState();
     state_.hasHighlight = false;
     state_.highlightShelf = 0;
     state_.highlightLocation = 0;
@@ -104,6 +125,7 @@ bool SmartCabinetService::appendHighlightLocation(
     }
 
     appController_.setMiniatureLightPower(true);
+    refreshLightingState();
     if (!appController_.highlightLocationPersistentColor(
         shelf, location, state_.highlightR, state_.highlightG, state_.highlightB
     )) {
@@ -137,7 +159,7 @@ void SmartCabinetService::setMiniatureLightPower(bool enabled) {
     if (state_.miniLightPower == enabled) return;
     appController_.setMiniatureLightPower(enabled);
     state_.activeScene = 0;
-    state_.miniLightPower = enabled;
+    refreshLightingState();
     notifyStateChanged();
 }
 
@@ -145,16 +167,14 @@ void SmartCabinetService::setMiniatureLightBrightness(uint8_t percent) {
     const uint8_t clamped = percent > 100 ? 100 : percent;
     appController_.setMiniatureLightBrightness(clamped);
     state_.activeScene = 0;
-    state_.miniLightBrightness = clamped;
+    refreshLightingState();
     notifyStateChanged();
 }
 
 void SmartCabinetService::setMiniatureLightColor(uint8_t r, uint8_t g, uint8_t b) {
     appController_.setMiniatureLightColor(r, g, b);
     state_.activeScene = 0;
-    state_.miniLightR = r;
-    state_.miniLightG = g;
-    state_.miniLightB = b;
+    refreshLightingState();
     notifyStateChanged();
 }
 
@@ -165,6 +185,7 @@ void SmartCabinetService::highlightLocationWhite(uint16_t shelf, uint16_t locati
         appController_.clearHighlight();
         // Ensure the miniature LEDs are on so the highlight is visible.
         appController_.setMiniatureLightPower(true);
+        refreshLightingState();
         appController_.highlightLocationPersistentWhite(shelf, location);
         state_.hasHighlight = true;
         state_.highlightShelf = shelf;
@@ -175,6 +196,18 @@ void SmartCabinetService::highlightLocationWhite(uint16_t shelf, uint16_t locati
 
 const CabinetRuntimeState& SmartCabinetService::state() const {
     return state_;
+}
+
+void SmartCabinetService::refreshLightingState() {
+    const AppLightingState lights = appController_.lightingState();
+    state_.power = lights.cabinetPower;
+    state_.brightness = lights.cabinetBrightness;
+    state_.miniLightPower = lights.miniaturePower;
+    state_.miniLightBrightness = lights.miniatureBrightness;
+    state_.miniLightR = lights.miniatureR;
+    state_.miniLightG = lights.miniatureG;
+    state_.miniLightB = lights.miniatureB;
+    state_.activeScene = lights.activeScene;
 }
 
 void SmartCabinetService::setStateChangedCallback(

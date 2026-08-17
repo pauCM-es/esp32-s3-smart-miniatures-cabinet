@@ -23,7 +23,34 @@ public:
     }
 
     void setBrightness(uint8_t percent) override {
-        app_.setPwmCabinetBrightness(percent);
+        setCabinetLightBrightness(percent);
+    }
+
+    void setCabinetLightPower(bool enabled) override {
+        const AppState state = app_.state();
+        if (state.pwmCabinetAvailable) app_.setPwmCabinetPower(enabled);
+        else if (state.rgbwCabinetAvailable) app_.setRgbwCabinetPower(enabled);
+    }
+
+    void setCabinetLightBrightness(uint8_t percent) override {
+        const AppState state = app_.state();
+        if (state.pwmCabinetAvailable) app_.setPwmCabinetBrightness(percent);
+        else if (state.rgbwCabinetAvailable) app_.setRgbwCabinetBrightness(percent);
+    }
+
+    AppLightingState lightingState() const override {
+        const AppState state = app_.state();
+        const bool usePwm = state.pwmCabinetAvailable;
+        return {
+            usePwm ? state.pwmCabinetOn : state.rgbwCabinetOn,
+            usePwm ? state.pwmCabinetBrightness : state.rgbwCabinetBrightness,
+            state.miniatureLightsOn,
+            state.miniatureBrightness,
+            state.miniatureColor.r,
+            state.miniatureColor.g,
+            state.miniatureColor.b,
+            static_cast<uint8_t>(state.activeScene),
+        };
     }
 
     void applyScene(uint8_t scene) override {

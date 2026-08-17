@@ -125,9 +125,7 @@ void openMiniatureNavigator() {
     miniatureNavigatorOpen = true;
     currentMiniatureIndex = 0;
 
-    const AppState state = app.state();
-    if (state.pwmCabinetAvailable) app.setPwmCabinetPower(false);
-    else if (state.rgbwCabinetAvailable) app.setRgbwCabinetPower(false);
+    smartCabinet.setCabinetLightPower(false);
     smartCabinet.setMiniatureLightPower(true);
 
     renderCurrentMiniature();
@@ -160,18 +158,12 @@ void closeMiniatureNavigator() {
 }
 
 void cabinetPowerChanged(bool enabled) {
-    const AppState state = app.state();
-    // HA's existing power entity is still the future all-lights control.
-    // This display control intentionally affects only the installed cabinet output.
-    if (state.pwmCabinetAvailable) app.setPwmCabinetPower(enabled);
-    else if (state.rgbwCabinetAvailable) app.setRgbwCabinetPower(enabled);
+    smartCabinet.setCabinetLightPower(enabled);
     syncState();
 }
 
 void cabinetBrightnessChanged(uint8_t percent) {
-    const AppState state = app.state();
-    if (state.pwmCabinetAvailable) app.setPwmCabinetBrightness(percent);
-    else if (state.rgbwCabinetAvailable) app.setRgbwCabinetBrightness(percent);
+    smartCabinet.setCabinetLightBrightness(percent);
     syncState();
 }
 

@@ -19,9 +19,12 @@ public:
 
     bool begin(const CabinetSettings& defaults = CabinetSettings{});
     void loop();
+    void syncFromApp();
 
     void setPower(bool enabled);
     void setBrightness(uint8_t percent);
+    void setCabinetLightPower(bool enabled);
+    void setCabinetLightBrightness(uint8_t percent);
     bool applyScene(uint8_t scene);
     bool highlightLocation(uint16_t shelf, uint16_t location);
     bool appendHighlightLocation(uint16_t shelf, uint16_t location);
@@ -40,6 +43,7 @@ public:
     void setStateChangedCallback(StateChangedCallback callback);
 
 private:
+    void refreshLightingState();
     void notifyStateChanged();
 
     IAppControllerActions& appController_;

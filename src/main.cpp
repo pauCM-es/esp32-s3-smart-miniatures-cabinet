@@ -120,6 +120,7 @@ void loop() {
     smartcabinet::app.update(nowMs);
     smartcabinet::debugConsole.update();
 
+    smartCabinet.syncFromApp();
     smartCabinet.loop();
     mqttApi.loop();
 }
