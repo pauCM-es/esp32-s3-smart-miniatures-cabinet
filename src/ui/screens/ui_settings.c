@@ -1,7 +1,8 @@
 #include "../ui_internal.h"
 
 static void add_icon_title(lv_obj_t* parent, const char* icon, const char* title) {
-    ui_make_label(parent, icon, 10, 6);
+    lv_obj_t* iconLabel = ui_make_label(parent, icon, 10, 6);
+    lv_obj_set_style_text_color(iconLabel, ui_color_text(), 0);
 
     lv_obj_t* titleLabel = ui_make_label(parent, title, 36, 6);
     lv_obj_set_style_text_font(titleLabel, UI_FONT_M, 0);
@@ -77,9 +78,6 @@ void ui_settings_screen_init(void) {
 
     lv_obj_t* plus = ui_make_button(limit, LV_SYMBOL_PLUS, 390, 57, 48, 40, false);
     lv_obj_add_state(plus, LV_STATE_DISABLED);
-
-    lv_obj_t* percent = ui_make_label(limit, "%", 444, 69);
-    lv_obj_add_style(percent, &ui_style_accent_text, 0);
 
     lv_obj_t* deferred = ui_make_label(limit, "Available in a later update", 10, 94);
     lv_obj_add_style(deferred, &ui_style_muted_text, 0);

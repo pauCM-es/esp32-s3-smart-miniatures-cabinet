@@ -105,7 +105,7 @@ lv_obj_t* ui_make_header(lv_obj_t* parent, const char* title, bool showBack) {
     lv_label_set_text(mqtt, "MQTT");
     lv_obj_add_style(mqtt, &ui_style_muted_text, 0);
     lv_obj_set_style_text_font(mqtt, UI_FONT_S, 0);
-    lv_obj_align_to(mqtt, clock, LV_ALIGN_OUT_LEFT_MID, -12, 0);
+    lv_obj_align_to(mqtt, clock, LV_ALIGN_OUT_LEFT_MID, -24, 0);
 
     lv_obj_t* wifi = lv_label_create(header);
     lv_label_set_text(wifi, LV_SYMBOL_WIFI);
