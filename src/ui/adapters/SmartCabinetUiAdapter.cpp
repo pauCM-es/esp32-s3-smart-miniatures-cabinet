@@ -183,6 +183,15 @@ void sceneSelected(uint8_t index) {
     syncState();
 }
 
+void wifiMqttReconnectRequested() {
+    if (WiFi.status() != WL_CONNECTED) {
+        WiFi.reconnect();
+    } else if (!mqttApi.connected()) {
+        mqttApi.reconnectNow();
+    }
+    syncState();
+}
+
 void miniaturePrevious() {
     const size_t count = catalogue.all().size();
     if (count == 0) return;
@@ -221,6 +230,7 @@ void SmartCabinetUiAdapter::begin() {
     handlers.onMiniaturesPowerChanged = miniaturesPowerChanged;
     handlers.onMiniaturesBrightnessChanged = miniaturesBrightnessChanged;
     handlers.onSceneSelected = sceneSelected;
+    handlers.onWifiMqttReconnectRequested = wifiMqttReconnectRequested;
     handlers.onMiniaturePrevious = miniaturePrevious;
     handlers.onMiniatureNext = miniatureNext;
     handlers.onScreenChanged = screenChanged;

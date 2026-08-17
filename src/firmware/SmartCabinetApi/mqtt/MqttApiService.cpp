@@ -86,6 +86,11 @@ bool MqttApiService::connected() {
     return mqtt_.connected();
 }
 
+bool MqttApiService::reconnectNow() {
+    lastReconnectAttemptMs_ = 0;
+    return ensureConnected();
+}
+
 bool MqttApiService::ensureConnected() {
     if (mqtt_.connected()) return true;
     if (config_.host == nullptr || strlen(config_.host) == 0) return false;

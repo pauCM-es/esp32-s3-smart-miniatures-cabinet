@@ -28,6 +28,7 @@ void ui_event_mini_next(lv_event_t* e);
 void ui_event_brightness_limit(lv_event_t* e);
 void ui_event_ota_action(lv_event_t* e);
 void ui_event_wifi_save(lv_event_t* e);
+void ui_event_wifi_mqtt_reconnect(lv_event_t* e);
 void ui_event_password_toggle(lv_event_t* e);
 void ui_event_textarea_focus(lv_event_t* e);
 void ui_event_keyboard(lv_event_t* e);

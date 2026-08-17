@@ -30,6 +30,7 @@ public:
     void loop();
 
     bool connected();
+    bool reconnectNow();
 
     void publishState();
     void publishMiniatures();

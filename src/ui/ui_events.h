@@ -26,6 +26,7 @@ typedef struct {
         const char* mqttUser,
         const char* mqttPassword
     );
+    void (*onWifiMqttReconnectRequested)(void);
 
     void (*onOtaEnableRequested)(uint32_t timeoutSeconds);
     void (*onOtaDisableRequested)(void);

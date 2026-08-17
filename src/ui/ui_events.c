@@ -137,6 +137,13 @@ void ui_event_wifi_save(lv_event_t* e) {
     );
 }
 
+void ui_event_wifi_mqtt_reconnect(lv_event_t* e) {
+    (void)e;
+    if (handlers.onWifiMqttReconnectRequested) {
+        handlers.onWifiMqttReconnectRequested();
+    }
+}
+
 void ui_event_password_toggle(lv_event_t* e) {
     lv_obj_t* textarea = (lv_obj_t*)lv_event_get_user_data(e);
     if (!textarea) return;

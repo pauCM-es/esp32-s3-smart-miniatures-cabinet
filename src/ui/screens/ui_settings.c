@@ -56,6 +56,15 @@ void ui_settings_screen_init(void) {
     lv_obj_add_style(wifiArrow, &ui_style_accent_text, 0);
     lv_obj_align(wifiArrow, LV_ALIGN_RIGHT_MID, -2, 0);
 
+    lv_obj_t* reconnect = lv_btn_create(wifi);
+    lv_obj_add_style(reconnect, &ui_style_secondary_button, 0);
+    lv_obj_set_size(reconnect, 34, 34);
+    lv_obj_align(reconnect, LV_ALIGN_RIGHT_MID, -32, 0);
+    lv_obj_add_event_cb(reconnect, ui_event_wifi_mqtt_reconnect, LV_EVENT_CLICKED, NULL);
+    lv_obj_t* reconnectIcon = lv_label_create(reconnect);
+    lv_label_set_text(reconnectIcon, LV_SYMBOL_REFRESH);
+    lv_obj_center(reconnectIcon);
+
     lv_obj_t* limit = ui_make_card(content, 10, 152, 460, 118);
     lv_obj_t* limitTitle = ui_make_label(limit, "Miniatures light limit brightness", 10, 4);
     lv_obj_set_style_text_font(limitTitle, UI_FONT_M, 0);
