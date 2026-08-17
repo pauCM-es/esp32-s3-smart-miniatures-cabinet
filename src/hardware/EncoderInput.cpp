@@ -42,23 +42,35 @@ EncoderEvent EncoderInput::update(uint32_t nowMs) {
     const uint8_t a = static_cast<uint8_t>((state >> config::kEncoderPinA) & 1U);
     const uint8_t b = static_cast<uint8_t>((state >> config::kEncoderPinB) & 1U);
     const uint8_t currentState = static_cast<uint8_t>((a << 1U) | b);
-    const uint8_t transition = static_cast<uint8_t>((previousState_ << 2U) | currentState);
+    const uint8_t previousState = previousState_;
+    const uint8_t transition = static_cast<uint8_t>((previousState << 2U) | currentState);
     previousState_ = currentState;
 
     const int8_t step = kEncoderTable[transition];
-    if (step != 0) {
+    if (currentState != previousState) {
         accumulator_ += step;
-        Serial.printf("[Enc] A=%u B=%u step=%+d accum=%d\n", a, b, step, accumulator_);
+        if (Serial) {
+            Serial.printf(
+                "[Enc] AB %u%u -> %u%u transition=0x%X step=%+d accum=%d\n",
+                (previousState >> 1U) & 1U,
+                previousState & 1U,
+                a,
+                b,
+                transition,
+                step,
+                accumulator_
+            );
+        }
     }
 
     if (accumulator_ >= config::kEncoderStepsPerTick) {
         event.delta = 1;
         accumulator_ = 0;
-        Serial.println("[Enc] -> delta=+1");
+        if (Serial) Serial.println("[Enc] -> delta=+1");
     } else if (accumulator_ <= -config::kEncoderStepsPerTick) {
         event.delta = -1;
         accumulator_ = 0;
-        Serial.println("[Enc] -> delta=-1");
+        if (Serial) Serial.println("[Enc] -> delta=-1");
     }
 #endif
     return event;

@@ -25,6 +25,9 @@ void ui_state_set_active_scene(int8_t activeIndex);
 
 void ui_state_set_miniature(
     const char* name,
+    const char* collection,
+    const char* artist,
+    const char* date,
     uint16_t index,
     uint16_t total,
     uint8_t shelf,

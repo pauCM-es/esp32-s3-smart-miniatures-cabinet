@@ -11,6 +11,17 @@ lv_obj_t* ui_make_header(lv_obj_t* parent, const char* title, bool showBack);
 lv_obj_t* ui_make_card(lv_obj_t* parent, lv_coord_t x, lv_coord_t y, lv_coord_t w, lv_coord_t h);
 lv_obj_t* ui_make_label(lv_obj_t* parent, const char* text, lv_coord_t x, lv_coord_t y);
 lv_obj_t* ui_make_button(lv_obj_t* parent, const char* text, lv_coord_t x, lv_coord_t y, lv_coord_t w, lv_coord_t h, bool primary);
+lv_obj_t* ui_make_icon_button(
+    lv_obj_t* parent,
+    const char* icon,
+    const char* text,
+    bool iconAfterText,
+    lv_coord_t x,
+    lv_coord_t y,
+    lv_coord_t w,
+    lv_coord_t h,
+    bool primary
+);
 
 void ui_event_back(lv_event_t* e);
 void ui_event_open_settings(lv_event_t* e);

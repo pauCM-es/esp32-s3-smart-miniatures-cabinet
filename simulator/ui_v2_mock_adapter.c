@@ -8,16 +8,19 @@
 
 typedef struct {
     const char* name;
+    const char* collection;
+    const char* artist;
+    const char* date;
     uint8_t shelf;
     const char* location;
 } MockMiniature;
 
 static const MockMiniature kMiniatures[] = {
-    {"TIE Interceptor", 1, "A1"},
-    {"X-wing Starfighter", 1, "A2"},
-    {"Millennium Falcon", 2, "B1"},
-    {"Razor Crest", 2, "B2"},
-    {"AT-AT Walker", 3, "C1"},
+    {"TIE Interceptor", "Star Wars", "Bandai", "2026-08-17", 1, "A1"},
+    {"X-wing Starfighter", "Star Wars", "Bandai", "2026-08-17", 1, "A2"},
+    {"Millennium Falcon", "Star Wars", "Fine Molds", "2026-08-17", 2, "B1"},
+    {"Razor Crest", "The Mandalorian", "Revell", "2026-08-17", 2, "B2"},
+    {"AT-AT Walker", "Star Wars", "Bandai", "2026-08-17", 3, "C1"},
 };
 
 static const char* const kScenes[] = {"Off", "Display", "Showcase"};
@@ -26,8 +29,9 @@ static uint16_t currentMiniature = 0;
 
 static void render_current_miniature(void) {
     const MockMiniature* miniature = &kMiniatures[currentMiniature];
-    ui_state_set_miniature(miniature->name, currentMiniature + 1, kMiniatureCount,
-        miniature->shelf, miniature->location);
+    ui_state_set_miniature(miniature->name, miniature->collection, miniature->artist,
+        miniature->date, currentMiniature + 1, kMiniatureCount, miniature->shelf,
+        miniature->location);
 }
 
 static void on_cabinet_power_changed(bool enabled) {

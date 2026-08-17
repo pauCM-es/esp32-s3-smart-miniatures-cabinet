@@ -73,26 +73,36 @@ static void render_miniature(void) {
     if (!ui_Miniatures) return;
 
     lv_label_set_text(ui_MiniNameLabel, state.miniature.name[0] ? state.miniature.name : "No miniature");
+    lv_label_set_text(ui_MiniCollectionLabel, state.miniature.collection);
+    lv_label_set_text(ui_MiniArtistLabel, state.miniature.artist);
+    lv_label_set_text(ui_MiniDateLabel, state.miniature.date);
 
     char text[64];
-    if (state.miniature.shelf > 0) {
-        lv_snprintf(text, sizeof(text), "Shelf %u", state.miniature.shelf);
+    if (state.miniature.shelf > 0 && state.miniature.location[0]) {
+        lv_snprintf(text, sizeof(text), "%u-%s", state.miniature.shelf, state.miniature.location);
     } else {
-        lv_snprintf(text, sizeof(text), "Shelf --");
+        lv_snprintf(text, sizeof(text), "--");
     }
-    lv_label_set_text(ui_MiniShelfLabel, text);
-
-    lv_snprintf(text, sizeof(text), "Location %s", state.miniature.location[0] ? state.miniature.location : "--");
     lv_label_set_text(ui_MiniLocationLabel, text);
 
     lv_snprintf(
         text,
         sizeof(text),
-        "%u / %u",
-        state.miniature.total ? state.miniature.index : 0,
-        state.miniature.total
+        "%u",
+        state.miniature.total ? state.miniature.index : 0
     );
     lv_label_set_text(ui_MiniPositionLabel, text);
+
+    lv_snprintf(text, sizeof(text), "/%u", state.miniature.total);
+    lv_label_set_text(ui_MiniPositionTotalLabel, text);
+    lv_obj_align(ui_MiniPositionTotalLabel, LV_ALIGN_BOTTOM_RIGHT, -10, -12);
+    lv_obj_align_to(
+        ui_MiniPositionLabel,
+        ui_MiniPositionTotalLabel,
+        LV_ALIGN_OUT_LEFT_MID,
+        -4,
+        0
+    );
 
     if (state.miniature.total == 0) {
         lv_obj_add_state(ui_MiniPreviousButton, LV_STATE_DISABLED);
@@ -259,12 +269,18 @@ void ui_state_set_active_scene(int8_t activeIndex) {
 
 void ui_state_set_miniature(
     const char* name,
+    const char* collection,
+    const char* artist,
+    const char* date,
     uint16_t index,
     uint16_t total,
     uint8_t shelf,
     const char* location
 ) {
     copy_text(state.miniature.name, sizeof(state.miniature.name), name);
+    copy_text(state.miniature.collection, sizeof(state.miniature.collection), collection);
+    copy_text(state.miniature.artist, sizeof(state.miniature.artist), artist);
+    copy_text(state.miniature.date, sizeof(state.miniature.date), date);
     state.miniature.index = index;
     state.miniature.total = total;
     state.miniature.shelf = shelf;

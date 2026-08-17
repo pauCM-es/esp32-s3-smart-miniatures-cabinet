@@ -26,9 +26,12 @@ lv_obj_t* ui_SceneLabels[UI_MAX_SCENES] = {NULL};
 
 /* Miniatures */
 lv_obj_t* ui_MiniNameLabel = NULL;
-lv_obj_t* ui_MiniShelfLabel = NULL;
+lv_obj_t* ui_MiniCollectionLabel = NULL;
+lv_obj_t* ui_MiniArtistLabel = NULL;
+lv_obj_t* ui_MiniDateLabel = NULL;
 lv_obj_t* ui_MiniLocationLabel = NULL;
 lv_obj_t* ui_MiniPositionLabel = NULL;
+lv_obj_t* ui_MiniPositionTotalLabel = NULL;
 lv_obj_t* ui_MiniPreviousButton = NULL;
 lv_obj_t* ui_MiniNextButton = NULL;
 
@@ -150,7 +153,46 @@ lv_obj_t* ui_make_button(lv_obj_t* parent, const char* text, lv_coord_t x, lv_co
 
     lv_obj_t* label = lv_label_create(btn);
     lv_label_set_text(label, text);
+    lv_obj_set_style_text_font(label, UI_FONT_L, 0);
     lv_obj_center(label);
+    return btn;
+}
+
+lv_obj_t* ui_make_icon_button(
+    lv_obj_t* parent,
+    const char* icon,
+    const char* text,
+    bool iconAfterText,
+    lv_coord_t x,
+    lv_coord_t y,
+    lv_coord_t w,
+    lv_coord_t h,
+    bool primary
+) {
+    lv_obj_t* btn = lv_btn_create(parent);
+    lv_obj_add_style(btn, primary ? &ui_style_primary_button : &ui_style_secondary_button, 0);
+    lv_obj_set_pos(btn, x, y);
+    lv_obj_set_size(btn, w, h);
+
+    lv_obj_t* iconLabel = lv_label_create(btn);
+    lv_label_set_text(iconLabel, icon);
+
+    if (!text || !text[0]) {
+        lv_obj_center(iconLabel);
+        return btn;
+    }
+
+    lv_obj_t* textLabel = lv_label_create(btn);
+    lv_label_set_text(textLabel, text);
+    lv_obj_set_style_text_font(textLabel, UI_FONT_L, 0);
+    lv_obj_center(textLabel);
+    lv_obj_align_to(
+        iconLabel,
+        textLabel,
+        iconAfterText ? LV_ALIGN_OUT_RIGHT_MID : LV_ALIGN_OUT_LEFT_MID,
+        iconAfterText ? 8 : -8,
+        0
+    );
     return btn;
 }
 

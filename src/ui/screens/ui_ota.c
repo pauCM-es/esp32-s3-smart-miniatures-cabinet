@@ -45,5 +45,6 @@ void ui_ota_screen_init(void) {
 
     ui_OtaActionLabel = lv_label_create(ui_OtaActionButton);
     lv_label_set_text(ui_OtaActionLabel, "Enable OTA");
+    lv_obj_set_style_text_font(ui_OtaActionLabel, UI_FONT_L, 0);
     lv_obj_center(ui_OtaActionLabel);
 }

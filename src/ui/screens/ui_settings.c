@@ -72,7 +72,7 @@ void ui_settings_screen_init(void) {
     lv_obj_t* limitHint = ui_make_label(limit, "Maximum allowed brightness (0-100%)", 10, 32);
     lv_obj_add_style(limitHint, &ui_style_muted_text, 0);
 
-    lv_obj_t* minus = ui_make_button(limit, LV_SYMBOL_MINUS, 230, 57, 48, 40, false);
+    lv_obj_t* minus = ui_make_icon_button(limit, LV_SYMBOL_MINUS, NULL, false, 230, 57, 48, 40, false);
     lv_obj_add_state(minus, LV_STATE_DISABLED);
 
     ui_BrightnessLimitSpinbox = lv_spinbox_create(limit);
@@ -85,7 +85,7 @@ void ui_settings_screen_init(void) {
     lv_obj_set_style_text_align(ui_BrightnessLimitSpinbox, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_add_state(ui_BrightnessLimitSpinbox, LV_STATE_DISABLED);
 
-    lv_obj_t* plus = ui_make_button(limit, LV_SYMBOL_PLUS, 390, 57, 48, 40, false);
+    lv_obj_t* plus = ui_make_icon_button(limit, LV_SYMBOL_PLUS, NULL, false, 390, 57, 48, 40, false);
     lv_obj_add_state(plus, LV_STATE_DISABLED);
 
     lv_obj_t* deferred = ui_make_label(limit, "Available in a later update", 10, 94);

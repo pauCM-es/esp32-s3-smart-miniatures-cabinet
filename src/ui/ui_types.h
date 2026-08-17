@@ -10,6 +10,7 @@ extern "C" {
 #define UI_MAX_SCENES 4
 #define UI_SCENE_NAME_LEN 20
 #define UI_MINIATURE_NAME_LEN 48
+#define UI_MINIATURE_METADATA_LEN 48
 #define UI_LOCATION_LABEL_LEN 24
 #define UI_SSID_LEN 33
 #define UI_MQTT_USER_LEN 33
@@ -33,6 +34,9 @@ typedef enum {
 
 typedef struct {
     char name[UI_MINIATURE_NAME_LEN];
+    char collection[UI_MINIATURE_METADATA_LEN];
+    char artist[UI_MINIATURE_METADATA_LEN];
+    char date[UI_MINIATURE_METADATA_LEN];
     uint16_t index;
     uint16_t total;
     uint8_t shelf;

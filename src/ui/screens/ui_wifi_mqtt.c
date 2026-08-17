@@ -54,9 +54,9 @@ void ui_wifi_mqtt_screen_init(void) {
     make_field(card, "MQTT user", "MQTT user", 116, false, &ui_MqttUserTextarea);
     make_field(card, "MQTT password", "MQTT password", 158, true, &ui_MqttPasswordTextarea);
 
-    lv_obj_t* save = ui_make_button(
+    lv_obj_t* save = ui_make_icon_button(
         ui_WifiMqtt,
-        LV_SYMBOL_SAVE "  Save & apply",
+        LV_SYMBOL_SAVE, "Save & apply", false,
         10, 274, 460, 36,
         true
     );

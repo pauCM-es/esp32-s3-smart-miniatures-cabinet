@@ -27,9 +27,12 @@ extern lv_obj_t* ui_SceneLabels[UI_MAX_SCENES];
 
 /* Miniatures */
 extern lv_obj_t* ui_MiniNameLabel;
-extern lv_obj_t* ui_MiniShelfLabel;
+extern lv_obj_t* ui_MiniCollectionLabel;
+extern lv_obj_t* ui_MiniArtistLabel;
+extern lv_obj_t* ui_MiniDateLabel;
 extern lv_obj_t* ui_MiniLocationLabel;
 extern lv_obj_t* ui_MiniPositionLabel;
+extern lv_obj_t* ui_MiniPositionTotalLabel;
 extern lv_obj_t* ui_MiniPreviousButton;
 extern lv_obj_t* ui_MiniNextButton;
 

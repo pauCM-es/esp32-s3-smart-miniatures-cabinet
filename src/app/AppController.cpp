@@ -228,13 +228,15 @@ void AppController::handleEncoder(uint32_t nowMs) {
     const EncoderEvent event = encoder_.update(nowMs);
     if (event.delta != 0) {
         if (encoderNavigationCallback_) {
-            Serial.printf("[Encoder] nav delta=%+d\n", event.delta);
+            if (Serial) Serial.printf("[Encoder] nav delta=%+d\n", event.delta);
             encoderNavigationCallback_(event.delta);
         } else if (lighting_.pwmCabinet().available()) {
             const int next = static_cast<int>(lighting_.pwmCabinet().brightness()) +
                              event.delta * config::kEncoderBrightnessStep;
             const uint8_t clamped = clampPercent(next);
-            Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
+            if (Serial) {
+                Serial.printf("[Encoder] delta=%d → brightness=%u%%\n", event.delta, clamped);
+            }
             lighting_.setPwmCabinetBrightness(clamped);
             if (encoderBrightnessCallback_) encoderBrightnessCallback_(clamped);
         }

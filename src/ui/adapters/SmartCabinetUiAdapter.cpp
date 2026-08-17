@@ -75,15 +75,17 @@ void syncState() {
 }
 
 void highlightCurrentMiniature() {
+    // highlightLocationPersistent adds to the highlight mask, so clear the
+    // previous miniature before applying the current selection.
+    app.clearHighlight();
+
     const auto& miniatures = catalogue.all();
     if (miniatures.empty()) {
-        app.clearHighlight();
         return;
     }
 
     const Miniature& miniature = miniatures[currentMiniatureIndex];
     if (miniature.shelf == 0 || miniature.location == 0) {
-        app.clearHighlight();
         return;
     }
 
@@ -97,7 +99,7 @@ void highlightCurrentMiniature() {
 void renderCurrentMiniature() {
     const auto& miniatures = catalogue.all();
     if (miniatures.empty()) {
-        ui_state_set_miniature("", 0, 0, 0, "");
+        ui_state_set_miniature("", "", "", "", 0, 0, 0, "");
         return;
     }
 
@@ -107,6 +109,9 @@ void renderCurrentMiniature() {
     lv_snprintf(location, sizeof(location), "%u", static_cast<unsigned>(miniature.location));
     ui_state_set_miniature(
         miniature.name.c_str(),
+        miniature.collection.c_str(),
+        miniature.artist.c_str(),
+        miniature.date.c_str(),
         static_cast<uint16_t>(currentMiniatureIndex + 1),
         static_cast<uint16_t>(miniatures.size()),
         static_cast<uint8_t>(miniature.shelf),

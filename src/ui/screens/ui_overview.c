@@ -92,6 +92,7 @@ void ui_overview_screen_init(void) {
         lv_label_set_text(label, "-");
         lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
         lv_obj_set_width(label, 54);
+        lv_obj_set_style_text_font(label, UI_FONT_L, 0);
         lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_center(label);
 
@@ -115,9 +116,9 @@ void ui_overview_screen_init(void) {
     lv_obj_add_style(arrow, &ui_style_accent_text, 0);
     lv_obj_align(arrow, LV_ALIGN_RIGHT_MID, -2, 0);
 
-    lv_obj_t* settings = ui_make_button(
+    lv_obj_t* settings = ui_make_icon_button(
         ui_Overview,
-        LV_SYMBOL_SETTINGS "  Settings",
+        LV_SYMBOL_SETTINGS, "Settings", false,
         10, 277, 460, 34,
         false
     );
