@@ -1,11 +1,15 @@
-type Panel = any;
+import type {
+	PanelActionHost,
+	PanelActions,
+} from "./panel-template-types.js";
 
-const inputValue = (panel: Panel, selector: string): string | undefined =>
-	panel.shadowRoot.querySelector(selector)?.value;
+const inputValue = (panel: PanelActionHost, selector: string): string | undefined =>
+	(panel.shadowRoot?.querySelector(selector) as HTMLInputElement | null)?.value;
 
-export const createPanelActions = (p: Panel) => ({
-	setHighlightColor: (hex) =>
-		p._command({ action: "setHighlightColor", ...p._hexToRgb(hex) }),
+export const createPanelActions = (p: PanelActionHost): PanelActions => ({
+	setHighlightColor: (hex) => p._setHighlightColor(hex),
+	openHighlightColorPicker: () => p._openHighlightColorPicker(),
+	closeHighlightColorPicker: () => p._closeHighlightColorPicker(),
 	selectShelf: (shelf) => {
 		p._selectedShelf = shelf;
 		p._selectedLocation = 1;
@@ -103,13 +107,16 @@ export const createPanelActions = (p: Panel) => ({
 		p._render();
 	},
 	saveLedRange: async () => {
-		const start = Math.min(p._mappingStart, p._mappingEnd);
+		const mappingStart = p._mappingStart;
+		const mappingEnd = p._mappingEnd;
+		if (mappingStart === null || mappingEnd === null) return;
+		const start = Math.min(mappingStart, mappingEnd);
 		await p._command({
 			action: "setLocationConfig",
 			shelf: p._selectedShelf,
 			location: p._selectedLocation,
 			start_led: start,
-			leds: Math.abs(p._mappingEnd - p._mappingStart) + 1,
+			leds: Math.abs(mappingEnd - mappingStart) + 1,
 		});
 		p._mappingStart = null;
 		p._mappingEnd = null;
@@ -147,13 +154,25 @@ export const createPanelActions = (p: Panel) => ({
 	},
 	setViewIndex: (index) => p._setViewIndex(index),
 	clearViewHighlight: async () => {
-		clearTimeout(p._viewTimer);
+		if (p._viewTimer !== null) clearTimeout(p._viewTimer);
 		await p._command({ action: "clearHighlight" });
 	},
 	applyScene: async (scene) => {
-		clearTimeout(p._viewTimer);
+		if (p._viewTimer !== null) clearTimeout(p._viewTimer);
 		await p._command({ action: "applyScene", scene });
 	},
+	setCabinetPower: (on) => p._setCabinetPower(on),
+	setCabinetBrightness: (brightness) => p._setCabinetBrightness(brightness),
+	setMiniatureLights: (update) => p._setMiniatureLights(update),
+	openPaletteEditor: () => p._openPaletteEditor(),
+	closePaletteEditor: () => p._closePaletteEditor(),
+	selectPaletteColor: (index) => p._selectPaletteColor(index),
+	setPaletteColor: (color) => p._setPaletteColor(color),
+	addPaletteColor: () => p._addPaletteColor(),
+	removePaletteColor: (index) => p._removePaletteColor(index),
+	startPaletteDrag: (index, event) => p._startPaletteDrag(index, event),
+	dropPaletteColor: (targetIndex, event) => p._dropPaletteColor(targetIndex, event),
+	finishPaletteDrag: () => p._finishPaletteDrag(),
 	setSearchQuery: (query) => {
 		p._searchQuery = query;
 		p._render();
@@ -172,4 +191,7 @@ export const createPanelActions = (p: Panel) => ({
 		p._catalogueView = view;
 		p._render();
 	},
+	selectSummaryLocation: (shelf, location) =>
+		p._selectSummaryLocation(shelf, location),
+	startSummaryMove: () => p._startSummaryMove(),
 });

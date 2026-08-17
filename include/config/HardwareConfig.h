@@ -36,7 +36,7 @@ constexpr int kMiniatureLedDataPin = 45;
 constexpr uint16_t kMiniatureLedCount = 800;    // 5 shelves at 160 LED/m.
 // Physical output ceiling for the miniature strip (0-255).
 // The public 0-100% brightness controls scale to this value, not to 255.
-constexpr uint8_t kMiniatureMaxBrightness = 125;
+constexpr uint8_t kMiniatureMaxBrightness = 51;
 
 // Encoder via PCF8575 I2C expander (original — commented out).
 constexpr int kI2cSdaPin = 38;
