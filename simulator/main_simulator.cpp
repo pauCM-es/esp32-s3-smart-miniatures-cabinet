@@ -3,6 +3,7 @@
 #include "hal/sdl_display.h"
 #include "hal/sdl_input.h"
 #include "ui/ui.h"
+#include "ui_v2_mock_adapter.h"
 #include "app_config.h"
 
 /* Two draw buffers: 480 * 10 lines each (double-buffered flush) */
@@ -46,6 +47,7 @@ int main(int /*argc*/, char * /*argv*/[])
 
     /* ── Load UI ────────────────────────────────────────────────────────── */
     ui_init();
+    ui_simulator_mock_init();
 
     /* ── Main loop ──────────────────────────────────────────────────────── */
     SDL_Event event;

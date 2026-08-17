@@ -20,7 +20,7 @@ static void copy_text(char* dst, size_t dstSize, const char* src) {
 
 static void render_clock(void) {
     char text[16];
-    lv_snprintf(text, sizeof(text), LV_SYMBOL_REFRESH " %s", state.clockText[0] ? state.clockText : "--:--");
+    lv_snprintf(text, sizeof(text), "%s", state.clockText[0] ? state.clockText : "--:--");
     for (uint8_t i = 0; i < 5; ++i) {
         if (ui_ClockLabels[i]) lv_label_set_text(ui_ClockLabels[i], text);
     }

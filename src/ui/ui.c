@@ -89,12 +89,14 @@ lv_obj_t* ui_make_header(lv_obj_t* parent, const char* title, bool showBack) {
 
     lv_obj_t* label = lv_label_create(header);
     lv_label_set_text(label, title);
-    lv_obj_set_style_text_font(label, LV_FONT_DEFAULT, 0);
+    lv_obj_set_style_text_font(label, UI_FONT_M, 0);
+    lv_obj_set_style_text_color(label, ui_color_text(), 0);
     lv_obj_align(label, LV_ALIGN_LEFT_MID, showBack ? 48 : 2, 0);
 
     lv_obj_t* clock = lv_label_create(header);
-    lv_label_set_text(clock, LV_SYMBOL_REFRESH " --:--");
+    lv_label_set_text(clock," --:--");
     lv_obj_add_style(clock, &ui_style_muted_text, 0);
+    lv_obj_set_style_text_font(clock, UI_FONT_M, 0);
     lv_obj_align(clock, LV_ALIGN_RIGHT_MID, 0, 0);
 
     /* Screen creation order matches UiScreen. */

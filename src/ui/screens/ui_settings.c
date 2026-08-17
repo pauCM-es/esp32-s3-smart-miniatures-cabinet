@@ -1,5 +1,13 @@
 #include "../ui_internal.h"
 
+static void add_icon_title(lv_obj_t* parent, const char* icon, const char* title) {
+    ui_make_label(parent, icon, 10, 6);
+
+    lv_obj_t* titleLabel = ui_make_label(parent, title, 36, 6);
+    lv_obj_set_style_text_font(titleLabel, UI_FONT_M, 0);
+    lv_obj_set_style_text_color(titleLabel, ui_color_text(), 0);
+}
+
 void ui_settings_screen_init(void) {
     ui_Settings = lv_obj_create(NULL);
     lv_obj_add_style(ui_Settings, &ui_style_screen, 0);
@@ -7,10 +15,28 @@ void ui_settings_screen_init(void) {
 
     ui_make_header(ui_Settings, "Settings", true);
 
-    lv_obj_t* ota = ui_make_card(ui_Settings, 10, 48, 460, 64);
+    lv_obj_t* content = lv_obj_create(ui_Settings);
+    lv_obj_set_size(content, 480, 280);
+    lv_obj_set_pos(content, 0, 40);
+    lv_obj_set_scroll_dir(content, LV_DIR_VER);
+    lv_obj_set_scrollbar_mode(content, LV_SCROLLBAR_MODE_AUTO);
+    lv_obj_set_style_bg_opa(content, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(content, 0, 0);
+    lv_obj_set_style_pad_all(content, 0, 0);
+
+    /* Explicit extent keeps the final card fully reachable by scrolling. */
+    lv_obj_t* scrollExtent = lv_obj_create(content);
+    lv_obj_set_size(scrollExtent, 1, 1);
+    lv_obj_set_pos(scrollExtent, 0, 304);
+    lv_obj_clear_flag(scrollExtent, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_opa(scrollExtent, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(scrollExtent, 0, 0);
+    lv_obj_set_style_pad_all(scrollExtent, 0, 0);
+
+    lv_obj_t* ota = ui_make_card(content, 10, 8, 460, 64);
     lv_obj_add_flag(ota, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(ota, ui_event_open_ota, LV_EVENT_CLICKED, NULL);
-    ui_make_label(ota, LV_SYMBOL_UPLOAD "  OTA", 10, 6);
+    add_icon_title(ota, LV_SYMBOL_UPLOAD, "OTA");
     lv_obj_t* otaHint = ui_make_label(ota, "Firmware maintenance mode", 10, 33);
     lv_obj_add_style(otaHint, &ui_style_muted_text, 0);
     lv_obj_t* otaArrow = lv_label_create(ota);
@@ -18,10 +44,10 @@ void ui_settings_screen_init(void) {
     lv_obj_add_style(otaArrow, &ui_style_accent_text, 0);
     lv_obj_align(otaArrow, LV_ALIGN_RIGHT_MID, -2, 0);
 
-    lv_obj_t* wifi = ui_make_card(ui_Settings, 10, 120, 460, 64);
+    lv_obj_t* wifi = ui_make_card(content, 10, 80, 460, 64);
     lv_obj_add_flag(wifi, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(wifi, ui_event_open_wifi, LV_EVENT_CLICKED, NULL);
-    ui_make_label(wifi, LV_SYMBOL_WIFI "  Wi-Fi + MQTT", 10, 6);
+    add_icon_title(wifi, LV_SYMBOL_WIFI, "Wi-Fi + MQTT");
     lv_obj_t* wifiHint = ui_make_label(wifi, "Connectivity credentials", 10, 33);
     lv_obj_add_style(wifiHint, &ui_style_muted_text, 0);
     lv_obj_t* wifiArrow = lv_label_create(wifi);
@@ -29,8 +55,10 @@ void ui_settings_screen_init(void) {
     lv_obj_add_style(wifiArrow, &ui_style_accent_text, 0);
     lv_obj_align(wifiArrow, LV_ALIGN_RIGHT_MID, -2, 0);
 
-    lv_obj_t* limit = ui_make_card(ui_Settings, 10, 192, 460, 118);
-    ui_make_label(limit, "Miniatures light limit brightness", 10, 4);
+    lv_obj_t* limit = ui_make_card(content, 10, 152, 460, 118);
+    lv_obj_t* limitTitle = ui_make_label(limit, "Miniatures light limit brightness", 10, 4);
+    lv_obj_set_style_text_font(limitTitle, UI_FONT_M, 0);
+    lv_obj_set_style_text_color(limitTitle, ui_color_text(), 0);
     lv_obj_t* limitHint = ui_make_label(limit, "Maximum allowed brightness (0-100%)", 10, 32);
     lv_obj_add_style(limitHint, &ui_style_muted_text, 0);
 

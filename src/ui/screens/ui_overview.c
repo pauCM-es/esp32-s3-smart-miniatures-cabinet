@@ -12,9 +12,11 @@ static lv_obj_t* add_control_card(
     lv_event_cb_t sliderEvent
 ) {
     lv_obj_t* card = ui_make_card(parent, x, y, 222, 105);
+    lv_obj_add_event_cb(card, switchEvent, LV_EVENT_VALUE_CHANGED, NULL);
 
     lv_obj_t* titleLabel = ui_make_label(card, title, 8, 4);
     lv_obj_set_style_text_color(titleLabel, ui_color_text(), 0);
+    lv_obj_set_style_text_font(titleLabel, UI_FONT_S, 0);
 
     lv_obj_t* sw = lv_switch_create(card);
     lv_obj_set_size(sw, 45, 23);
@@ -27,6 +29,8 @@ static lv_obj_t* add_control_card(
 
     lv_obj_t* valueLabel = ui_make_label(card, "0%", 167, 35);
     lv_obj_add_style(valueLabel, &ui_style_accent_text, 0);
+    lv_obj_set_style_text_font(valueLabel, UI_FONT_M, 0);
+    lv_obj_align(valueLabel, LV_ALIGN_RIGHT_MID, -8, 0);
 
     lv_obj_t* slider = lv_slider_create(card);
     lv_obj_set_size(slider, 195, 16);
@@ -49,11 +53,11 @@ void ui_overview_screen_init(void) {
     lv_obj_add_style(ui_Overview, &ui_style_screen, 0);
     lv_obj_clear_flag(ui_Overview, LV_OBJ_FLAG_SCROLLABLE);
 
-    ui_make_header(ui_Overview, "Smart Cabinet", false);
+    ui_make_header(ui_Overview, "SMART CABINET", false);
 
     add_control_card(
         ui_Overview,
-        "Cabinet light",
+        "Cabinet",
         10, 43,
         &ui_CabinetSwitch,
         &ui_CabinetSlider,
@@ -64,7 +68,7 @@ void ui_overview_screen_init(void) {
 
     add_control_card(
         ui_Overview,
-        "Miniatures light",
+        "Miniatures",
         248, 43,
         &ui_MiniaturesSwitch,
         &ui_MiniaturesSlider,
@@ -104,10 +108,7 @@ void ui_overview_screen_init(void) {
 
     ui_MiniatureCountLabel = ui_make_label(countCard, "0", 6, 29);
     lv_obj_add_style(ui_MiniatureCountLabel, &ui_style_accent_text, 0);
-    lv_obj_set_style_text_font(ui_MiniatureCountLabel, LV_FONT_DEFAULT, 0);
-
-    lv_obj_t* countHint = ui_make_label(countCard, "in cabinet", 6, 63);
-    lv_obj_add_style(countHint, &ui_style_muted_text, 0);
+    lv_obj_set_style_text_font(ui_MiniatureCountLabel, UI_FONT_XL, 0);
 
     lv_obj_t* arrow = lv_label_create(countCard);
     lv_label_set_text(arrow, LV_SYMBOL_RIGHT);

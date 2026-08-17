@@ -37,18 +37,20 @@ target_include_directories(lvgl PUBLIC
 
 # ─── Shared UI sources (also compiled into the ESP32 build) ─────────────────
 set(UI_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/ui.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/ui_router.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/theme/ui_theme.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/screens/screen_overview.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/screens/screen_settings.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/components/ui_icon_placeholder.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/components/ui_image_placeholder.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/components/ui_info_card.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/components/ui_nav_bar.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/components/ui_header.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/components/ui_circle_icon.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/assets/img_cabinet.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/ui.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/ui_events.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/ui_state.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/ui_theme.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/screens/ui_overview.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/screens/ui_miniatures.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/screens/ui_settings.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/screens/ui_ota.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/screens/ui_wifi_mqtt.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/fonts/orbitron_16.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/fonts/orbitron_18.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/fonts/orbitron_24.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src/ui/fonts/orbitron_32.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ui_v2_mock_adapter.c"
 )
 
 # ─── Simulator executable ───────────────────────────────────────────────────

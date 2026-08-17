@@ -13,6 +13,8 @@ void ui_miniatures_screen_init(void) {
     lv_obj_add_style(current, &ui_style_accent_text, 0);
 
     ui_MiniNameLabel = ui_make_label(card, "No miniature", 10, 36);
+    lv_obj_add_style(ui_MiniNameLabel, &ui_style_accent_text, 0);
+    lv_obj_set_style_text_font(ui_MiniNameLabel, UI_FONT_L, 0);
     lv_label_set_long_mode(ui_MiniNameLabel, LV_LABEL_LONG_DOT);
     lv_obj_set_width(ui_MiniNameLabel, 330);
 
